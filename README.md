@@ -2,6 +2,14 @@
 
 A PWA for tracking US credit card rewards, points, and miles across multiple cards and owners.
 
+## 🌐 Live Demo
+
+**[📱 Try the App Now!](https://cholunchiang.github.io/CardPointsTracker/dist/CardPointsTracker.html)** — Works on iPhone, iPad, and Desktop!
+
+👉 **Bookmark this on your iPhone** to add it to your home screen as a native app!
+
+See [docs/IPHONE_SETUP.md](docs/IPHONE_SETUP.md) for complete setup instructions.
+
 ## 🚀 Quick Start
 
 ```bash
@@ -129,7 +137,9 @@ See [docs/DEV_LOG.md](docs/DEV_LOG.md) for:
 
 ## 🔗 Quick Links
 
-- [View App](dist/CardPointsTracker.html)
+- [View App](https://cholunchiang.github.io/CardPointsTracker/dist/CardPointsTracker.html) 🚀
+- [iPhone Setup Guide](docs/IPHONE_SETUP.md) 📱
+- [GitHub Repository](https://github.com/cholunchiang/CardPointsTracker)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Test Suite](tests/README.md)
 - [Version History](docs/DEV_LOG.md)

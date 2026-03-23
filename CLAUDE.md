@@ -4,6 +4,27 @@
 >
 > 📌 **Current Status:** v3.5 with Smart Benefit Notifications & Auto-Reset — Ready for UI/UX overhaul!
 
+## 🌐 GitHub Deployment
+
+**Live App:** https://cholunchiang.github.io/CardPointsTracker/dist/CardPointsTracker.html
+
+**Repository:** https://github.com/cholunchiang/CardPointsTracker
+
+**Backup Location:** User's iCloud: `~/Library/Mobile Documents/com~apple~CloudDocs/Card Tracker/`
+
+### Updating the App (GitHub Pages Auto-Deploy)
+1. Make changes to source files
+2. Run build: `bash build/build.sh`
+3. Test locally with `open dist/CardPointsTracker.html`
+4. Commit and push:
+   ```bash
+   git add .
+   git commit -m "Description of changes"
+   git push origin main
+   ```
+5. Wait 1-2 minutes for GitHub Pages to deploy
+6. Refresh on iPhone (data persists!)
+
 ## Project Overview
 
 **CardPointsTracker** is a PWA for tracking US credit card rewards, points, and miles.
@@ -13,13 +34,34 @@
 - **Stack:** Vanilla HTML/CSS/JS, localStorage, single-file PWA
 - **Tests:** 226 tests (24 DOM + 30 E2E + 172 unit including 18 v3.5) — all passing ✅
 
+## 🌐 GitHub Deployment
+
+**Live App:** https://cholunchiang.github.io/CardPointsTracker/dist/CardPointsTracker.html
+
+**Repository:** https://github.com/cholunchiang/CardPointsTracker
+
+**Backup Location:** User's iCloud Drive: `~/Library/Mobile Documents/com~apple~CloudDocs/Card Tracker/`
+
+### Updating the App
+1. Make changes to source files
+2. Run build: `bash build/build.sh`
+3. Test locally
+4. Commit and push:
+   ```bash
+   git add .
+   git commit -m "Description of changes"
+   git push origin main
+   ```
+5. Wait 1-2 minutes for GitHub Pages to deploy
+6. Refresh on iPhone (data persists!)
+
 ## Quick Commands
 
 ```bash
 # Build the app
 bash /Users/cholunchiang/Desktop/CardPointsTracker/build/build.sh
 
-# Run tests (all ~159 tests)
+# Run tests (all ~226 tests)
 open /Users/cholunchiang/Desktop/CardPointsTracker/tests/dom-tests.html
 
 # Check current roadmap
@@ -34,13 +76,14 @@ grep -n "PATTERN" /Users/cholunchiang/Desktop/CardPointsTracker/src/js/main.js
 | File | What It Does |
 |------|--------------|
 | `README.md` | Project overview & quick start |
+| `docs/IPHONE_SETUP.md` | How to use on iPhone (with backup & import guide) |
+| `docs/ARCHITECTURE.md` | Technical architecture |
+| `docs/TESTING.md` | Test framework & patterns |
+| `docs/DEV_LOG.md` | Version history + roadmap |
 | `src/js/main.js` | **ALL** application logic (~48KB) |
 | `src/styles/components.css` | UI styling (~21KB) |
 | `src/index.html` | HTML template |
-| `dist/CardPointsTracker.html` | Production build (~87KB) |
-| `docs/DEV_LOG.md` | Version history + roadmap |
-| `docs/ARCHITECTURE.md` | Technical architecture |
-| `docs/TESTING.md` | Test framework & patterns |
+| `dist/CardPointsTracker.html` | Production build (~87KB) — deployed to GitHub Pages |
 | `tests/README.md` | How to run tests |
 | `tests/dom-tests.html` | 24 DOM/UI tests |
 | `tests/e2e-tests.html` | 30 E2E workflow tests |
