@@ -1,0 +1,4267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>💳 Card Points Tracker</title>
+    <style>
+/* === base.css === */
+/* ============================================
+   BASE STYLES & DESIGN TOKENS
+   CardPointsTracker Design System v1.0
+   ============================================ */
+
+/* ============================================
+   CSS VARIABLES — LIGHT MODE (DEFAULT)
+   ============================================ */
+:root {
+  /* === COLORS: Semantic === */
+  --color-primary: #007AFF;
+  --color-primary-hover: #0056b3;
+  --color-success: #34C759;
+  --color-success-hover: #2da44e;
+  --color-warning: #FF9500;
+  --color-warning-hover: #e68600;
+  --color-danger: #FF3B30;
+  --color-danger-hover: #d63027;
+  
+  /* === COLORS: Surfaces === */
+  --color-bg-primary: #F2F2F7;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #E5E5EA;
+  --color-bg-elevated: #FFFFFF;
+  
+  /* === COLORS: Text === */
+  --color-text-primary: #1C1C1E;
+  --color-text-secondary: #8E8E93;
+  --color-text-tertiary: #AEAEB2;
+  --color-text-inverse: #FFFFFF;
+  
+  /* === COLORS: Borders === */
+  --color-border: #C6C6C8;
+  --color-border-light: #E5E5EA;
+  --color-divider: rgba(60, 60, 67, 0.12);
+  
+  /* === COLORS: Category Tags === */
+  --color-tag-dining: #34C759;
+  --color-tag-dining-bg: rgba(52, 199, 89, 0.15);
+  --color-tag-travel: #007AFF;
+  --color-tag-travel-bg: rgba(0, 122, 255, 0.15);
+  --color-tag-groceries: #FF9500;
+  --color-tag-groceries-bg: rgba(255, 149, 0, 0.15);
+  --color-tag-gas: #FF3B30;
+  --color-tag-gas-bg: rgba(255, 59, 48, 0.15);
+  --color-tag-streaming: #AF52DE;
+  --color-tag-streaming-bg: rgba(175, 82, 222, 0.15);
+  --color-tag-hotels: #5856D6;
+  --color-tag-hotels-bg: rgba(88, 86, 214, 0.15);
+  --color-tag-default: #8E8E93;
+  --color-tag-default-bg: rgba(142, 142, 147, 0.15);
+  
+  /* === COLORS: Banks (keep existing) === */
+  --color-chase: #1a4480;
+  --color-amex: #006fcf;
+  --color-citi: #003b70;
+  --color-capital-one: #d03027;
+  --color-discover: #ff6000;
+  --color-bofa: #e31837;
+  --color-wells-fargo: #cd1409;
+  --color-usbank: #0c2074;
+  --color-barclays: #00aeef;
+  
+  /* === TYPOGRAPHY === */
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-md: 17px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 28px;
+  --font-size-3xl: 34px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+  
+  /* === SPACING === */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  
+  /* === BORDER RADIUS === */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  
+  /* === SHADOWS === */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-modal: 0 10px 40px rgba(0, 0, 0, 0.2);
+  
+  /* === TRANSITIONS === */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  
+  /* === Z-INDEX === */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal-backdrop: 999;
+  --z-modal: 1000;
+  --z-toast: 1100;
+}
+
+/* ============================================
+   CSS VARIABLES — DARK MODE
+   Auto-switches based on system preference
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* === COLORS: Semantic (brighter for dark bg) === */
+    --color-primary: #0A84FF;
+    --color-primary-hover: #409CFF;
+    --color-success: #30D158;
+    --color-success-hover: #4ae06a;
+    --color-warning: #FF9F0A;
+    --color-warning-hover: #ffb340;
+    --color-danger: #FF453A;
+    --color-danger-hover: #ff6961;
+    
+    /* === COLORS: Surfaces === */
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #1C1C1E;
+    --color-bg-tertiary: #2C2C2E;
+    --color-bg-elevated: #2C2C2E;
+    
+    /* === COLORS: Text === */
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #8E8E93;
+    --color-text-tertiary: #636366;
+    --color-text-inverse: #000000;
+    
+    /* === COLORS: Borders === */
+    --color-border: #38383A;
+    --color-border-light: #2C2C2E;
+    --color-divider: rgba(84, 84, 88, 0.65);
+    
+    /* === COLORS: Category Tags (same colors, adjusted bg) === */
+    --color-tag-dining-bg: rgba(48, 209, 88, 0.2);
+    --color-tag-travel-bg: rgba(10, 132, 255, 0.2);
+    --color-tag-groceries-bg: rgba(255, 159, 10, 0.2);
+    --color-tag-gas-bg: rgba(255, 69, 58, 0.2);
+    --color-tag-streaming-bg: rgba(191, 90, 242, 0.2);
+    --color-tag-hotels-bg: rgba(94, 92, 230, 0.2);
+    --color-tag-default-bg: rgba(142, 142, 147, 0.2);
+    
+    /* === SHADOWS (deeper for dark mode) === */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-modal: 0 10px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ============================================
+   UNIVERSAL RESETS
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   TYPOGRAPHY BASE
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-tertiary { color: var(--color-text-tertiary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-danger); }
+
+.bg-primary { background-color: var(--color-bg-primary); }
+.bg-secondary { background-color: var(--color-bg-secondary); }
+.bg-tertiary { background-color: var(--color-bg-tertiary); }
+
+/* === components.css === */
+/* ============================================
+   COMPONENT STYLES
+   Cards, modals, forms, buttons, navigation
+   ============================================ */
+
+/* TOP BAR */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-dropdown);
+  padding: var(--space-md) var(--space-md) var(--space-sm);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.85);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .top-bar {
+    background: rgba(28,28,30,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+}
+
+/* SEARCH */
+.search-wrap {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.search-box {
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm) var(--space-xs) 34px;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+  outline: none;
+  background: rgba(118,118,128,0.12);
+  color: var(--color-text-primary);
+}
+
+.search-box::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* TABS */
+.tab-row {
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tab-row::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-pill {
+  flex-shrink: 0;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  background: rgba(118,118,128,0.12);
+  color: var(--color-text-primary);
+}
+
+.tab-pill.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* FILTER BAR — Category/Partner + Sort dropdowns */
+.category-filter-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px 12px;
+  margin-top: 8px;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0,0,0,0.1);
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.filter-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
+}
+
+/* Legacy support - apply same style to old IDs */
+#categoryFilter, #sortFilter {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0,0,0,0.1);
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+#categoryFilter:focus, #sortFilter:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.15);
+}
+
+/* CONTENT AREA */
+.content-area {
+  padding: 12px 16px 100px;
+}
+
+/* CARD TILES */
+.card-tile {
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  margin-bottom: var(--space-xs);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+  background: var(--color-bg-secondary);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.card-tile:active {
+  transform: scale(0.98);
+}
+
+.card-tile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.card-title-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-bank {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.bank-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(0,0,0,0.06);
+  color: var(--color-text-primary);
+}
+
+.owner-chip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 3px;
+}
+
+.points-badge {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.points-num {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.points-unit {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* TAGS */
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.tag {
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(0,122,255,0.1);
+  color: var(--color-primary);
+}
+
+.tag.tag-green {
+  background: rgba(52,199,89,0.12);
+  color: var(--color-success);
+}
+
+.tag.tag-blue {
+  background: rgba(0,122,255,0.1);
+  color: var(--color-primary);
+}
+
+.tag.tag-orange {
+  background: rgba(255,149,0,0.12);
+  color: var(--color-warning);
+}
+
+.tag.tag-purple {
+  background: rgba(175,82,222,0.12);
+  color: #AF52DE;
+}
+
+.tag.tag-red {
+  background: rgba(255,59,48,0.12);
+  color: var(--color-danger);
+}
+
+.tag.tag-pink {
+  background: rgba(255,45,85,0.12);
+  color: #FF2D55;
+}
+
+.tag.tag-teal {
+  background: rgba(90,200,250,0.18);
+  color: #32ADE6;
+}
+
+.tag.tag-gray {
+  background: rgba(142,142,147,0.12);
+  color: var(--color-text-secondary);
+}
+
+/* PROGRESS */
+.progress-section {
+  margin-top: 4px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  opacity: 0.65;
+  margin-bottom: 4px;
+}
+
+.progress-bar-bg {
+  border-radius: var(--radius-sm);
+  height: 5px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.08);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, #007AFF, #5AC8FA);
+  transition: width 0.6s ease;
+}
+
+/* SUMMARY CARD */
+.summary-card {
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  margin-bottom: var(--space-md);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #007AFF, #5AC8FA);
+  color: #fff;
+}
+
+.summary-title {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.summary-num {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 4px 0;
+}
+
+.summary-sub {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* MODALS */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  display: flex;
+  align-items: flex-end;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.35);
+}
+
+.modal-bg.hidden {
+  display: none;
+}
+
+.modal {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  max-height: 88vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  background: var(--color-bg-secondary);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(128,128,128,0.3);
+  margin: 10px auto 4px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(128,128,128,0.2);
+  color: inherit;
+}
+
+.modal-body {
+  padding: 0 20px 24px;
+}
+
+/* DETAIL ROWS */
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.detail-icon-bg {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  background: rgba(0,122,255,0.1);
+}
+
+.detail-content {
+  flex: 1;
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* COUPONS */
+.coupon-item {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity var(--transition-normal);
+  background: rgba(255,149,0,0.08);
+  border-left: 3px solid var(--color-warning);
+}
+
+.coupon-item.used {
+  opacity: 0.45;
+}
+
+.coupon-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-normal);
+  background: rgba(255,149,0,0.2);
+  color: var(--color-warning);
+}
+
+.coupon-check.done {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.coupon-text {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.coupon-expiry {
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+/* REDEMPTION */
+.redemption-item {
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.redemption-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.redemption-ratio {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.redemption-value {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* FORMS */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  outline: none;
+  transition: all var(--transition-normal);
+  background: rgba(118,118,128,0.1);
+  border: 1px solid rgba(0,0,0,0.1);
+  color: var(--color-text-primary);
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  background: var(--color-bg-secondary);
+}
+
+/* CUSTOM BANK INPUT */
+#customBankInputWrapper {
+  animation: slideDown 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#f-bank-custom {
+  border-left: 3px solid var(--color-text-secondary) !important;
+  background: rgba(142,142,147,0.08) !important;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.add-btn,
+.cancel-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: var(--radius-lg);
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.add-btn {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.cancel-btn {
+  background: rgba(118,118,128,0.15);
+  color: var(--color-text-primary);
+}
+
+/* EMOJI & COLOR GRIDS */
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.emoji-btn {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  background: rgba(118,118,128,0.1);
+}
+
+.emoji-btn.selected {
+  background: rgba(0,122,255,0.2);
+  outline: 2px solid var(--color-primary);
+}
+
+.color-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.color-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.color-btn.selected {
+  border-color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.empty-state .big-emoji {
+  font-size: 56px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.empty-state strong {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* FAB (Floating Action Button) */
+.fab {
+  position: fixed;
+  bottom: 90px;
+  right: calc(50% - 215px + 16px);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  z-index: 200;
+  transition: transform 0.2s;
+}
+
+.fab:active {
+  transform: scale(0.92);
+}
+
+@media (prefers-color-scheme: light) {
+  .fab {
+    background: #007AFF;
+    box-shadow: 0 4px 16px rgba(0,122,255,0.4);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .fab {
+    background: #0A84FF;
+    box-shadow: 0 4px 20px rgba(10,132,255,0.45);
+  }
+}
+
+/* NAVIGATION BAR */
+.nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  display: flex;
+  padding: 8px 0 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 150;
+}
+
+@media (prefers-color-scheme: light) {
+  .nav-bar {
+    background: rgba(255,255,255,0.9);
+    border-top: 1px solid rgba(0,0,0,0.1);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .nav-bar {
+    background: rgba(28,28,30,0.95);
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+@media (prefers-color-scheme: light) {
+  .nav-btn {
+    color: #86868b;
+  }
+  .nav-btn.active {
+    color: #007AFF;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .nav-btn {
+    color: #636366;
+  }
+  .nav-btn.active {
+    color: #0A84FF;
+  }
+}
+
+.nav-btn .nav-icon {
+  font-size: 22px;
+}
+
+/* BACKUP */
+.backup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+
+@media (prefers-color-scheme: light) {
+  .backup-export {
+    background: rgba(0,122,255,0.1);
+    color: #007AFF;
+  }
+  .backup-import {
+    background: rgba(52,199,89,0.1);
+    color: #34C759;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .backup-export {
+    background: rgba(10,132,255,0.15);
+    color: #0A84FF;
+  }
+  .backup-import {
+    background: rgba(48,209,88,0.15);
+    color: #30D158;
+  }
+}
+
+.backup-info {
+  font-size: 12px;
+  opacity: 0.5;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+#restore-input {
+  display: none;
+}
+
+/* HISTORY */
+.hist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(128,128,128,0.1);
+}
+
+.hist-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+@media (prefers-color-scheme: light) {
+  .hist-earned .hist-dot {
+    background: rgba(52,199,89,0.15);
+    color: #34C759;
+  }
+  .hist-spent .hist-dot {
+    background: rgba(255,59,48,0.12);
+    color: #FF3B30;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .hist-earned .hist-dot {
+    background: rgba(48,209,88,0.18);
+    color: #30D158;
+  }
+  .hist-spent .hist-dot {
+    background: rgba(255,69,58,0.18);
+    color: #FF453A;
+  }
+}
+
+.hist-body {
+  flex: 1;
+}
+
+.hist-amount {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+@media (prefers-color-scheme: light) {
+  .hist-earned .hist-amount {
+    color: #34C759;
+  }
+  .hist-spent .hist-amount {
+    color: #FF3B30;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .hist-earned .hist-amount {
+    color: #30D158;
+  }
+  .hist-spent .hist-amount {
+    color: #FF453A;
+  }
+}
+
+.hist-meta {
+  font-size: 11px;
+  opacity: 0.55;
+  margin-top: 2px;
+}
+
+.hist-note {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 3px;
+  font-style: italic;
+}
+
+/* LOG BUTTON */
+.log-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 6px;
+  transition: all 0.2s;
+}
+
+@media (prefers-color-scheme: light) {
+  .log-btn {
+    background: rgba(0,122,255,0.1);
+    color: #007AFF;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .log-btn {
+    background: rgba(10,132,255,0.15);
+    color: #0A84FF;
+  }
+}
+
+/* OWNER CHIPS */
+@media (prefers-color-scheme: light) {
+  .owner-me {
+    background: rgba(0,122,255,0.13);
+    color: #007AFF;
+  }
+  .owner-wife {
+    background: rgba(255,45,85,0.13);
+    color: #FF2D55;
+  }
+  .owner-shared {
+    background: rgba(52,199,89,0.13);
+    color: #34C759;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .owner-me {
+    background: rgba(10,132,255,0.2);
+    color: #0A84FF;
+  }
+  .owner-wife {
+    background: rgba(255,69,58,0.2);
+    color: #FF453A;
+  }
+  .owner-shared {
+    background: rgba(48,209,88,0.2);
+    color: #30D158;
+  }
+}
+
+/* REDEEM ROWS */
+.redeem-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 44px;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.redeem-row-name {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+@media (prefers-color-scheme: light) {
+  .redeem-row-name {
+    background: rgba(118,118,128,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f;
+  }
+  .redeem-row-name:focus {
+    border-color: #007AFF;
+    background: var(--color-bg-secondary);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .redeem-row-name {
+    background: rgba(118,118,128,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #f5f5f7;
+  }
+  .redeem-row-name:focus {
+    border-color: #0A84FF;
+  }
+}
+
+.redeem-row-ratio {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: light) {
+  .redeem-row-ratio {
+    background: rgba(118,118,128,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f;
+  }
+  .redeem-row-ratio:focus {
+    border-color: #007AFF;
+    background: var(--color-bg-secondary);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .redeem-row-ratio {
+    background: rgba(118,118,128,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #f5f5f7;
+  }
+  .redeem-row-ratio:focus {
+    border-color: #0A84FF;
+  }
+}
+
+.redeem-row-delete {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+@media (prefers-color-scheme: light) {
+  .redeem-row-delete {
+    background: rgba(255,59,48,0.12);
+    color: #FF3B30;
+  }
+  .redeem-row-delete:active {
+    background: rgba(255,59,48,0.25);
+  }
+}
+
+/* EDITABLE PERK TAGS */
+.perk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.perk-chip-remove {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.perk-chip-remove:hover {
+  opacity: 1;
+}
+
+@media (prefers-color-scheme: light) {
+  .perk-chip {
+    background: rgba(0,122,255,0.1);
+    color: #007AFF;
+  }
+  .perk-chip.tag-green {
+    background: rgba(52,199,89,0.12);
+    color: #34C759;
+  }
+  .perk-chip.tag-blue {
+    background: rgba(0,122,255,0.1);
+    color: #007AFF;
+  }
+  .perk-chip.tag-orange {
+    background: rgba(255,149,0,0.12);
+    color: #FF9500;
+  }
+  .perk-chip.tag-purple {
+    background: rgba(175,82,222,0.12);
+    color: #AF52DE;
+  }
+  .perk-chip.tag-red {
+    background: rgba(255,59,48,0.12);
+    color: #FF3B30;
+  }
+  .perk-chip.tag-pink {
+    background: rgba(255,45,85,0.12);
+    color: #FF2D55;
+  }
+  .perk-chip.tag-teal {
+    background: rgba(90,200,250,0.18);
+    color: #32ADE6;
+  }
+  .perk-chip.tag-gray {
+    background: rgba(142,142,147,0.12);
+    color: #8E8E93;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .perk-chip {
+    background: rgba(10,132,255,0.2);
+    color: #0A84FF;
+  }
+  .perk-chip.tag-green {
+    background: rgba(48,209,88,0.18);
+    color: #30D158;
+  }
+  .perk-chip.tag-blue {
+    background: rgba(10,132,255,0.2);
+    color: #0A84FF;
+  }
+  .perk-chip.tag-orange {
+    background: rgba(255,159,10,0.18);
+    color: #FF9F0A;
+  }
+  .perk-chip.tag-purple {
+    background: rgba(191,90,242,0.18);
+    color: #BF5AF2;
+  }
+  .perk-chip.tag-red {
+    background: rgba(255,69,58,0.18);
+    color: #FF453A;
+  }
+  .perk-chip.tag-pink {
+    background: rgba(255,55,95,0.18);
+    color: #FF375F;
+  }
+  .perk-chip.tag-teal {
+    background: rgba(102,212,207,0.18);
+    color: #66D4CF;
+  }
+  .perk-chip.tag-gray {
+    background: rgba(174,174,178,0.18);
+    color: #AEAEB2;
+  }
+}
+
+.redeem-add-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 2px dashed;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: none;
+}
+
+@media (prefers-color-scheme: light) {
+  .redeem-add-btn {
+    border-color: rgba(0,122,255,0.4);
+    color: #007AFF;
+  }
+  .redeem-add-btn:active {
+    background: rgba(0,122,255,0.08);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .redeem-add-btn {
+    border-color: rgba(10,132,255,0.4);
+    color: #0A84FF;
+  }
+  .redeem-add-btn:active {
+    background: rgba(10,132,255,0.12);
+  }
+}
+
+/* BENEFIT ROWS */
+.benefit-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 100px 44px;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.benefit-row-text {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+@media (prefers-color-scheme: light) {
+  .benefit-row-text {
+    background: rgba(118,118,128,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f;
+  }
+  .benefit-row-text:focus {
+    border-color: #007AFF;
+    background: var(--color-bg-secondary);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .benefit-row-text {
+    background: rgba(118,118,128,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #f5f5f7;
+  }
+  .benefit-row-text:focus {
+    border-color: #0A84FF;
+  }
+}
+
+.benefit-row-recurrence {
+  width: 100%;
+  padding: 10px 8px;
+  border-radius: 12px;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: light) {
+  .benefit-row-recurrence {
+    background: rgba(118,118,128,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f;
+  }
+  .benefit-row-recurrence:focus {
+    border-color: #007AFF;
+    background: var(--color-bg-secondary);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .benefit-row-recurrence {
+    background: rgba(118,118,128,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #f5f5f7;
+  }
+  .benefit-row-recurrence:focus {
+    border-color: #0A84FF;
+  }
+}
+
+.benefit-row-expiry {
+  width: 100%;
+  padding: 10px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+@media (prefers-color-scheme: light) {
+  .benefit-row-expiry {
+    background: rgba(118,118,128,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f;
+  }
+  .benefit-row-expiry:focus {
+    border-color: #007AFF;
+    background: var(--color-bg-secondary);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .benefit-row-expiry {
+    background: rgba(118,118,128,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #f5f5f7;
+  }
+  .benefit-row-expiry:focus {
+    border-color: #0A84FF;
+  }
+}
+
+.benefit-row-delete {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+@media (prefers-color-scheme: light) {
+  .benefit-row-delete {
+    background: rgba(255,59,48,0.12);
+    color: #FF3B30;
+  }
+  .benefit-row-delete:active {
+    background: rgba(255,59,48,0.25);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .benefit-row-delete {
+    background: rgba(255,69,58,0.18);
+    color: #FF453A;
+  }
+  .benefit-row-delete:active {
+    background: rgba(255,69,58,0.3);
+  }
+}
+
+.benefit-add-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 2px dashed;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: none;
+}
+
+@media (prefers-color-scheme: light) {
+  .benefit-add-btn {
+    border-color: rgba(255,149,0,0.4);
+    color: #FF9500;
+  }
+  .benefit-add-btn:active {
+    background: rgba(255,149,0,0.08);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .benefit-add-btn {
+    border-color: rgba(255,159,10,0.4);
+    color: #FF9F0A;
+  }
+  .benefit-add-btn:active {
+    background: rgba(255,159,10,0.12);
+  }
+}
+
+/* BENEFIT CARDS - Period-based tracking */
+.benefit-card {
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 10px;
+  background: rgba(255,149,0,0.06);
+  border-left: 3px solid var(--color-warning);
+  transition: all var(--transition-fast);
+}
+
+.benefit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.benefit-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.benefit-meta {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 3px;
+}
+
+.benefit-periods {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.period-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition-fast);
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(255,149,0,0.1);
+  color: var(--color-warning);
+}
+
+.period-box:active {
+  transform: scale(0.95);
+}
+
+.period-box.used {
+  background: var(--color-success);
+  color: #fff;
+  border-color: var(--color-success);
+}
+
+@media (prefers-color-scheme: dark) {
+  .period-box {
+    background: rgba(255,159,10,0.15);
+    border-color: rgba(255,159,10,0.3);
+    color: #FF9F0A;
+  }
+  
+  .period-box.used {
+    background: #30D158;
+    color: #000;
+  }
+}
+
+/* Benefit Reminder Banner v3.5 */
+.benefit-reminder-banner {
+  background: linear-gradient(135deg, var(--color-warning), #ff9500);
+  color: white;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-lg);
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
+}
+
+.reminder-header {
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.reminder-list {
+  font-size: var(--font-size-sm);
+}
+
+.reminder-item {
+  padding: var(--space-xs) 0;
+  opacity: 0.95;
+}
+
+.reminder-card {
+  font-weight: 600;
+}
+
+.reminder-days {
+  opacity: 0.9;
+  font-style: italic;
+  margin-left: 4px;
+}
+
+/* Period box expiring soon indicator */
+.period-box.expiring {
+  border: 2px solid var(--color-warning) !important;
+  animation: pulse-warning 1.5s infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(255, 149, 0, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .benefit-reminder-banner {
+    background: linear-gradient(135deg, #FF9F0A, #ff7800);
+    box-shadow: 0 2px 12px rgba(255, 159, 10, 0.35);
+  }
+}
+
+/* === themes.css === */
+/* ============================================
+   THEME STYLES
+   Component-specific theme overrides
+   Now uses CSS variables from base.css
+   ============================================ */
+
+/* ============================================
+   COMPONENT THEME OVERRIDES
+   These handle edge cases not covered by variables
+   ============================================ */
+
+/* Modal backdrop uses semi-transparent overlay */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-backdrop {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Bank badge specific colors (brand colors don't change in dark mode) */
+.bank-badge.chase { background: var(--color-chase); color: white; }
+.bank-badge.amex { background: var(--color-amex); color: white; }
+.bank-badge.citi { background: var(--color-citi); color: white; }
+.bank-badge.capital-one { background: var(--color-capital-one); color: white; }
+.bank-badge.discover { background: var(--color-discover); color: white; }
+.bank-badge.bofa { background: var(--color-bofa); color: white; }
+.bank-badge.wells-fargo { background: var(--color-wells-fargo); color: white; }
+.bank-badge.usbank { background: var(--color-usbank); color: white; }
+.bank-badge.barclays { background: var(--color-barclays); color: white; }
+.bank-badge.other { background: var(--color-text-secondary); color: white; }
+
+/* Category tag colors using CSS variables */
+.tag-green { 
+  background: var(--color-tag-dining-bg); 
+  color: var(--color-tag-dining); 
+}
+.tag-blue { 
+  background: var(--color-tag-travel-bg); 
+  color: var(--color-tag-travel); 
+}
+.tag-orange { 
+  background: var(--color-tag-groceries-bg); 
+  color: var(--color-tag-groceries); 
+}
+.tag-red { 
+  background: var(--color-tag-gas-bg); 
+  color: var(--color-tag-gas); 
+}
+.tag-purple { 
+  background: var(--color-tag-streaming-bg); 
+  color: var(--color-tag-streaming); 
+}
+.tag-indigo { 
+  background: var(--color-tag-hotels-bg); 
+  color: var(--color-tag-hotels); 
+}
+.tag-gray { 
+  background: var(--color-tag-default-bg); 
+  color: var(--color-tag-default); 
+}
+
+/* Pink and teal don't have specific semantic meaning, use defaults */
+.tag-pink { 
+  background: rgba(255, 45, 85, 0.15); 
+  color: #FF2D55; 
+}
+.tag-teal { 
+  background: rgba(90, 200, 250, 0.15); 
+  color: #5AC8FA; 
+}
+
+@media (prefers-color-scheme: dark) {
+  .tag-pink { 
+    background: rgba(255, 55, 95, 0.2); 
+    color: #FF375F; 
+  }
+  .tag-teal { 
+    background: rgba(100, 210, 255, 0.2); 
+    color: #64D2FF; 
+  }
+}
+
+/* Owner tabs active state */
+.tab.active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Summary stat highlights */
+.stat-value.highlight {
+  color: var(--color-primary);
+}
+
+.stat-value.success {
+  color: var(--color-success);
+}
+
+.stat-value.warning {
+  color: var(--color-warning);
+}
+
+.stat-value.danger {
+  color: var(--color-danger);
+}
+
+/* Card icon gradients (these are decorative, keep as-is) */
+.card-icon-gradient-blue {
+  background: linear-gradient(135deg, #1a1f71, #00d4ff);
+}
+
+.card-icon-gradient-gold {
+  background: linear-gradient(135deg, #b8860b, #ffd700);
+}
+
+.card-icon-gradient-green {
+  background: linear-gradient(135deg, #1a472a, #34c759);
+}
+
+.card-icon-gradient-red {
+  background: linear-gradient(135deg, #8b0000, #ff6b6b);
+}
+
+/* History item type indicators */
+.history-earned {
+  color: var(--color-success);
+}
+
+.history-spent {
+  color: var(--color-danger);
+}
+
+/* Form validation states */
+.form-input.error {
+  border-color: var(--color-danger);
+}
+
+.form-input.success {
+  border-color: var(--color-success);
+}
+
+/* Button variants (extends base button styles) */
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+.btn-secondary {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* 5/24 Status indicators */
+.status-under524 {
+  color: var(--color-success);
+}
+
+.status-over524 {
+  color: var(--color-danger);
+}
+
+/* Annual fee display */
+.fee-none {
+  color: var(--color-success);
+}
+
+.fee-value {
+  color: var(--color-warning);
+}
+
+
+</style>
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <h1>💳 Card Points Tracker</h1>
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input class="search-box" id="searchBox" type="text" placeholder="Search cards, airlines, rewards" oninput="handleSearch(this.value)">
+            </div>
+        </div>
+
+        <div class="tab-row" id="tabRow"></div>
+
+        <div class="category-filter-wrap">
+            <select id="categoryFilter" onchange="filterByCategory(this.value)"></select>
+            <select id="sortFilter" onchange="setSortOrder(this.value)">
+                <option value="recent">Recently Added</option>
+                <option value="points">Points (High→Low)</option>
+                <option value="due">Due Date (Soon→Later)</option>
+                <option value="name">Name (A→Z)</option>
+            </select>
+        </div>
+
+        <div class="content-area" id="contentArea"></div>
+
+        <button class="fab" onclick="openAddModal()">➕</button>
+
+        <div class="nav-bar">
+            <button class="nav-btn active" id="nav-cards" onclick="switchNav('cards')">
+                <span class="nav-icon">💳</span>
+                Cards
+            </button>
+            <button class="nav-btn" id="nav-miles" onclick="switchNav('miles')">
+                <span class="nav-icon">✈️</span>
+                Miles
+            </button>
+            <button class="nav-btn" id="nav-coupons" onclick="switchNav('coupons')">
+                <span class="nav-icon">🎁</span>
+                Perks
+            </button>
+            <button class="nav-btn" id="nav-summary" onclick="switchNav('summary')">
+                <span class="nav-icon">📊</span>
+                Summary
+            </button>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-bg hidden" id="detailModal">
+        <div class="modal" id="detailModalContent"></div>
+    </div>
+
+    <!-- Add Card Modal -->
+    <div class="modal-bg hidden" id="addModal">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <span class="modal-title">Add Credit Card</span>
+                <button class="close-btn" onclick="closeAddModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Card Name</label>
+                    <input class="form-input" id="f-name" placeholder="e.g. Chase Sapphire Preferred" oninput="autofillCard(this.value)" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bank</label>
+                    <div id="bankGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px"></div>
+                    <div id="customBankInputWrapper" style="display:none;margin-bottom:0">
+                        <label class="form-label" for="f-bank-custom" style="margin-top:8px;margin-bottom:6px;font-size:13px">Enter Custom Bank Name</label>
+                        <input class="form-input" id="f-bank-custom" placeholder="e.g. Local Credit Union, AMCU" oninput="updateCustomBank()" />
+                    </div>
+                    <input class="form-input" id="f-bank" placeholder="Or type bank name" style="display:none" oninput="autofillCard(document.getElementById('f-name').value)" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Owner</label>
+                    <select class="form-input" id="f-owner">
+                        <option value="Me">👤 Me</option>
+                        <option value="Wife">👩 Wife</option>
+                        <option value="Shared">🤝 Shared</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Card Opened</label>
+                    <input class="form-input" id="f-open-date" type="date" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Statement Date</label>
+                    <input class="form-input" id="f-due" type="date" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reward Categories <span style="opacity:0.5;font-weight:400">(auto-filled, editable)</span></label>
+                    <div id="f-perks-container" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:rgba(0,122,255,0.05);border-radius:12px;border:1px solid rgba(0,122,255,0.15);margin-bottom:8px;min-height:44px;align-items:center"></div>
+                    <div style="display:flex;gap:8px">
+                        <input class="form-input" id="f-perks-input" placeholder="Add new category (e.g., 3x Dining)" style="flex:1" oninput="handlePerkInput(event)" />
+                        <button type="button" class="form-btn" onclick="addPerk()" style="padding:10px 16px;border-radius:10px;border:none;background:#007AFF;color:white;font-weight:600;cursor:pointer;white-space:nowrap">+ Add</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transfer Partners <span style="opacity:0.5;font-weight:400">(auto-filled)</span></label>
+                    <div id="f-redeem-container"></div>
+                    <button type="button" class="redeem-add-btn" onclick="addRedeemRow()">+ Add Partner</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Annual Benefits <span style="opacity:0.5;font-weight:400">(auto-filled)</span></label>
+                    <div id="f-benefits-container"></div>
+                    <button type="button" class="benefit-add-btn" onclick="addBenefitRow()">+ Add Benefit</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Annual Fee</label>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:14px;font-weight:600;color:#666">$</span>
+                        <input class="form-input" id="f-annual-fee" type="number" placeholder="0" style="flex:1" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current Points</label>
+                    <input class="form-input" id="f-points" type="number" placeholder="0" />
+                </div>
+                <div class="form-actions">
+                    <button class="cancel-btn" onclick="closeAddModal()">Cancel</button>
+                    <button class="add-btn" onclick="saveCard()">Save Card</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Points Modal -->
+    <div class="modal-bg hidden" id="logModal">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <span class="modal-title">📝 Log Points</span>
+                <button class="close-btn" onclick="closeLogModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                        <button id="log-type-earned" onclick="setLogType('earned')" style="padding:10px;border-radius:12px;border:2px solid #34C759;background:rgba(52,199,89,0.12);color:#34C759;font-size:14px;font-weight:600;cursor:pointer">➕ Earned</button>
+                        <button id="log-type-spent"  onclick="setLogType('spent')"  style="padding:10px;border-radius:12px;border:2px solid rgba(128,128,128,0.3);background:transparent;color:inherit;font-size:14px;font-weight:600;cursor:pointer">➖ Spent / Redeemed</button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Points</label>
+                        <input class="form-input" id="log-amount" type="number" placeholder="0" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input class="form-input" id="log-date" type="date" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Note <span style="opacity:0.5;font-weight:400">(optional)</span></label>
+                    <input class="form-input" id="log-note" placeholder="e.g. Monthly spend, Transferred to United" />
+                </div>
+                <div class="form-actions">
+                    <button class="cancel-btn" onclick="closeLogModal()">Cancel</button>
+                    <button class="add-btn" onclick="saveLog()">Save Entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// ============================================================================
+// CARD POINTS TRACKER - Main Application
+// ============================================================================
+
+// 🎨 Constants
+const EMOJIS = ['💳','🏦','✈️','🎁','💰','🌟','🔷','💎','🎯','⭐','🏅','🎖️','💵','💴','💶','💷'];
+const COLORS  = ['#FF6B6B','#FF9500','#FFCC02','#34C759','#00C7BE','#007AFF','#5856D6','#AF52DE','#FF2D55','#8E8E93'];
+const TC      = ['','green','orange','purple','red','teal','','green','orange','purple'];
+
+// 🏷️ Category Color Mapping
+const CATEGORY_COLORS = {
+  'dining': 'green',
+  'restaurant': 'green',
+  'restaurants': 'green',
+  'travel': 'blue',
+  'flights': 'blue',
+  'hotels': 'purple',
+  'flights booked directly': 'blue',
+  'prepaid hotels': 'purple',
+  'groceries': 'orange',
+  'supermarkets': 'orange',
+  'gas': 'red',
+  'streaming': 'pink',
+  'entertainment': 'pink',
+  'drugstores': 'teal',
+  'everything': 'gray',
+  'prepaid': 'purple',
+  'car rentals': 'blue',
+  'cars': 'blue',
+};
+
+// Dynamic color assignment for unknown categories
+let dynamicColorIndex = 0;
+const DYNAMIC_COLORS = ['green', 'blue', 'orange', 'purple', 'red', 'pink', 'teal'];
+
+function extractCategory(perk) {
+  const match = perk.match(/^\d+(\.\d+)?x\s+(.+)$/i);
+  return match ? match[2] : null;
+}
+
+// Normalize category names for grouping (e.g., "Dining worldwide" -> "Dining", "Everything else" -> "Everything")
+const CATEGORY_ALIASES = {
+  'dining worldwide': 'Dining',
+  'restaurants worldwide': 'Dining',
+  'restaurant': 'Dining',
+  'restaurants': 'Dining',
+  'everything else': 'Everything',
+  'us supermarkets': 'Supermarkets',
+  'supermarkets': 'Supermarkets',
+  'groceries': 'Groceries',
+  'flights booked directly': 'Flights',
+  'flights': 'Flights',
+  'travel': 'Travel',
+  'hotels': 'Hotels',
+  'prepaid hotels': 'Hotels',
+  'gas': 'Gas',
+  'transit': 'Transit',
+  'streaming': 'Streaming',
+  'entertainment': 'Entertainment',
+  'drugstores': 'Drugstores',
+};
+
+function normalizeCategory(cat) {
+  if (!cat) return null;
+  const lower = cat.toLowerCase();
+  // Check for alias match
+  for (const [alias, normalized] of Object.entries(CATEGORY_ALIASES)) {
+    if (lower.includes(alias) || alias.includes(lower)) return normalized;
+  }
+  // Check if it starts with a known category
+  for (const [alias, normalized] of Object.entries(CATEGORY_ALIASES)) {
+    if (lower.startsWith(alias.split(' ')[0])) return normalized;
+  }
+  // Return original with title case
+  return cat.charAt(0).toUpperCase() + cat.slice(1);
+}
+
+function getCategoryColor(perk) {
+  const category = extractCategory(perk);
+  if (!category) return 'blue';
+  
+  const categoryLower = category.toLowerCase();
+  
+  // Check known categories (partial match)
+  for (const [key, color] of Object.entries(CATEGORY_COLORS)) {
+    if (categoryLower.includes(key)) return color;
+  }
+  
+  // Assign dynamic color for unknown categories
+  const assignedColor = DYNAMIC_COLORS[dynamicColorIndex % DYNAMIC_COLORS.length];
+  CATEGORY_COLORS[categoryLower] = assignedColor;
+  dynamicColorIndex++;
+  return assignedColor;
+}
+
+// 🏦 Bank Logo Map
+const BANK_BRANDS = {
+  'chase':            { bg:'#117ACA', fg:'#fff', abbr:'CHASE' },
+  'american express': { bg:'#016FD0', fg:'#fff', abbr:'AMEX'  },
+  'amex':             { bg:'#016FD0', fg:'#fff', abbr:'AMEX'  },
+  'citi':             { bg:'#C01933', fg:'#fff', abbr:'citi'  },
+  'citibank':         { bg:'#C01933', fg:'#fff', abbr:'citi'  },
+  'capital one':      { bg:'#D03027', fg:'#fff', abbr:'C1'    },
+  'discover':         { bg:'#FF6600', fg:'#fff', abbr:'DISC'  },
+  'wells fargo':      { bg:'#D71E28', fg:'#fff', abbr:'WF'    },
+  'bank of america':  { bg:'#E31837', fg:'#fff', abbr:'BofA'  },
+  'us bank':          { bg:'#003087', fg:'#fff', abbr:'USB'   },
+  'barclays':         { bg:'#00AEEF', fg:'#fff', abbr:'BARC'  },
+  'navy federal':     { bg:'#002F6C', fg:'#fff', abbr:'NFCU'  },
+  'pnc':              { bg:'#F58025', fg:'#fff', abbr:'PNC'   },
+  'td bank':          { bg:'#34A853', fg:'#fff', abbr:'TD'    },
+  'synchrony':        { bg:'#6E2B8B', fg:'#fff', abbr:'SYF'   },
+};
+
+function cardIconHtml(c) {
+  const key   = (c.bank || '').toLowerCase();
+  const brand = Object.entries(BANK_BRANDS).find(([k]) => key.includes(k))?.[1];
+  if (brand) {
+    return `<div style="width:36px;height:36px;border-radius:8px;background:${brand.bg};display:flex;align-items:center;justify-content:center;font-size:${brand.abbr.length>4?8:9}px;font-weight:800;color:${brand.fg};letter-spacing:0.2px;font-family:-apple-system,sans-serif">${brand.abbr}</div>`;
+  }
+  // For custom banks, create a generic badge with first 2-3 letters
+  const abbr = c.bank.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 3);
+  return `<div style="width:36px;height:36px;border-radius:8px;background:${c.color||'#8E8E93'};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;letter-spacing:0.2px;font-family:-apple-system,sans-serif">${abbr}</div>`;
+}
+
+// 💾 Persistence
+function saveCards() { localStorage.setItem('cpCards', JSON.stringify(cards)); }
+
+// 🔧 Hard reset corrupted data
+(function(){
+  try {
+    const raw = localStorage.getItem('cpCards');
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (!Array.isArray(p) || p.length === 0) { localStorage.removeItem('cpCards'); return; }
+    const bad = p.some(c =>
+      !c || typeof c !== 'object' ||
+      typeof c.name !== 'string' ||
+      typeof c.bank !== 'string' ||
+      !Array.isArray(c.redeem) ||
+      !Array.isArray(c.perks) ||
+      !Array.isArray(c.coupons) ||
+      /[\u4e00-\u9fff]/.test(c.name + c.bank)
+    );
+    if (bad) localStorage.removeItem('cpCards');
+  } catch(e) { localStorage.removeItem('cpCards'); }
+})();
+
+function loadCards() {
+  try {
+    const raw = localStorage.getItem('cpCards');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.length) return null;
+    if (parsed.some(c => !c.name || !c.bank || !Array.isArray(c.redeem) || /[\u4e00-\u9fff]/.test(c.name + c.bank))) {
+      localStorage.removeItem('cpCards');
+      return null;
+    }
+    return parsed.map(c => {
+      const card = {
+        id:         c.id         ?? Date.now(),
+        name:       c.name       ?? 'Unknown',
+        bank:       c.bank       ?? 'Unknown',
+        icon:       c.icon       ?? '💳',
+        color:      c.color      ?? '#007AFF',
+        points:     typeof c.points === 'number' ? c.points : 0,
+        due:        c.due        ?? '',
+        owner:      c.owner      ?? 'Me',
+        annualFee:  typeof c.annualFee === 'number' ? c.annualFee : 0,
+        openDate:   c.openDate   ?? null,
+        perks:      Array.isArray(c.perks)   ? c.perks   : [],
+        redeem:     Array.isArray(c.redeem)  ? c.redeem  : [],
+        coupons:    Array.isArray(c.coupons) ? c.coupons : [],
+        history:    Array.isArray(c.history) ? c.history : [],
+        createdAt:  c.createdAt  ?? new Date(c.id).toISOString(),
+        updatedAt:  c.updatedAt  ?? new Date().toISOString(),
+      };
+      
+      // Normalize coupons to new benefit structure
+      card.coupons = card.coupons.map(coupon => {
+        // If it's the old format (has 'done' and 'expiry'), convert it
+        if (coupon.hasOwnProperty('done')) {
+          return {
+            text: coupon.text || '',
+            amount: coupon.amount || 0,
+            yearlyTotal: coupon.yearlyTotal || 0,
+            recurrence: coupon.recurrence || 'annual',
+            periods: coupon.periods || {},
+            expiry: coupon.expiry || null,
+            lastReset: coupon.lastReset || new Date().toISOString(),
+            nextReset: coupon.nextReset || null
+          };
+        }
+        // Already new format
+        return coupon;
+      });
+      
+      // Initialize periods for all benefits if not present
+      card.coupons = card.coupons.map(benefit => initializeBenefitPeriods(benefit));
+      
+      return card;
+    });
+  } catch(e) { localStorage.removeItem('cpCards'); return null; }
+}
+
+const DEFAULTS = [
+  { id:1, name:'Chase Sapphire Reserve', bank:'Chase', icon:'💳', color:'#007AFF', points:85000, due:'2025-09-15', owner:'Me', annualFee:550,
+    perks:['3x Dining','3x Travel','1.5x Everything','Priority Pass Lounge'],
+    redeem:[{name:'United MileagePlus',ratio:'1:1',est:85000},{name:'World of Hyatt',ratio:'1:1',est:85000},{name:'Southwest Rapid Rewards',ratio:'1:1',est:85000},{name:'Air Canada Aeroplan',ratio:'1:1',est:85000}],
+    coupons:[
+      {text:'$300 Annual Travel Credit',amount:300,yearlyTotal:300,recurrence:'annual',periods:{},expiry:'2026-01-01',lastReset:new Date().toISOString(),nextReset:null},
+      {text:'Global Entry / TSA PreCheck Credit',amount:100,yearlyTotal:100,recurrence:'annual',periods:{},expiry:'2026-01-01',lastReset:new Date().toISOString(),nextReset:null},
+      {text:'DoorDash DashPass',amount:0,yearlyTotal:0,recurrence:'annual',periods:{},expiry:'2025-12-31',lastReset:new Date().toISOString(),nextReset:null}
+    ],
+    history:[] },
+  { id:2, name:'Amex Platinum', bank:'American Express', icon:'💎', color:'#AF52DE', points:120000, due:'2025-09-20', owner:'Wife', annualFee:695,
+    perks:['5x Flights booked directly','5x Prepaid Hotels via Amex','Centurion Lounge Access','Fine Hotels & Resorts'],
+    redeem:[{name:'Delta SkyMiles',ratio:'1:1',est:120000},{name:'British Airways Avios',ratio:'1:1',est:120000},{name:'Air France/KLM Flying Blue',ratio:'1:1',est:120000},{name:'Marriott Bonvoy',ratio:'1:2',est:240000}],
+    coupons:[
+      {text:'$200 Airline Fee Credit',amount:200,yearlyTotal:200,recurrence:'annual',periods:{},expiry:'2025-12-31',lastReset:new Date().toISOString(),nextReset:null},
+      {text:'$200 Fine Hotels Credit',amount:200,yearlyTotal:200,recurrence:'annual',periods:{},expiry:'2025-12-31',lastReset:new Date().toISOString(),nextReset:null},
+      {text:'$240 Digital Entertainment Credit',amount:240,yearlyTotal:240,recurrence:'annual',periods:{},expiry:'2025-12-31',lastReset:new Date().toISOString(),nextReset:null},
+      {text:'Centurion Lounge Access',amount:0,yearlyTotal:0,recurrence:'annual',periods:{},expiry:'2026-01-01',lastReset:new Date().toISOString(),nextReset:null},
+      {text:'$189 CLEAR Plus Credit',amount:189,yearlyTotal:189,recurrence:'annual',periods:{},expiry:'2025-12-31',lastReset:new Date().toISOString(),nextReset:null}
+    ],
+    history:[] },
+  { id:3, name:'Chase Freedom Unlimited', bank:'Chase', icon:'💰', color:'#34C759', points:22000, due:'2025-09-05', owner:'Me', annualFee:0,
+    perks:['1.5x Everything','3x Dining','3x Drugstores','5x Travel via Chase Portal'],
+    redeem:[{name:'Chase Ultimate Rewards (cash)',ratio:'1:1',est:22000}],
+    coupons:[{text:'No Annual Fee',amount:0,yearlyTotal:0,recurrence:'annual',periods:{},expiry:'',lastReset:new Date().toISOString(),nextReset:null}],
+    history:[] },
+  { id:4, name:'Amex Gold', bank:'American Express', icon:'🌟', color:'#FF9500', points:45000, due:'2025-09-28', owner:'Wife', annualFee:250,
+    perks:['4x Dining worldwide','4x US Supermarkets (up to $25k/yr)','3x Flights','1x Everything else'],
+    redeem:[{name:'Delta SkyMiles',ratio:'1:1',est:45000},{name:'Air Canada Aeroplan',ratio:'1:1',est:45000},{name:'British Airways Avios',ratio:'1:1',est:45000},{name:'Marriott Bonvoy',ratio:'1:2',est:90000}],
+    coupons:[
+      {text:'$120 Dining Credit ($10/mo)',amount:10,yearlyTotal:120,recurrence:'monthly',periods:{},expiry:'2025-12-31',lastReset:new Date().toISOString(),nextReset:null},
+      {text:'$120 Uber Cash ($10/mo)',amount:10,yearlyTotal:120,recurrence:'monthly',periods:{},expiry:'2025-12-31',lastReset:new Date().toISOString(),nextReset:null}
+    ],
+    history:[] },
+];
+
+let cards = loadCards() || DEFAULTS;
+if (!loadCards()) saveCards();
+
+let currentTab  = 'all';
+let currentNav  = 'cards';
+let selEmoji    = '💳';
+let selColor    = '#007AFF';
+let searchQuery = '';
+let currentCategoryFilter = '';
+let currentPartnerFilter = '';  // For Miles view - filter by transfer partner
+let currentSort = 'recent';  // 'recent' | 'points' | 'due' | 'name'
+let editingCardId = null;  // Track if we're in edit mode
+let searchTimeout;  // For debounced search (300ms delay)
+
+// 🧭 Nav & Tabs
+function switchNav(n) {
+  currentNav = n;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + n).classList.add('active');
+  renderAll();
+}
+
+function buildTabs() {
+  const opts   = ['all','Me','Wife','Shared', ...new Set(cards.map(c => c.bank))];
+  const labels = { all:'All Cards', Me:'👤 Mine', Wife:'👩 Wife', Shared:'🤝 Shared' };
+  
+  // Get count of expiring benefits for badge
+  const expiringCount = getExpiringBenefits(7).length;
+  
+  document.getElementById('tabRow').innerHTML = opts.map(o => {
+    let tabLabel = labels[o]||o;
+    // Add badge to Coupons tab if there are expiring benefits
+    if (o === 'all' && currentNav === 'coupons' && expiringCount > 0) {
+      tabLabel = `🎁 Coupons <span style="background:#FF3B30;color:white;border-radius:10px;padding:2px 6px;font-size:10px;font-weight:700;margin-left:4px">${expiringCount}</span>`;
+    }
+    return `<button class="tab-pill ${o===currentTab?'active':''}" onclick="setTab('${o}')">${tabLabel}</button>`;
+  }).join('');
+}
+
+function setTab(t) { currentTab = t; renderAll(); }
+
+function handleSearch(v) {
+  clearTimeout(searchTimeout);
+  searchQuery = v.toLowerCase().trim();
+  // Debounce: wait 300ms before rendering to avoid excessive re-renders
+  searchTimeout = setTimeout(() => renderAll(), 300);
+}
+
+function filtered() {
+  let list = cards;
+  if (['Me','Wife','Shared'].includes(currentTab)) list = cards.filter(c => (c.owner||'Me') === currentTab);
+  else if (currentTab !== 'all') list = cards.filter(c => c.bank === currentTab);
+  if (searchQuery) list = list.filter(c =>
+    c.name.toLowerCase().includes(searchQuery) ||
+    c.bank.toLowerCase().includes(searchQuery) ||
+    (c.owner||'Me').toLowerCase().includes(searchQuery) ||
+    c.perks.some(p => p.toLowerCase().includes(searchQuery)) ||
+    c.redeem.some(r => r.name.toLowerCase().includes(searchQuery)) ||
+    (c.coupons||[]).some(x => x.text.toLowerCase().includes(searchQuery))
+  );
+  return list;
+}
+
+function filterByCategory(category) {
+  currentCategoryFilter = category;
+  renderAll();
+}
+
+function filterByPartner(partner) {
+  currentPartnerFilter = partner;
+  renderAll();
+}
+
+function setSortOrder(order) {
+  currentSort = order;
+  renderAll();
+}
+
+function sortCards(list) {
+  const sorted = [...list];
+  switch(currentSort) {
+    case 'points':
+      return sorted.sort((a, b) => b.points - a.points);
+    case 'due':
+      return sorted.sort((a, b) => {
+        if (!a.due) return 1;
+        if (!b.due) return -1;
+        return new Date(a.due) - new Date(b.due);
+      });
+    case 'name':
+      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+    case 'recent':
+    default:
+      return sorted.sort((a, b) => b.id - a.id);  // id is timestamp
+  }
+}
+
+function getCardsFilteredByCategory(list) {
+  if (!currentCategoryFilter) return list;
+  
+  // Filter cards that have the category (using normalized matching)
+  const filtered = list.filter(c => {
+    return (c.perks || []).some(p => {
+      const cat = extractCategory(p);
+      const normalized = normalizeCategory(cat);
+      return normalized && normalized.toLowerCase() === currentCategoryFilter.toLowerCase();
+    });
+  });
+  
+  // Sort by earning rate for that category (highest first)
+  filtered.sort((a, b) => {
+    const rateA = getEarningRateForCategory(a, currentCategoryFilter);
+    const rateB = getEarningRateForCategory(b, currentCategoryFilter);
+    return rateB - rateA;
+  });
+  
+  return filtered;
+}
+
+function getEarningRateForCategory(card, category) {
+  for (const perk of (card.perks || [])) {
+    const match = perk.match(/^(\d+(?:\.\d+)?)x\s+(.+)$/i);
+    if (match) {
+      const normalized = normalizeCategory(match[2]);
+      if (normalized && normalized.toLowerCase() === category.toLowerCase()) {
+        return parseFloat(match[1]);
+      }
+    }
+  }
+  return 0;
+}
+
+function populateCategoryFilter() {
+  const categories = new Set();
+  cards.forEach(c => {
+    (c.perks || []).forEach(p => {
+      const cat = extractCategory(p);
+      if (cat) {
+        const normalized = normalizeCategory(cat);
+        if (normalized) categories.add(normalized);
+      }
+    });
+  });
+  
+  const select = document.getElementById('categoryFilter');
+  if (!select) return;
+  select.innerHTML = '<option value="">All Categories</option>' +
+    [...categories].sort().map(cat => 
+      `<option value="${cat}">${cat}</option>`
+    ).join('');
+  
+  // Restore selected value after rebuilding dropdown
+  select.value = currentCategoryFilter;
+}
+
+// Hotel partner keywords for emoji detection
+const HOTEL_PARTNERS = ['marriott', 'hilton', 'hyatt', 'ihg', 'wyndham', 'choice', 'accor', 'radisson', 'best western', 'hotel', 'hotels', 'i prefer'];
+
+function getPartnerEmoji(partnerName) {
+  const lower = partnerName.toLowerCase();
+  if (HOTEL_PARTNERS.some(h => lower.includes(h))) {
+    return '🏨';
+  }
+  return '✈️';
+}
+
+function populatePartnerFilter() {
+  const partners = new Set();
+  cards.forEach(c => {
+    (c.redeem || []).forEach(r => {
+      if (r.name) partners.add(r.name);
+    });
+  });
+  
+  const select = document.getElementById('categoryFilter');
+  if (!select) return;
+  select.innerHTML = '<option value="">All Partners</option>' +
+    [...partners].sort().map(p => 
+      `<option value="${p}">${getPartnerEmoji(p)} ${p}</option>`
+    ).join('');
+  
+  // Restore selected value after rebuilding dropdown
+  select.value = currentPartnerFilter;
+}
+
+function populateSortFilter() {
+  const select = document.getElementById('sortFilter');
+  if (!select) return;
+  // Ensure the sort option matches current sort state
+  select.value = currentSort;
+}
+
+// 🎨 Render
+function renderAll() {
+  buildTabs();
+  
+  // Use different filter based on current view
+  if (currentNav === 'miles') {
+    populatePartnerFilter();
+    updateFilterDropdownHandler('partner');
+  } else {
+    populateCategoryFilter();
+    updateFilterDropdownHandler('category');
+  }
+  
+  populateSortFilter();
+  const area = document.getElementById('contentArea');
+  let list = filtered();
+  
+  // Apply appropriate filter based on view
+  if (currentNav === 'miles') {
+    list = getCardsFilteredByPartner(list);
+  } else {
+    list = getCardsFilteredByCategory(list);
+  }
+  
+  list = sortCards(list);  // Apply sorting after filtering
+  if (currentNav==='cards')   renderCards(area, list);
+  else if (currentNav==='miles')   renderMiles(area, list);
+  else if (currentNav==='coupons') renderCoupons(area, list);
+  else renderSummary(area);
+}
+
+// Update filter dropdown handler based on view
+function updateFilterDropdownHandler(type) {
+  const select = document.getElementById('categoryFilter');
+  if (!select) return;
+  if (type === 'partner') {
+    select.onchange = function() { filterByPartner(this.value); };
+  } else {
+    select.onchange = function() { filterByCategory(this.value); };
+  }
+}
+
+// Filter cards by transfer partner
+function getCardsFilteredByPartner(list) {
+  if (!currentPartnerFilter) return list;
+  return list.filter(c => {
+    return (c.redeem || []).some(r => r.name === currentPartnerFilter);
+  });
+}
+
+function tc(i) { return TC[i % TC.length]; }
+
+function renderCards(area, list) {
+  if (!list.length) { area.innerHTML = `<div class="empty-state"><span class="big-emoji">💳</span><strong>No cards yet</strong>Tap + to add your first card</div>`; return; }
+  area.innerHTML = list.map(c => {
+    const due      = c.due ? new Date(c.due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const daysLeft = c.due ? Math.ceil((new Date(c.due)-new Date())/86400000) : 99;
+    const prog     = Math.max(0, Math.min(100, (1-daysLeft/30)*100));
+    const owner    = (c.owner||'Me').toLowerCase();
+    // Only show earning rates on tiles (filter for "Nx" patterns)
+    const earningRates = (c.perks || []).filter(p => /^\d+(\.\d+)?x\s/i.test(p)).sort((a, b) => { const rA = parseFloat(a.match(/^(\d+(?:\.\d+)?)/)[1]); const rB = parseFloat(b.match(/^(\d+(?:\.\d+)?)/)[1]); return rB - rA; }).slice(0, 4);
+    return `<div class="card-tile" onclick="openDetail(${c.id})">
+      <div class="card-tile-header">
+        <div class="card-icon" style="background:${c.color}22">${cardIconHtml(c)}</div>
+        <div class="card-title-block">
+          <div class="card-name">${c.name}</div>
+          <div class="card-bank"><span class="bank-chip">${c.bank}</span> <span class="owner-chip owner-${owner}">${c.owner||'Me'}</span></div>
+        </div>
+        <div class="points-badge"><div class="points-num">${c.points.toLocaleString()}</div><div class="points-unit">pts</div></div>
+      </div>
+      ${earningRates.length ? `<div class="tags-row">${earningRates.map(p=>`<span class="tag tag-${getCategoryColor(p)}">${p}</span>`).join('')}</div>` : ''}
+      ${c.due ? `<div class="progress-section">
+        <div class="progress-label"><span>Statement ${due}</span><span>${daysLeft>0?daysLeft+' days':'Today!'}</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${prog}%"></div></div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderMiles(area, list) {
+  if (!list.length) { area.innerHTML = `<div class="empty-state"><span class="big-emoji">✈️</span><strong>No cards found</strong></div>`; return; }
+  const pm = {};
+  list.forEach(c => c.redeem.forEach(r => { if (!pm[r.name]) pm[r.name]=[]; pm[r.name].push({card:c,ratio:r.ratio,est:r.est}); }));
+  let html = `<div class="section-label">Transfer Partners by Card</div>`;
+  list.forEach(c => {
+    html += `<div class="card-tile">
+      <div class="card-tile-header">
+        <div class="card-icon" style="background:${c.color}22">${cardIconHtml(c)}</div>
+        <div class="card-title-block"><div class="card-name">${c.name}</div><div class="card-bank"><span class="bank-chip">${c.bank}</span></div></div>
+        <div class="points-badge"><div class="points-num">${c.points.toLocaleString()}</div><div class="points-unit">pts</div></div>
+      </div>
+      ${c.redeem.map(r=>`<div class="redemption-item"><div><div class="redemption-name">${r.name}</div><div class="redemption-ratio">Ratio ${r.ratio}</div></div><div class="redemption-value">${r.est.toLocaleString()} mi</div></div>`).join('')}
+    </div>`;
+  });
+  html += `<div class="section-label" style="margin-top:20px">Combined by Partner</div>`;
+  Object.entries(pm).forEach(([name, es]) => {
+    const tot  = es.reduce((s,e)=>s+e.est,0);
+    const from = es.map(e=>`${e.card.icon} ${e.card.name}`).join(', ');
+    html += `<div class="redemption-item" style="display:block;margin-bottom:10px">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">✈️ ${name}</div>
+      <div style="font-size:12px;opacity:0.6;margin-bottom:6px">From: ${from}</div>
+      <div style="font-size:22px;font-weight:800">${tot.toLocaleString()} <span style="font-size:13px;font-weight:500;opacity:0.7">miles</span></div>
+    </div>`;
+  });
+  area.innerHTML = html;
+}
+
+function renderCoupons(area, list) {
+  // Check for auto-reset first and ensure current periods exist
+  checkAndResetBenefits();
+  
+  // Get expiring benefits
+  const expiring = getExpiringBenefits(7);
+  
+  let html = '';
+  
+  // Reminder banner
+  if (expiring.length > 0) {
+    html += `<div class="benefit-reminder-banner">
+      <div class="reminder-header">⚠️ ${expiring.length} benefit${expiring.length > 1 ? 's' : ''} expiring soon!</div>
+      <div class="reminder-list">
+        ${expiring.map(e => `
+          <div class="reminder-item">
+            <span class="reminder-card">${e.card.name}</span>: 
+            ${e.benefit.text} 
+            <span class="reminder-days">(${e.daysUntil === 0 ? 'Today!' : e.daysUntil + ' days'})</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+  
+  let has = false;
+  
+  list.forEach(c => {
+    if (!c.coupons||!c.coupons.length) return;
+    has = true;
+    
+    html += `<div class="card-tile" style="cursor:default">
+      <div class="card-tile-header" style="margin-bottom:12px">
+        <div class="card-icon" style="background:${c.color}22">${cardIconHtml(c)}</div>
+        <div class="card-title-block"><div class="card-name">${c.name}</div><div class="card-bank"><span class="bank-chip">${c.bank}</span></div></div>
+      </div>`;
+    
+    // Render each benefit card with period boxes
+    c.coupons.forEach((benefit, bidx) => {
+      const recurrence = benefit.recurrence || 'annual';
+      const periodLabels = getPeriodLabels(recurrence);
+      const periods = benefit.periods || {};
+      const amount = benefit.amount || 0;
+      const yearlyTotal = benefit.yearlyTotal || amount;
+      const usedTotal = getBenefitUsedTotal(benefit);
+      
+      // Check if this benefit is expiring
+      const isExpiring = expiring.some(e => e.card.id === c.id && e.benefitIdx === bidx);
+      
+      const periodBoxesHtml = periodLabels.map((label, pidx) => {
+        const periodKey = getPeriodKey(recurrence, pidx);
+        const periodData = periods[periodKey] || { used: false, amount: 0 };
+        const isUsed = periodData.used;
+        // Add expiring class to current period if benefit is expiring
+        const isCurrentPeriod = pidx === getCurrentPeriodIndex(recurrence);
+        const expiringClass = isExpiring && isCurrentPeriod ? 'expiring' : '';
+        return `<div class="period-box ${isUsed ? 'used' : ''} ${expiringClass}" onclick="toggleBenefitPeriod(${c.id},${bidx},'${periodKey}')" title="${label}: $${amount}">${label}</div>`;
+      }).join('');
+      
+      html += `<div class="benefit-card">
+        <div class="benefit-header">
+          <div style="flex:1">
+            <div class="benefit-text">${benefit.text}</div>
+            <div class="benefit-meta">$${usedTotal}/$${yearlyTotal} · ${recurrence}</div>
+          </div>
+        </div>
+        <div class="benefit-periods">
+          ${periodBoxesHtml}
+        </div>
+      </div>`;
+    });
+    
+    html += `</div>`;
+  });
+  
+  if (!has) html = `${html}<div class="empty-state"><span class="big-emoji">🎁</span><strong>No perks yet</strong>Add benefits when creating a card</div>`;
+  area.innerHTML = html;
+}
+
+function renderSummary(area) {
+  const totalPts   = cards.reduce((s,c)=>s+(c.points||0),0);
+  const totalMiles = cards.reduce((s,c)=>s+c.redeem.reduce((a,r)=>a+r.est,0),0);
+  const totalPerks = cards.reduce((s,c)=>s+(c.coupons||[]).filter(x=>!x.done).length,0);
+  const totalFees  = getTotalAnnualFees(cards);
+  const myFees     = getMyAnnualFees();
+  const wifeFees   = getWifeAnnualFees();
+  const sharedFees = getSharedAnnualFees();
+  const expiring   = cards.filter(c=>c.due&&Math.ceil((new Date(c.due)-new Date())/86400000)<=7);
+  area.innerHTML = `
+    <div class="summary-card">
+      <div class="summary-title">💰 Total Points · All Cards</div>
+      <div class="summary-num">${totalPts.toLocaleString()}</div>
+      <div class="summary-sub">${cards.length} cards tracked</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="redemption-item" style="display:block;text-align:center">
+        <div style="font-size:28px;font-weight:800">${totalMiles.toLocaleString()}</div>
+        <div style="font-size:12px;opacity:0.6;margin-top:2px">✈️ Est. Miles</div>
+      </div>
+      <div class="redemption-item" style="display:block;text-align:center">
+        <div style="font-size:28px;font-weight:800">${totalPerks}</div>
+        <div style="font-size:12px;opacity:0.6;margin-top:2px">🎁 Unused Perks</div>
+      </div>
+    </div>
+    <div class="section-label" style="margin-bottom:10px">💳 Annual Fees</div>
+    <div class="summary-card" style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.15)">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center">
+        <div>
+          <div style="font-size:24px;font-weight:800;color:#FF9500">$${totalFees.toLocaleString()}</div>
+          <div style="font-size:11px;color:#666;margin-top:2px">Total</div>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:700;color:#333">$${myFees.toLocaleString()}</div>
+          <div style="font-size:11px;color:#666;margin-top:2px">👤 Mine</div>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:700;color:#333">$${wifeFees.toLocaleString()}</div>
+          <div style="font-size:11px;color:#666;margin-top:2px">👩 Wife</div>
+        </div>
+      </div>
+      ${sharedFees>0?`<div style="text-align:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,152,0,0.15)">
+        <div style="font-size:16px;font-weight:600;color:#333">$${sharedFees.toLocaleString()}</div>
+        <div style="font-size:11px;color:#666">🤝 Shared</div>
+      </div>`:''}
+    </div>
+    ${render524Section()}
+    ${expiring.length?`<div class="section-label" style="margin-top:20px">⚠️ Statement Due Soon</div>${expiring.map(c=>`
+    <div class="card-tile" onclick="openDetail(${c.id})" style="border-left:3px solid #FF9500">
+      <div class="card-tile-header" style="margin-bottom:0">
+        <div class="card-icon" style="background:${c.color}22">${cardIconHtml(c)}</div>
+        <div class="card-title-block"><div class="card-name">${c.name}</div></div>
+        <div class="points-badge"><div class="points-num" style="color:#FF9500">${Math.ceil((new Date(c.due)-new Date())/86400000)}</div><div class="points-unit">days</div></div>
+      </div>
+    </div>`).join('')}`:''}
+    <div class="section-label" style="margin-top:20px">☁️ Backup Status</div>
+    ${(() => {
+      const backupStatus = formatLastBackup();
+      const needsBackup = shouldShowBackupReminder();
+      const days = getDaysSinceBackup();
+      const daysDisplay = days === null ? '—' : days;
+      return `<div class="summary-card" style="background:${needsBackup ? 'rgba(255,152,0,0.08)' : 'rgba(52,199,89,0.08)'};border:1px solid ${needsBackup ? 'rgba(255,152,0,0.15)' : 'rgba(52,199,89,0.15)'}">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;margin-bottom:12px">
+          <div>
+            <div style="font-size:24px;font-weight:800;color:${needsBackup ? '#FF9500' : '#34C759'}">${daysDisplay}</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">Days Since</div>
+          </div>
+          <div>
+            <div style="font-size:24px">${needsBackup ? '⚠️' : '✅'}</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">${needsBackup ? 'Backup Now' : 'Up to Date'}</div>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#333;margin-top:4px">${backupStatus}</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">Last Backup</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="backup-btn backup-export" onclick="exportBackup()">📤 Export</button>
+          <button class="backup-btn backup-import" onclick="document.getElementById('restore-input').click()">📥 Import</button>
+        </div>
+        <button class="backup-btn" style="margin-top:8px;background:rgba(255,59,48,0.1);color:#FF3B30" onclick="if(confirm('Reset all data to defaults? This cannot be undone!')){localStorage.removeItem('cpCards');location.reload();}">🗑️ Reset to Defaults</button>
+      </div>`;
+    })()}
+    <input type="file" id="restore-input" accept=".json" onchange="importBackup(event)" />
+
+    <div class="section-label">Points Distribution</div>    ${cards.map(c=>{
+      const pct = totalPts>0?(c.points/totalPts*100).toFixed(1):0;
+      return `<div class="redemption-item" style="display:block;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:5px;background:${c.color}22;display:inline-flex;align-items:center;justify-content:center;overflow:hidden">${cardIconHtml(c)}</span> ${c.name}</span>
+          <span style="font-size:15px;font-weight:700">${c.points.toLocaleString()}</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+        <div style="font-size:11px;opacity:0.55;margin-top:3px;text-align:right">${pct}%</div>
+      </div>`;
+    }).join('')}`;
+}
+
+// 📋 Detail Modal
+function openDetail(id) {
+  const c = cards.find(x=>x.id===id); if (!c) return;
+  const due   = c.due ? new Date(c.due).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : 'Not set';
+  const owner = (c.owner||'Me').toLowerCase();
+  const age   = formatCardAge(c.openDate);
+  const anniversary = getNextAnniversaryDate(c.openDate);
+  const anniversaryStr = anniversary ? new Date(anniversary).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : 'N/A';
+  // Separate earning rates from perks
+  const earningRates = (c.perks || []).filter(p => /^\d+(\.\d+)?x\s/i.test(p)).sort((a, b) => { const rA = parseFloat(a.match(/^(\d+(?:\.\d+)?)/)[1]); const rB = parseFloat(b.match(/^(\d+(?:\.\d+)?)/)[1]); return rB - rA; });
+  const otherPerks = (c.perks || []).filter(p => !/^\d+(\.\d+)?x\s/i.test(p));
+  document.getElementById('detailModalContent').innerHTML = `
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">${cardIconHtml(c)} ${c.name}</span>
+      <div style="display:flex;gap:8px">
+        <button class="close-btn" onclick="openEditModal(${c.id})" style="background:rgba(0,122,255,0.15);color:#007AFF">✏️</button>
+        <button class="close-btn" onclick="deleteCard(${c.id})" style="background:rgba(255,59,48,0.15);color:#FF3B30">🗑️</button>
+        <button class="close-btn" onclick="closeDetailModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="detail-row"><div class="detail-icon-bg">🏦</div><div class="detail-content"><div class="detail-label">Bank</div><div class="detail-value">${c.bank}</div></div></div>
+      <div class="detail-row"><div class="detail-icon-bg">👤</div><div class="detail-content"><div class="detail-label">Owner</div><div class="detail-value"><span class="owner-chip owner-${owner}">${c.owner||'Me'}</span></div></div></div>
+      <div class="detail-row"><div class="detail-icon-bg">💰</div><div class="detail-content"><div class="detail-label">Current Points</div><div class="detail-value" style="font-size:20px;font-weight:700">${c.points.toLocaleString()} pts</div></div></div>
+      ${c.openDate ? `<div class="detail-row"><div class="detail-icon-bg">📅</div><div class="detail-content"><div class="detail-label">Card Age</div><div class="detail-value">${age}</div><div class="detail-subtext">Next anniversary: ${anniversaryStr}</div></div></div>` : ''}
+      <div class="detail-row"><div class="detail-icon-bg">📅</div><div class="detail-content"><div class="detail-label">Statement Date</div><div class="detail-value">${due}</div></div></div>
+      <div class="detail-row"><div class="detail-icon-bg">💳</div><div class="detail-content"><div class="detail-label">Annual Fee</div><div class="detail-value" style="font-size:18px;font-weight:700;color:${c.annualFee===0?'#34C759':'#FF9500'}">${c.annualFee===0?'No fee':'$'+c.annualFee}</div></div></div>
+      ${earningRates.length ? `<div class="detail-row" style="border:none"><div class="detail-icon-bg">💳</div><div class="detail-content"><div class="detail-label">Earning Rates</div>
+        <div class="tags-row" style="margin-top:6px">${earningRates.map(p=>`<span class="tag tag-${getCategoryColor(p)}">${p}</span>`).join(' ')}</div>
+      </div></div>` : ''}
+      ${otherPerks.length ? `<div class="detail-row" style="border:none"><div class="detail-icon-bg">🎁</div><div class="detail-content"><div class="detail-label">Perks</div>
+        <div class="tags-row" style="margin-top:6px">${otherPerks.map(p=>`<span class="tag tag-${getCategoryColor(p)}">${p}</span>`).join(' ')}</div>
+      </div></div>` : ''}
+      ${c.redeem.length?`<div style="font-size:14px;font-weight:700;margin:10px 0 8px">✈️ Transfer Partners</div>
+        ${c.redeem.map(r=>`<div class="redemption-item"><div><div class="redemption-name">${r.name}</div><div class="redemption-ratio">Ratio ${r.ratio}</div></div><div class="redemption-value">${r.est.toLocaleString()} mi</div></div>`).join('')}`:''}
+      ${(c.coupons||[]).length?`<div style="font-size:14px;font-weight:700;margin:14px 0 8px">🎁 Annual Benefits</div>
+        ${c.coupons.map((x,xi)=>`<div class="coupon-item ${x.done?'used':''}">
+          <button class="coupon-check ${x.done?'done':''}" onclick="toggleCouponDetail(${c.id},${xi})">${x.done?'✓':'!'}</button>
+          <div style="flex:1"><div class="coupon-text">${x.text}</div>${x.expiry?`<div class="coupon-expiry">Expires ${new Date(x.expiry).toLocaleDateString('en-US')}</div>`:''}</div>
+        </div>`).join('')}`:''}
+
+      <button class="log-btn" onclick="openLogModal(${c.id})">📝 Log Points</button>
+
+      ${(c.history||[]).length ? `
+        <div style="font-size:14px;font-weight:700;margin:18px 0 8px">📊 Point History</div>
+        ${c.history.slice(0,20).map(h=>`
+          <div class="hist-item hist-${h.type}">
+            <div class="hist-dot">${h.type==='earned'?'⬆️':'⬇️'}</div>
+            <div class="hist-body">
+              <div class="hist-amount">${h.type==='earned'?'+':'-'}${h.amount.toLocaleString()} pts</div>
+              <div class="hist-meta">${new Date(h.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</div>
+              ${h.note?`<div class="hist-note">"${h.note}"</div>`:''}
+            </div>
+          </div>`).join('')}
+      ` : `<div style="font-size:13px;opacity:0.45;text-align:center;padding:16px 0">No history yet — tap Log Points to start tracking</div>`}
+    </div>`;
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
+
+/**
+ * Open edit modal for an existing card
+ * Populates the Add modal with card data and sets edit mode
+ */
+function openEditModal(id) {
+  const card = cards.find(c => c.id === id);
+  if (!card) return;
+  
+  closeDetailModal();  // Close detail modal first
+  
+  // Open the Add modal (this resets editingCardId to null)
+  openAddModal();
+  
+  // Set edit mode flag AFTER openAddModal() since it resets the flag
+  editingCardId = id;
+  
+  // Change title to "Edit Card"
+  const titleElement = document.querySelector('#addModal .modal-title');
+  if (titleElement) titleElement.textContent = '✏️ Edit Card';
+  
+  // Populate all fields with card data
+  document.getElementById('f-name').value = card.name || '';
+  document.getElementById('f-points').value = card.points || 0;
+  document.getElementById('f-open-date').value = card.openDate || '';
+  document.getElementById('f-due').value = card.due || '';
+  document.getElementById('f-owner').value = card.owner || 'Me';
+  document.getElementById('f-annual-fee').value = card.annualFee || 0;
+  
+  // Populate perks
+  renderPerkTags(card.perks || []);
+  document.getElementById('f-perks-input').value = '';
+  
+  // Populate transfer partners
+  renderRedeemRows(card.redeem || []);
+  
+  // Populate benefits (v3.4)
+  renderBenefitRows(card.coupons || []);
+  
+  // Set color and emoji
+  selColor = card.color || '#007AFF';
+  selEmoji = card.icon || '💳';
+  
+  // Handle bank selection
+  const bankList = BANK_LIST.map(b => b.name);
+  if (bankList.includes(card.bank)) {
+    // Bank is in the predefined list
+    selectBank(card.bank);
+  } else {
+    // Custom bank - select "Other" and populate custom input
+    selectBank('Other');
+    document.getElementById('f-bank-custom').value = card.bank;
+    document.getElementById('f-bank').value = card.bank;
+  }
+}
+
+function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
+
+function toggleCouponDetail(cid,idx) {
+  const c=cards.find(x=>x.id===cid);
+  if(c&&c.coupons[idx]){c.coupons[idx].done=!c.coupons[idx].done;saveCards();openDetail(cid);renderAll();}
+}
+function toggleCoupon(cid,idx) {
+  const c=cards.find(x=>x.id===cid);
+  if(c&&c.coupons[idx]){c.coupons[idx].done=!c.coupons[idx].done;saveCards();renderAll();}
+}
+function deleteCard(id) {
+  if(confirm('Delete this card?')){cards=cards.filter(c=>c.id!==id);saveCards();closeDetailModal();renderAll();}
+}
+
+// 📅 Card Open Date & 5/24 Tracking
+/**
+ * Calculate card age from open date
+ * Returns object { years, months } or null if no open date
+ */
+function getCardAge(openDate) {
+  if (!openDate) return null;
+  const opened = new Date(openDate);
+  const today = new Date();
+  const diffMs = today - opened;
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  let years = 0, months = 0;
+  let current = new Date(opened);
+  
+  while (current.getFullYear() < today.getFullYear() || 
+         (current.getFullYear() === today.getFullYear() && current.getMonth() < today.getMonth())) {
+    if (current.getMonth() === 11) {
+      current = new Date(current.getFullYear() + 1, 0, 1);
+      years++;
+    } else {
+      current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      months++;
+    }
+  }
+  
+  return { years, months, days: diffDays };
+}
+
+/**
+ * Format card age as human-readable string (e.g., "2y 3m")
+ */
+function formatCardAge(openDate) {
+  const age = getCardAge(openDate);
+  if (!age) return 'Unknown';
+  if (age.years > 0 && age.months > 0) return `${age.years}y ${age.months}m`;
+  if (age.years > 0) return `${age.years}y`;
+  if (age.months > 0) return `${age.months}m`;
+  return `${age.days}d`;
+}
+
+/**
+ * Get next anniversary date (1 year from open date)
+ */
+function getNextAnniversaryDate(openDate) {
+  if (!openDate) return null;
+  const opened = new Date(openDate);
+  const next = new Date(opened.getFullYear() + 1, opened.getMonth(), opened.getDate());
+  const today = new Date();
+  if (next <= today) {
+    next.setFullYear(next.getFullYear() + 1);
+  }
+  return next;
+}
+
+/**
+ * Count cards opened in the last 24 months
+ */
+function getCardsOpenedInLast24Months(cardList, owner = null) {
+  const today = new Date();
+  const twoYearsAgo = new Date(today.getFullYear() - 2, today.getMonth(), today.getDate());
+  
+  return cardList.filter(c => {
+    if (owner && (c.owner || 'Me') !== owner) return false;
+    if (!c.openDate) return false;
+    const opened = new Date(c.openDate);
+    return opened >= twoYearsAgo && opened <= today;
+  }).length;
+}
+
+/**
+ * Get 5/24 status for a specific owner (Chase rule: max 5 new accounts in 24 months)
+ */
+function get524Status(cardList, owner) {
+  const count = getCardsOpenedInLast24Months(cardList, owner);
+  const status = count < 5 ? 'green' : count === 5 ? 'yellow' : 'red';
+  const message = count < 5 ? `${count}/5` : count === 5 ? '5/5 (At Limit)' : `${count}/5 (Over)`;
+  return { count, status, message };
+}
+
+/**
+ * Get list of cards opened in last 24 months (for display)
+ */
+function getCardsOpenedInLast24MonthsList(cardList, owner = null) {
+  const today = new Date();
+  const twoYearsAgo = new Date(today.getFullYear() - 2, today.getMonth(), today.getDate());
+  
+  return cardList.filter(c => {
+    if (owner && (c.owner || 'Me') !== owner) return false;
+    if (!c.openDate) return false;
+    const opened = new Date(c.openDate);
+    return opened >= twoYearsAgo && opened <= today;
+  }).sort((a, b) => new Date(b.openDate) - new Date(a.openDate));
+}
+
+// 💰 Annual Fees Helper Functions
+function getTotalAnnualFees(cards, owner = null) {
+  return cards.reduce((total, c) => {
+    if (owner && (c.owner || 'Me') !== owner) return total;
+    return total + (c.annualFee || 0);
+  }, 0);
+}
+
+function getMyAnnualFees() {
+  return getTotalAnnualFees(cards, 'Me');
+}
+
+function getWifeAnnualFees() {
+  return getTotalAnnualFees(cards, 'Wife');
+}
+
+function getSharedAnnualFees() {
+  return getTotalAnnualFees(cards, 'Shared');
+}
+
+// 📊 5/24 Tracker Status Section
+function render524Section() {
+  const myStatus = get524Status(cards, 'Me');
+  const wifeStatus = get524Status(cards, 'Wife');
+  const combinedCards = getCardsOpenedInLast24Months(cards);
+  
+  // Determine colors based on status
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'green': return '#34C759';  // Safe
+      case 'yellow': return '#FF9500'; // At limit
+      case 'red': return '#FF3B30';    // Over limit
+      default: return '#8E8E93';
+    }
+  };
+  
+  const getStatusIcon = (status) => {
+    switch(status) {
+      case 'green': return '✅';
+      case 'yellow': return '⚠️';
+      case 'red': return '🚫';
+      default: return '📊';
+    }
+  };
+  
+  return `
+    <div class="section-label" style="margin-top:20px">📊 5/24 Status (Chase Rule)</div>
+    <div class="summary-card" style="background:rgba(100,200,255,0.06);border:1px solid rgba(100,200,255,0.15)">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center">
+        <div>
+          <div style="font-size:20px;font-weight:700;color:${getStatusColor(myStatus.status)}">${getStatusIcon(myStatus.status)} ${myStatus.count}/5</div>
+          <div style="font-size:11px;color:#666;margin-top:2px">👤 Me</div>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:700;color:${getStatusColor(wifeStatus.status)}">${getStatusIcon(wifeStatus.status)} ${wifeStatus.count}/5</div>
+          <div style="font-size:11px;color:#666;margin-top:2px">👩 Wife</div>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:700;color:${getStatusColor(combinedCards < 5 ? 'green' : combinedCards === 5 ? 'yellow' : 'red')}">${combinedCards}</div>
+          <div style="font-size:11px;color:#666;margin-top:2px">Combined</div>
+        </div>
+      </div>
+      <div style="font-size:12px;opacity:0.6;margin-top:10px;padding-top:10px;border-top:1px solid rgba(100,200,255,0.15);text-align:center">
+        Cards opened in the last 24 months
+      </div>
+    </div>
+  `;
+}
+
+// ➕ Add Card
+const BANK_LIST = [
+  { name:'Chase',            ...BANK_BRANDS['chase']           },
+  { name:'American Express', ...BANK_BRANDS['american express'] },
+  { name:'Citi',             ...BANK_BRANDS['citi']            },
+  { name:'Capital One',      ...BANK_BRANDS['capital one']     },
+  { name:'Discover',         ...BANK_BRANDS['discover']        },
+  { name:'Wells Fargo',      ...BANK_BRANDS['wells fargo']     },
+  { name:'Bank of America',  ...BANK_BRANDS['bank of america'] },
+  { name:'US Bank',          ...BANK_BRANDS['us bank']         },
+  { name:'Barclays',         ...BANK_BRANDS['barclays']        },
+  { name:'Navy Federal',     ...BANK_BRANDS['navy federal']    },
+  { name:'PNC',              ...BANK_BRANDS['pnc']             },
+  { name:'TD Bank',          ...BANK_BRANDS['td bank']         },
+  { name:'Other',            bg:'#8E8E93', fg:'#fff', abbr:'...' },
+];
+
+function openAddModal() {
+  editingCardId = null;  // Reset edit mode
+  
+  const titleElement = document.querySelector('#addModal .modal-title');
+  if (titleElement) titleElement.textContent = 'Add Credit Card';
+  
+  document.getElementById('bankGrid').innerHTML = BANK_LIST.map(b =>
+    `<button type="button" class="bank-badge-btn" data-bank="${b.name}" onclick="selectBank('${b.name}')"
+      style="padding:8px 4px;border-radius:12px;border:2px solid transparent;background:rgba(128,128,128,0.08);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all 0.15s">
+      <div style="width:40px;height:40px;border-radius:10px;background:${b.bg};display:flex;align-items:center;justify-content:center;font-size:${b.abbr.length>4?8:10}px;font-weight:800;color:${b.fg};letter-spacing:0.2px">${b.abbr}</div>
+      <span style="font-size:9px;font-weight:500;opacity:0.7;text-align:center;line-height:1.2">${b.name.replace('American Express','Amex').replace('Bank of America','BofA').replace('Navy Federal','Navy Fed')}</span>
+    </button>`
+  ).join('');
+  ['f-name','f-points','f-due','f-open-date','f-annual-fee'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-perks-input').value = '';  // v1.9: Clear perk input
+  document.getElementById('f-perks-container').innerHTML = '';  // v1.9: Clear perk chips
+  document.getElementById('f-redeem-container').innerHTML = '';
+  document.getElementById('f-benefits-container').innerHTML = '';  // v3.4: Clear benefits
+  document.getElementById('f-bank').value = '';
+  document.getElementById('f-bank-custom').value = '';
+  document.getElementById('customBankInputWrapper').style.display = 'none';
+  selColor = '#007AFF';
+  selEmoji = '💳';
+  document.getElementById('addModal').classList.remove('hidden');
+}
+
+function selectBank(name) {
+  document.querySelectorAll('.bank-badge-btn').forEach(b => {
+    const isSelected = b.dataset.bank === name;
+    b.style.borderColor = isSelected ? '#007AFF' : 'transparent';
+    b.style.background  = isSelected ? 'rgba(0,122,255,0.1)' : 'rgba(128,128,128,0.08)';
+  });
+  
+  // Show/hide custom bank input based on selection
+  const customWrapper = document.getElementById('customBankInputWrapper');
+  const customInput = document.getElementById('f-bank-custom');
+  const hiddenBankInput = document.getElementById('f-bank');
+  
+  if (name === 'Other') {
+    customWrapper.style.display = 'block';
+    customInput.focus();
+    customInput.value = '';
+    hiddenBankInput.value = '';
+  } else {
+    customWrapper.style.display = 'none';
+    customInput.value = '';
+    hiddenBankInput.value = name;
+    const key   = name.toLowerCase();
+    const brand = Object.entries(BANK_BRANDS).find(([k]) => key.includes(k))?.[1];
+    if (brand) selColor = brand.bg;
+    autofillCard(document.getElementById('f-name').value);
+  }
+}
+
+// Update hidden bank input when user types custom bank name
+function updateCustomBank() {
+  const customInput = document.getElementById('f-bank-custom');
+  const hiddenBankInput = document.getElementById('f-bank');
+  const customName = customInput.value.trim();
+  hiddenBankInput.value = customName;
+  
+  // Optional: Try to autofill if the custom name matches a card in DB
+  if (customName) autofillCard(document.getElementById('f-name').value);
+}
+
+function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
+function selE(e) { selEmoji=e; }
+function selC(c) { selColor=c; }
+
+// 📚 Card DB for autofill - v1.7 with per-partner transfer ratios
+const CARD_DB = {
+  // === CHASE ===
+  'chase sapphire reserve': {
+    bank: 'Chase',
+    icon: '💳',
+    color: '#007AFF',
+    perks: ['3x Dining', '3x Travel', '10x Hotels & Car Rentals via Chase', '5x Flights via Chase', 'Priority Pass Lounge'],
+    redeem: [
+      {name: 'United MileagePlus', ratio: '1:1'},
+      {name: 'World of Hyatt', ratio: '1:1'},
+      {name: 'Southwest Rapid Rewards', ratio: '1:1'},
+      {name: 'Air Canada Aeroplan', ratio: '1:1'},
+      {name: 'British Airways Avios', ratio: '1:1'},
+      {name: 'Marriott Bonvoy', ratio: '1:1'},
+      {name: 'IHG Rewards', ratio: '1:1'},
+      {name: 'JetBlue TrueBlue', ratio: '1:1'}
+    ],
+    coupons: ['$300 Annual Travel Credit', 'Global Entry / TSA PreCheck Credit', 'DoorDash DashPass', '$100 Anniversary Points']
+  },
+  'chase sapphire preferred': {
+    bank: 'Chase',
+    icon: '💳',
+    color: '#5856D6',
+    perks: ['3x Dining', '3x Streaming', '3x Online Groceries', '2x Travel', '5x Travel via Chase Portal'],
+    redeem: [
+      {name: 'United MileagePlus', ratio: '1:1'},
+      {name: 'World of Hyatt', ratio: '1:1'},
+      {name: 'Southwest Rapid Rewards', ratio: '1:1'},
+      {name: 'Marriott Bonvoy', ratio: '1:1'},
+      {name: 'IHG Rewards', ratio: '1:1'}
+    ],
+    coupons: ['$50 Annual Hotel Credit', '10% Anniversary Points Bonus']
+  },
+  'chase freedom unlimited': {
+    bank: 'Chase',
+    icon: '💰',
+    color: '#34C759',
+    perks: ['1.5x Everything', '3x Dining', '3x Drugstores', '5x Travel via Chase Portal'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['No Annual Fee']
+  },
+  'chase freedom flex': {
+    bank: 'Chase',
+    icon: '🎯',
+    color: '#00C7BE',
+    perks: ['5x Rotating Categories (activate quarterly)', '3x Dining', '3x Drugstores', '1x Everything'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['No Annual Fee']
+  },
+  'chase ink business preferred': {
+    bank: 'Chase',
+    icon: '💼',
+    color: '#1D1D1F',
+    perks: ['3x Travel', '3x Shipping', '3x Internet/Cable/Phone', '3x Social Media Ads', '1x Everything'],
+    redeem: [
+      {name: 'United MileagePlus', ratio: '1:1'},
+      {name: 'World of Hyatt', ratio: '1:1'},
+      {name: 'Southwest Rapid Rewards', ratio: '1:1'}
+    ],
+    coupons: ['Cell Phone Protection', 'No Foreign Transaction Fees']
+  },
+
+  // === AMERICAN EXPRESS ===
+  'amex platinum': {
+    bank: 'American Express',
+    icon: '💎',
+    color: '#AF52DE',
+    perks: ['5x Flights (direct)', '5x Prepaid Hotels via Amex', 'Centurion Lounge Access', 'Fine Hotels & Resorts'],
+    redeem: [
+      {name: 'Delta SkyMiles', ratio: '1:1'},
+      {name: 'British Airways Avios', ratio: '1:1'},
+      {name: 'Air France/KLM Flying Blue', ratio: '1:1'},
+      {name: 'Singapore Airlines KrisFlyer', ratio: '1:1'},
+      {name: 'ANA Mileage Club', ratio: '1:1'},
+      {name: 'Virgin Atlantic Flying Club', ratio: '1:1'},
+      {name: 'Marriott Bonvoy', ratio: '1:1'},
+      {name: 'Hilton Honors', ratio: '1:2'}
+    ],
+    coupons: ['$200 Airline Fee Credit', '$200 Hotel Credit', '$240 Digital Entertainment', '$189 CLEAR Plus', 'Centurion Lounge', '$200 Uber Cash', 'Walmart+ Membership']
+  },
+  'amex gold': {
+    bank: 'American Express',
+    icon: '🌟',
+    color: '#FF9500',
+    perks: ['4x Restaurants worldwide', '4x US Supermarkets ($25k/yr cap)', '3x Flights', '1x Everything else'],
+    redeem: [
+      {name: 'Delta SkyMiles', ratio: '1:1'},
+      {name: 'Air Canada Aeroplan', ratio: '1:1'},
+      {name: 'British Airways Avios', ratio: '1:1'},
+      {name: 'JetBlue TrueBlue', ratio: '1:0.8'},
+      {name: 'Marriott Bonvoy', ratio: '1:1'},
+      {name: 'Hilton Honors', ratio: '1:2'}
+    ],
+    coupons: ['$120 Dining Credit ($10/mo)', '$120 Uber Cash ($10/mo)', '$84 Dunkin Credit']
+  },
+  'amex green': {
+    bank: 'American Express',
+    icon: '🌿',
+    color: '#34C759',
+    perks: ['3x Travel', '3x Transit', '3x Restaurants', '1x Everything'],
+    redeem: [
+      {name: 'Delta SkyMiles', ratio: '1:1'},
+      {name: 'British Airways Avios', ratio: '1:1'},
+      {name: 'Hilton Honors', ratio: '1:2'}
+    ],
+    coupons: ['$189 CLEAR Plus Credit', 'LoungeBuddy Credit']
+  },
+  'amex blue cash preferred': {
+    bank: 'American Express',
+    icon: '💵',
+    color: '#007AFF',
+    perks: ['6% US Supermarkets ($6k/yr cap)', '6% Streaming', '3% Gas & Transit', '1% Everything'],
+    redeem: [{name: 'Statement Credit', ratio: '1:1'}],
+    coupons: ['$84 Disney Bundle Credit']
+  },
+
+  // === CITI ===
+  'citi premier': {
+    bank: 'Citi',
+    icon: '🔷',
+    color: '#003B70',
+    perks: ['3x Restaurants', '3x Supermarkets', '3x Gas', '3x Air Travel', '3x Hotels', '1x Everything'],
+    redeem: [
+      {name: 'Turkish Miles&Smiles', ratio: '1:1'},
+      {name: 'Singapore Airlines KrisFlyer', ratio: '1:1'},
+      {name: 'Air France/KLM Flying Blue', ratio: '1:1'},
+      {name: 'Virgin Atlantic Flying Club', ratio: '1:1'},
+      {name: 'Qatar Airways Privilege Club', ratio: '1:1'},
+      {name: 'Etihad Guest', ratio: '1:1'}
+    ],
+    coupons: ['$100 Annual Hotel Credit']
+  },
+  'citi double cash': {
+    bank: 'Citi',
+    icon: '💵',
+    color: '#FF2D55',
+    perks: ['2% Everything (1% purchase + 1% payment)'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['No Annual Fee']
+  },
+  'citi custom cash': {
+    bank: 'Citi',
+    icon: '🎯',
+    color: '#C01933',
+    perks: ['5% Top Spending Category (auto, up to $500/mo)', '1% Everything'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['No Annual Fee']
+  },
+
+  // === CAPITAL ONE ===
+  // Transfer ratios from capitalone.com (2024)
+  // Airlines 1:1: Aeromexico, Air Canada, Avianca, British Airways, Cathay Pacific, Etihad, Finnair, Flying Blue, Qantas, Qatar, Singapore, TAP, Turkish, Virgin Red
+  // Airlines 2:1.5 (0.75): Emirates, EVA Air, JAL
+  // Airlines 5:3 (0.6): JetBlue
+  // Hotels: Choice/Wyndham 1:1, I Prefer 1:2, Accor 2:1 (0.5)
+  'capital one venture x': {
+    bank: 'Capital One',
+    icon: '✈️',
+    color: '#D03027',
+    perks: ['10x Hotels via C1 Travel', '5x Flights via C1 Travel', '2x Everything'],
+    redeem: [
+      // Airlines - 1:1 ratio
+      {name: 'Aeromexico Rewards', ratio: '1:1'},
+      {name: 'Air Canada Aeroplan', ratio: '1:1'},
+      {name: 'Avianca LifeMiles', ratio: '1:1'},
+      {name: 'British Airways Avios', ratio: '1:1'},
+      {name: 'Cathay Pacific Asia Miles', ratio: '1:1'},
+      {name: 'Etihad Guest', ratio: '1:1'},
+      {name: 'Finnair Plus', ratio: '1:1'},
+      {name: 'Air France/KLM Flying Blue', ratio: '1:1'},
+      {name: 'Qantas Frequent Flyer', ratio: '1:1'},
+      {name: 'Qatar Airways Privilege Club', ratio: '1:1'},
+      {name: 'Singapore Airlines KrisFlyer', ratio: '1:1'},
+      {name: 'TAP Miles&Go', ratio: '1:1'},
+      {name: 'Turkish Miles&Smiles', ratio: '1:1'},
+      {name: 'Virgin Red', ratio: '1:1'},
+      // Airlines - 2:1.5 ratio (0.75)
+      {name: 'Emirates Skywards', ratio: '2:1.5'},
+      {name: 'EVA Air Infinity MileageLands', ratio: '2:1.5'},
+      {name: 'JAL Mileage Bank', ratio: '2:1.5'},
+      // Airlines - 5:3 ratio (0.6)
+      {name: 'JetBlue TrueBlue', ratio: '5:3'},
+      // Hotels
+      {name: 'Choice Privileges', ratio: '1:1'},
+      {name: 'Wyndham Rewards', ratio: '1:1'},
+      {name: 'I Prefer Hotel Rewards', ratio: '1:2'},
+      {name: 'Accor Live Limitless', ratio: '2:1'}
+    ],
+    coupons: ['$300 Annual Travel Credit', '10,000 Anniversary Miles', 'Priority Pass Lounge', 'Global Entry/TSA PreCheck']
+  },
+  'capital one venture': {
+    bank: 'Capital One',
+    icon: '✈️',
+    color: '#D03027',
+    perks: ['5x Hotels & Cars via C1 Travel', '2x Everything'],
+    redeem: [
+      // Airlines - 1:1 ratio
+      {name: 'Aeromexico Rewards', ratio: '1:1'},
+      {name: 'Air Canada Aeroplan', ratio: '1:1'},
+      {name: 'Avianca LifeMiles', ratio: '1:1'},
+      {name: 'British Airways Avios', ratio: '1:1'},
+      {name: 'Cathay Pacific Asia Miles', ratio: '1:1'},
+      {name: 'Etihad Guest', ratio: '1:1'},
+      {name: 'Finnair Plus', ratio: '1:1'},
+      {name: 'Air France/KLM Flying Blue', ratio: '1:1'},
+      {name: 'Qantas Frequent Flyer', ratio: '1:1'},
+      {name: 'Qatar Airways Privilege Club', ratio: '1:1'},
+      {name: 'Singapore Airlines KrisFlyer', ratio: '1:1'},
+      {name: 'TAP Miles&Go', ratio: '1:1'},
+      {name: 'Turkish Miles&Smiles', ratio: '1:1'},
+      {name: 'Virgin Red', ratio: '1:1'},
+      // Airlines - 2:1.5 ratio (0.75)
+      {name: 'Emirates Skywards', ratio: '2:1.5'},
+      {name: 'EVA Air Infinity MileageLands', ratio: '2:1.5'},
+      {name: 'JAL Mileage Bank', ratio: '2:1.5'},
+      // Airlines - 5:3 ratio (0.6)
+      {name: 'JetBlue TrueBlue', ratio: '5:3'},
+      // Hotels
+      {name: 'Choice Privileges', ratio: '1:1'},
+      {name: 'Wyndham Rewards', ratio: '1:1'},
+      {name: 'I Prefer Hotel Rewards', ratio: '1:2'},
+      {name: 'Accor Live Limitless', ratio: '2:1'}
+    ],
+    coupons: ['Global Entry / TSA PreCheck Credit']
+  },
+  'capital one savor': {
+    bank: 'Capital One',
+    icon: '🍽️',
+    color: '#D03027',
+    perks: ['4% Dining', '4% Entertainment', '3% Groceries', '1% Everything'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['No Foreign Transaction Fees']
+  },
+
+  // === OTHER BANKS ===
+  'discover it cash back': {
+    bank: 'Discover',
+    icon: '🎯',
+    color: '#FF6600',
+    perks: ['5% Rotating Categories (activate quarterly)', '1% Everything'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['No Annual Fee', 'Cashback Match (1st year doubled)']
+  },
+  'wells fargo active cash': {
+    bank: 'Wells Fargo',
+    icon: '💵',
+    color: '#D71E28',
+    perks: ['2% Everything'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['No Annual Fee', 'Cell Phone Protection']
+  },
+  'wells fargo autograph': {
+    bank: 'Wells Fargo',
+    icon: '✈️',
+    color: '#D71E28',
+    perks: ['3x Restaurants', '3x Travel', '3x Gas', '3x Transit', '3x Streaming', '1x Everything'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['No Annual Fee', 'Cell Phone Protection']
+  },
+  'bank of america premium rewards': {
+    bank: 'Bank of America',
+    icon: '🏆',
+    color: '#E31837',
+    perks: ['2x Travel & Dining', '1.5x Everything', 'Up to 75% bonus with Preferred Rewards'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['$100 Airline Incidental Credit', 'Global Entry/TSA PreCheck']
+  },
+  'us bank altitude reserve': {
+    bank: 'US Bank',
+    icon: '🏔️',
+    color: '#003087',
+    perks: ['3x Travel & Mobile Wallet', '1x Everything'],
+    redeem: [{name: 'Cash Back', ratio: '1:1'}],
+    coupons: ['$325 Annual Travel Credit', 'Priority Pass', 'Global Entry/TSA PreCheck']
+  }
+};
+
+
+// Render partner rows from data
+function renderRedeemRows(redeemData) {
+  const container = document.getElementById('f-redeem-container');
+  container.innerHTML = '';
+  (redeemData || []).forEach((r, i) => {
+    container.innerHTML += `
+      <div class="redeem-row" data-idx="${i}">
+        <input class="redeem-row-name" value="${r.name}" placeholder="Partner name">
+        <input class="redeem-row-ratio" value="${r.ratio || '1:1'}" placeholder="1:1">
+        <button type="button" class="redeem-row-delete" onclick="removeRedeemRow(${i})">✕</button>
+      </div>`;
+  });
+}
+
+// Add empty row
+function addRedeemRow() {
+  const container = document.getElementById('f-redeem-container');
+  const idx = container.children.length;
+  container.innerHTML += `
+    <div class="redeem-row" data-idx="${idx}">
+      <input class="redeem-row-name" value="" placeholder="Partner name">
+      <input class="redeem-row-ratio" value="1:1" placeholder="1:1">
+      <button type="button" class="redeem-row-delete" onclick="removeRedeemRow(${idx})">✕</button>
+    </div>`;
+}
+
+// Remove a row
+function removeRedeemRow(idx) {
+  const container = document.getElementById('f-redeem-container');
+  const row = container.querySelector(`[data-idx="${idx}"]`);
+  if (row) row.remove();
+}
+
+// Collect all rows as array
+function getRedeemRows() {
+  const container = document.getElementById('f-redeem-container');
+  const rows = container.querySelectorAll('.redeem-row');
+  const result = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.redeem-row-name').value.trim();
+    const ratio = row.querySelector('.redeem-row-ratio').value.trim() || '1:1';
+    if (name) result.push({ name, ratio });
+  });
+  return result;
+}
+
+// 🎁 Benefit/Perk Helper Functions v3.4+
+/**
+ * Get period labels based on recurrence type
+ * monthly: [Jan, Feb, Mar, ...Dec]
+ * quarterly: [Q1, Q2, Q3, Q4]
+ * semi-annual: [H1, H2]
+ * annual: [Year]
+ */
+function getPeriodLabels(recurrence) {
+  switch(recurrence) {
+    case 'monthly':
+      return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    case 'quarterly':
+      return ['Q1', 'Q2', 'Q3', 'Q4'];
+    case 'semi-annual':
+      return ['H1', 'H2'];
+    case 'annual':
+    default:
+      return ['Year'];
+  }
+}
+
+/**
+ * Get period key for a given recurrence and period index
+ * Used to access periods object
+ * @param {string} recurrence - Type of recurrence
+ * @param {number} periodIdx - 0-based period index
+ * @param {number} year - Optional year (default: current year)
+ */
+function getPeriodKey(recurrence, periodIdx, year = null) {
+  if (!year) year = new Date().getFullYear();
+  switch(recurrence) {
+    case 'monthly':
+      return `${year}-${String(periodIdx + 1).padStart(2, '0')}`;
+    case 'quarterly':
+      return `${year}-Q${periodIdx + 1}`;
+    case 'semi-annual':
+      return `${year}-H${periodIdx + 1}`;
+    case 'annual':
+    default:
+      return `${year}`;
+  }
+}
+
+/**
+ * Get current period key based on recurrence
+ */
+function getCurrentPeriodKey(recurrence) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  
+  switch(recurrence) {
+    case 'monthly':
+      return `${year}-${String(month + 1).padStart(2, '0')}`;
+    case 'quarterly':
+      const quarter = Math.floor(month / 3) + 1;
+      return `${year}-Q${quarter}`;
+    case 'semi-annual':
+      const half = month < 6 ? 1 : 2;
+      return `${year}-H${half}`;
+    case 'annual':
+    default:
+      return `${year}`;
+  }
+}
+
+/**
+ * Initialize benefit periods for current year
+ * Creates empty period tracking structure
+ */
+function initializeBenefitPeriods(benefit) {
+  // Check if periods exist AND have entries (not just empty object)
+  if (benefit.periods && Object.keys(benefit.periods).length > 0) return benefit;
+  
+  const recurrence = benefit.recurrence || 'annual';
+  const periodLabels = getPeriodLabels(recurrence);
+  const periods = {};
+  
+  periodLabels.forEach((_, idx) => {
+    const key = getPeriodKey(recurrence, idx);
+    periods[key] = { used: false, amount: 0 };
+  });
+  
+  benefit.periods = periods;
+  return benefit;
+}
+
+/**
+ * Get total used amount across all periods
+ */
+function getBenefitUsedTotal(benefit) {
+  if (!benefit.periods) return 0;
+  return Object.values(benefit.periods).reduce((sum, p) => sum + (p.used ? p.amount : 0), 0);
+}
+
+/**
+ * Toggle benefit period usage
+ */
+function toggleBenefitPeriod(cardId, benefitIdx, periodKey) {
+  const card = cards.find(c => c.id === cardId);
+  if (!card || !card.coupons[benefitIdx]) return;
+  
+  const benefit = card.coupons[benefitIdx];
+  if (!benefit.periods) benefit.periods = {};
+  
+  const periodData = benefit.periods[periodKey] = benefit.periods[periodKey] || { used: false, amount: 0 };
+  periodData.used = !periodData.used;
+  
+  // Set amount if toggling on
+  if (periodData.used && periodData.amount === 0) {
+    periodData.amount = benefit.amount || benefit.yearlyTotal || 0;
+  }
+  
+  saveCards();
+  renderAll();
+}
+
+/**
+ * Calculate next reset date based on recurrence (legacy, kept for compatibility)
+ * recurrence: 'monthly' | 'quarterly' | 'semi-annual' | 'annual' | 'one-time'
+ */
+function getNextResetDate(benefit) {
+  if (benefit.recurrence === 'one-time' || !benefit.lastReset) {
+    return null;
+  }
+  
+  const lastReset = new Date(benefit.lastReset);
+  let next = new Date(lastReset);
+  
+  switch(benefit.recurrence) {
+    case 'monthly':
+      next.setMonth(next.getMonth() + 1);
+      break;
+    case 'quarterly':
+      next.setMonth(next.getMonth() + 3);
+      break;
+    case 'semi-annual':
+      next.setMonth(next.getMonth() + 6);
+      break;
+    case 'annual':
+      next.setFullYear(next.getFullYear() + 1);
+      break;
+  }
+  
+  return next;
+}
+
+/**
+ * Check if benefit should auto-reset based on recurrence
+ */
+function shouldResetBenefit(benefit) {
+  if (benefit.recurrence === 'one-time') return false;
+  if (!benefit.lastReset) return false;
+  
+  const nextReset = getNextResetDate(benefit);
+  if (!nextReset) return false;
+  
+  const today = new Date();
+  return today >= nextReset;
+}
+
+/**
+ * Auto-reset benefits if needed
+ */
+function resetBenefitsIfNeeded(card) {
+  if (!card.coupons || !Array.isArray(card.coupons)) return;
+  
+  const now = new Date().toISOString();
+  card.coupons.forEach(benefit => {
+    if (shouldResetBenefit(benefit)) {
+      benefit.used = false;
+      benefit.lastReset = now;
+      benefit.nextReset = getNextResetDate(benefit)?.toISOString() || null;
+    }
+  });
+}
+
+/**
+ * Get current period index for a recurrence type
+ * monthly: 0-11
+ * quarterly: 0-3
+ * semi-annual: 0-1
+ * annual: 0
+ */
+function getCurrentPeriodIndex(recurrence) {
+  const now = new Date();
+  switch(recurrence) {
+    case 'monthly':
+      return now.getMonth(); // 0-11
+    case 'quarterly':
+      return Math.floor(now.getMonth() / 3); // 0-3
+    case 'semi-annual':
+      return now.getMonth() < 6 ? 0 : 1; // 0-1
+    case 'annual':
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Get end date of current period
+ */
+function getCurrentPeriodEndDate(recurrence) {
+  const now = new Date();
+  const year = now.getFullYear();
+  switch(recurrence) {
+    case 'monthly':
+      return new Date(year, now.getMonth() + 1, 0); // Last day of current month
+    case 'quarterly':
+      const q = Math.floor(now.getMonth() / 3);
+      return new Date(year, (q + 1) * 3, 0); // Last day of quarter
+    case 'semi-annual':
+      return now.getMonth() < 6 ? new Date(year, 5, 30) : new Date(year, 11, 31);
+    case 'annual':
+    default:
+      return new Date(year, 11, 31);
+  }
+}
+
+/**
+ * Get benefits expiring within N days
+ * Returns array of {card, benefit, benefitIdx, daysUntil, periodKey, value}
+ */
+function getExpiringBenefits(daysThreshold = 7) {
+  const expiring = [];
+  const now = new Date();
+  
+  cards.forEach(card => {
+    (card.coupons || []).forEach((benefit, idx) => {
+      if (benefit.recurrence === 'one-time') return;
+      
+      const endDate = getCurrentPeriodEndDate(benefit.recurrence);
+      const daysUntil = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+      
+      if (daysUntil <= daysThreshold && daysUntil >= 0) {
+        // Check if current period is unused
+        const periodIdx = getCurrentPeriodIndex(benefit.recurrence);
+        const periodKey = getPeriodKey(benefit.recurrence, periodIdx);
+        const periodData = (benefit.periods || {})[periodKey];
+        
+        if (!periodData || !periodData.used) {
+          expiring.push({
+            card,
+            benefit,
+            benefitIdx: idx,
+            daysUntil,
+            periodKey,
+            value: benefit.amount || 0
+          });
+        }
+      }
+    });
+  });
+  
+  return expiring.sort((a, b) => a.daysUntil - b.daysUntil);
+}
+
+/**
+ * Initialize new period if needed (for year transitions)
+ * Returns true if period was created
+ */
+function ensureCurrentPeriodExists(benefit) {
+  const recurrence = benefit.recurrence || 'annual';
+  const periodIdx = getCurrentPeriodIndex(recurrence);
+  const periodKey = getPeriodKey(recurrence, periodIdx);
+  
+  if (!benefit.periods) benefit.periods = {};
+  if (!benefit.periods[periodKey]) {
+    benefit.periods[periodKey] = { used: false, amount: 0 };
+    return true; // Period was created
+  }
+  return false;
+}
+
+/**
+ * Auto-reset check on load
+ * Ensures current period exists and initializes new periods
+ */
+function checkAndResetBenefits() {
+  let changed = false;
+  cards.forEach(card => {
+    (card.coupons || []).forEach(benefit => {
+      if (ensureCurrentPeriodExists(benefit)) {
+        changed = true;
+      }
+    });
+  });
+  if (changed) saveCards();
+}
+
+/**
+ * Render editable benefit rows in Add Card form
+ */
+function renderBenefitRows(benefitsData) {
+  const container = document.getElementById('f-benefits-container');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  (benefitsData || []).forEach((b, i) => {
+    container.innerHTML += `
+      <div class="benefit-row" data-idx="${i}">
+        <input class="benefit-row-text" value="${b.text || ''}" placeholder="e.g. $300 Travel Credit">
+        <select class="benefit-row-recurrence">
+          <option value="monthly" ${b.recurrence === 'monthly' ? 'selected' : ''}>Monthly</option>
+          <option value="quarterly" ${b.recurrence === 'quarterly' ? 'selected' : ''}>Quarterly</option>
+          <option value="semi-annual" ${b.recurrence === 'semi-annual' ? 'selected' : ''}>Semi-Annual</option>
+          <option value="annual" ${b.recurrence === 'annual' ? 'selected' : ''}>Annual</option>
+          <option value="one-time" ${b.recurrence === 'one-time' ? 'selected' : ''}>One-Time</option>
+        </select>
+        <input class="benefit-row-expiry" type="date" value="${b.expiry || ''}" placeholder="Expiry (optional)">
+        <button type="button" class="benefit-row-delete" onclick="removeBenefitRow(${i})">✕</button>
+      </div>`;
+  });
+}
+
+/**
+ * Add empty benefit row
+ */
+function addBenefitRow() {
+  const container = document.getElementById('f-benefits-container');
+  if (!container) return;
+  
+  const idx = container.children.length;
+  container.innerHTML += `
+    <div class="benefit-row" data-idx="${idx}">
+      <input class="benefit-row-text" value="" placeholder="e.g. $300 Travel Credit">
+      <select class="benefit-row-recurrence">
+        <option value="monthly">Monthly</option>
+        <option value="quarterly">Quarterly</option>
+        <option value="semi-annual">Semi-Annual</option>
+        <option value="annual" selected>Annual</option>
+        <option value="one-time">One-Time</option>
+      </select>
+      <input class="benefit-row-expiry" type="date" value="" placeholder="Expiry (optional)">
+      <button type="button" class="benefit-row-delete" onclick="removeBenefitRow(${idx})">✕</button>
+    </div>`;
+}
+
+/**
+ * Remove a benefit row
+ */
+function removeBenefitRow(idx) {
+  const container = document.getElementById('f-benefits-container');
+  if (!container) return;
+  
+  const row = container.querySelector(`[data-idx="${idx}"]`);
+  if (row) row.remove();
+}
+
+/**
+ * Collect all benefits from form
+ */
+function getBenefits() {
+  const container = document.getElementById('f-benefits-container');
+  if (!container) return [];
+  
+  const rows = container.querySelectorAll('.benefit-row');
+  const result = [];
+  
+  rows.forEach(row => {
+    const text = row.querySelector('.benefit-row-text').value.trim();
+    const recurrence = row.querySelector('.benefit-row-recurrence').value || 'annual';
+    const expiry = row.querySelector('.benefit-row-expiry').value || null;
+    
+    if (text) {
+      result.push({
+        text,
+        recurrence,
+        expiry,
+        used: false,
+        lastReset: new Date().toISOString(),
+        nextReset: null
+      });
+    }
+  });
+  
+  return result;
+}
+
+function autofillCard(val) {
+  const key = val.toLowerCase().trim();
+  const match = Object.keys(CARD_DB).find(k => key.includes(k)||k.includes(key));
+  if (!match) return;
+  const d = CARD_DB[match];
+  document.getElementById('f-bank').value    = d.bank    || '';
+  // v1.9: Use new renderPerkTags() instead of textarea
+  renderPerkTags(d.perks || []);
+  // v1.7: Handle new redeem format with per-partner ratios
+  if (d.redeem && d.redeem.length) {
+    renderRedeemRows(d.redeem);
+  } else {
+    document.getElementById('f-redeem-container').innerHTML = '';
+  }
+  // v3.4: Render benefits instead of raw coupons
+  if (d.coupons && d.coupons.length) {
+    const benefits = d.coupons.map(text => ({
+      text,
+      recurrence: 'annual',
+      expiry: null,
+      used: false,
+      lastReset: new Date().toISOString(),
+      nextReset: null
+    }));
+    renderBenefitRows(benefits);
+  } else {
+    document.getElementById('f-benefits-container').innerHTML = '';
+  }
+  if (d.icon)  selE(d.icon);
+  if (d.color) selC(d.color);
+}
+
+// v1.9: Editable Perks Functions
+function renderPerkTags(perks) {
+  const container = document.getElementById('f-perks-container');
+  if (!container) return;
+  container.innerHTML = '';
+  (perks || []).forEach((perk, idx) => {
+    const colorClass = getCategoryColor(perk);
+    const chip = document.createElement('div');
+    chip.className = `perk-chip tag-${colorClass}`;
+    chip.dataset.idx = idx;
+    chip.dataset.perk = perk;  // Store perk text in data attribute
+    chip.innerHTML = `${perk} <button type="button" class="perk-chip-remove" onclick="removePerk(${idx})">✕</button>`;
+    container.appendChild(chip);
+  });
+}
+
+function addPerk() {
+  const input = document.getElementById('f-perks-input');
+  const value = input.value.trim();
+  if (!value) return;
+  
+  const currentPerks = getPerks();
+  currentPerks.push(value);
+  renderPerkTags(currentPerks);
+  input.value = '';
+  input.focus();
+}
+
+function removePerk(idx) {
+  const currentPerks = getPerks();
+  currentPerks.splice(idx, 1);
+  renderPerkTags(currentPerks);
+}
+
+function getPerks() {
+  const container = document.getElementById('f-perks-container');
+  if (!container) return [];
+  const chips = container.querySelectorAll('.perk-chip');
+  const perks = [];
+  chips.forEach(chip => {
+    // Use data-perk attribute instead of textContent to avoid the × button
+    const perk = chip.dataset.perk;
+    if (perk) perks.push(perk);
+  });
+  return perks;
+}
+
+function handlePerkInput(event) {
+  // Allow Enter key to add perk
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    addPerk();
+  }
+}
+
+function saveCard() {
+  const name  = document.getElementById('f-name').value.trim();
+  let bank  = document.getElementById('f-bank').value.trim();
+  
+  // If "Other" was selected, get value from custom input
+  if (!bank) {
+    const customInput = document.getElementById('f-bank-custom');
+    if (customInput && customInput.style.display !== 'none') {
+      bank = customInput.value.trim();
+    }
+  }
+  
+  if (!name || !bank) { alert('Please enter card name and bank'); return; }
+  
+  const pts   = parseInt(document.getElementById('f-points').value)||0;
+  const openDate = document.getElementById('f-open-date').value;
+  const due   = document.getElementById('f-due').value;
+  const owner = document.getElementById('f-owner')?.value||'Me';
+  const annualFee = parseInt(document.getElementById('f-annual-fee').value)||0;
+  const perks = getPerks();  // v1.9: Use new getPerks() function
+  const redeemData = getRedeemRows();
+  const redeem = redeemData.map(r => {
+    const parts = r.ratio.split(':').map(Number);
+    const a = parts[0] || 1;
+    const b = parts[1] || 1;
+    return { name: r.name, ratio: r.ratio, est: Math.floor(pts / a * b) };
+  });
+  const coupons = getBenefits();  // v3.4: Use new getBenefits() function
+  const now = new Date().toISOString();
+  
+  // Check if we're editing an existing card
+  if (editingCardId) {
+    // Update existing card
+    const card = cards.find(c => c.id === editingCardId);
+    if (card) {
+      card.name = name;
+      card.bank = bank;
+      card.icon = selEmoji;
+      card.color = selColor;
+      card.points = pts;
+      card.openDate = openDate || null;
+      card.due = due;
+      card.owner = owner;
+      card.annualFee = annualFee;
+      card.perks = perks.length ? perks : ['General spending'];
+      card.redeem = redeem;
+      card.coupons = coupons;  // v3.4: Use getBenefits() result
+      card.updatedAt = now;  // Update timestamp when editing
+      // Preserve history and createdAt
+    }
+    editingCardId = null;  // Reset edit mode
+  } else {
+    // Create new card
+    cards.push({
+      id: Date.now(),
+      name,
+      bank,
+      icon: selEmoji,
+      color: selColor,
+      points: pts,
+      openDate: openDate || null,
+      due,
+      owner,
+      annualFee,
+      perks: perks.length ? perks : ['General spending'],
+      redeem: redeem,
+      coupons: coupons,  // v3.4: Use getBenefits() result
+      history: [],
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+  
+  saveCards();
+  closeAddModal();
+  renderAll();
+}
+
+// ☁️ iCloud Backup & Freshness Tracking
+function getLastBackupDate() {
+  return localStorage.getItem('cpLastBackup');
+}
+
+function getDaysSinceBackup() {
+  const last = getLastBackupDate();
+  if (!last) return null;
+  const diff = Date.now() - new Date(last).getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function shouldShowBackupReminder() {
+  const days = getDaysSinceBackup();
+  return days === null || days >= 30;
+}
+
+function formatLastBackup() {
+  const last = getLastBackupDate();
+  if (!last) return 'Never backed up';
+  const days = getDaysSinceBackup();
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  return `${days} days ago`;
+}
+
+function exportBackup() {
+  const now = new Date().toISOString();
+  
+  // Save last backup timestamp
+  localStorage.setItem('cpLastBackup', now);
+  
+  // Calculate metadata for AI analysis
+  const totalPoints = cards.reduce((sum, c) => sum + (c.points || 0), 0);
+  const totalAnnualFees = cards.reduce((sum, c) => sum + (c.annualFee || 0), 0);
+  const owners = [...new Set(cards.map(c => c.owner || 'Me'))];
+  const banks = [...new Set(cards.map(c => c.bank))];
+  
+  // Calculate date range
+  let oldestCard = null;
+  let newestCard = null;
+  if (cards.length > 0) {
+    oldestCard = cards.reduce((min, c) => {
+      const d = c.openDate || c.createdAt;
+      if (!d) return min;
+      return !min || d < min ? d : min;
+    }, null);
+    newestCard = cards.reduce((max, c) => {
+      const d = c.openDate || c.createdAt;
+      if (!d) return max;
+      return !max || d > max ? d : max;
+    }, null);
+  }
+  
+  const metadata = {
+    totalCards: cards.length,
+    totalPoints: totalPoints,
+    totalAnnualFees: totalAnnualFees,
+    owners: owners,
+    banks: banks,
+    dateRange: {
+      oldestCard: oldestCard,
+      newestCard: newestCard
+    }
+  };
+  
+  const data = {
+    version: 3,
+    appVersion: '3.3',
+    exported: now,
+    lastBackup: now,
+    metadata: metadata,
+    cards: cards.map(c => ({
+      ...c,
+      createdAt: c.createdAt || new Date(c.id).toISOString(),
+      updatedAt: c.updatedAt || now
+    }))
+  };
+  
+  const json     = JSON.stringify(data, null, 2);
+  const blob     = new Blob([json], { type: 'application/json' });
+  const url      = URL.createObjectURL(blob);
+  const date     = new Date().toISOString().slice(0,10);
+  const filename = `CardPoints_backup_${date}.json`;
+  const a  = document.createElement('a');
+  a.href   = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data   = JSON.parse(e.target.result);
+      const version = data.version || 2;
+      const parsed = data.cards || (Array.isArray(data) ? data : null);
+      if (!parsed || !Array.isArray(parsed) || !parsed.length) {
+        alert('Invalid backup file — no cards found.'); return;
+      }
+      if (!confirm(`Import ${parsed.length} cards? This will replace your current data.`)) return;
+      
+      const importTime = new Date().toISOString();
+      
+      cards = parsed.map(c => ({
+        id:         c.id         ?? Date.now(),
+        name:       c.name       ?? 'Unknown',
+        bank:       c.bank       ?? 'Unknown',
+        icon:       c.icon       ?? '💳',
+        color:      c.color      ?? '#007AFF',
+        points:     typeof c.points === 'number' ? c.points : 0,
+        due:        c.due        ?? '',
+        owner:      c.owner      ?? 'Me',
+        annualFee:  typeof c.annualFee === 'number' ? c.annualFee : 0,
+        openDate:   c.openDate   ?? null,
+        perks:      Array.isArray(c.perks)   ? c.perks   : [],
+        redeem:     Array.isArray(c.redeem)  ? c.redeem  : [],
+        coupons:    Array.isArray(c.coupons) ? c.coupons : [],
+        history:    Array.isArray(c.history) ? c.history : [],
+        createdAt:  c.createdAt  ?? new Date(c.id).toISOString(),
+        updatedAt:  c.updatedAt  ?? importTime
+      }));
+      
+      // For v3+ backups, also preserve the lastBackup timestamp if present
+      if (version >= 3 && data.lastBackup) {
+        localStorage.setItem('cpLastBackup', data.lastBackup);
+      }
+      
+      saveCards();
+      renderAll();
+      alert(`✅ Imported ${cards.length} cards successfully! (v${version})`);
+    } catch(err) {
+      alert('Could not read file — make sure it\'s a valid CardPoints backup JSON.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// 📝 Log Points
+let logCardId  = null;
+let logType    = 'earned';
+
+function openLogModal(id) {
+  logCardId = id;
+  logType   = 'earned';
+  setLogType('earned');
+  document.getElementById('log-amount').value = '';
+  document.getElementById('log-note').value   = '';
+  document.getElementById('log-date').value   = new Date().toISOString().slice(0,10);
+  document.getElementById('logModal').classList.remove('hidden');
+}
+function closeLogModal() { document.getElementById('logModal').classList.add('hidden'); }
+
+function setLogType(t) {
+  logType = t;
+  const eBtn = document.getElementById('log-type-earned');
+  const sBtn = document.getElementById('log-type-spent');
+  eBtn.style.borderColor  = t==='earned' ? '#34C759' : 'rgba(128,128,128,0.3)';
+  eBtn.style.background   = t==='earned' ? 'rgba(52,199,89,0.12)' : 'transparent';
+  eBtn.style.color        = t==='earned' ? '#34C759' : 'inherit';
+  sBtn.style.borderColor  = t==='spent'  ? '#FF3B30' : 'rgba(128,128,128,0.3)';
+  sBtn.style.background   = t==='spent'  ? 'rgba(255,59,48,0.08)' : 'transparent';
+  sBtn.style.color        = t==='spent'  ? '#FF3B30' : 'inherit';
+}
+
+function saveLog() {
+  const amt  = parseInt(document.getElementById('log-amount').value);
+  const date = document.getElementById('log-date').value;
+  const note = document.getElementById('log-note').value.trim();
+  if (!amt || amt <= 0) { alert('Please enter a valid point amount'); return; }
+  if (!date)            { alert('Please select a date'); return; }
+  const c = cards.find(x => x.id === logCardId);
+  if (!c) return;
+  if (!c.history) c.history = [];
+  c.history.unshift({ type: logType, amount: amt, date, note });
+  c.points = logType === 'earned' ? c.points + amt : Math.max(0, c.points - amt);
+  const ratio = c.redeem[0]?.ratio || '1:1';
+  const [a, b] = ratio.split(':').map(Number);
+  c.redeem = c.redeem.map(r => ({ ...r, est: Math.floor(c.points / (a||1) * (b||1)) }));
+  saveCards();
+  closeLogModal();
+  openDetail(logCardId);
+  renderAll();
+}
+
+// 🖱️ Background close
+document.getElementById('detailModal').addEventListener('click',function(e){if(e.target===this)closeDetailModal();});
+document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
+document.getElementById('logModal').addEventListener('click',function(e){if(e.target===this)closeLogModal();});
+
+// 🚀 Init
+renderAll();
+
+</script>
+</body>
+</html>

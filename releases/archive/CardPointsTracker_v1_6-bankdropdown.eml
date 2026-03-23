@@ -1,0 +1,1350 @@
+Date: Sat, 21 Mar 2026 10:24:08  -0700
+From:
+To:
+Subject: Card Points Tracker v1.6
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang=3D"en">
+<head>
+<meta charset=3D"UTF-8">
+<meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=3D1.=
+0, maximum-scale=3D1.0">
+<title>=00 Card Points Tracker</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', =
+sans-serif; -webkit-font-smoothing: antialiased; }
+
+  @media (prefers-color-scheme: light) {
+    body { background: #f2f2f7; color: #1d1d1f; }
+    .top-bar { background: rgba(255,255,255,0.85); border-bottom: 1px solid=
+ rgba(0,0,0,0.1); }
+    .search-box { background: rgba(118,118,128,0.12); color: #1d1d1f; }
+    .search-box::placeholder { color: #86868b; }
+    .card-tile { background: #fff; border: 1px solid rgba(0,0,0,0.08); }
+    .section-label { color: #86868b; }
+    .tag { background: rgba(0,122,255,0.1); color: #007AFF; }
+    .tag.green { background: rgba(52,199,89,0.12); color: #34C759; }
+    .tag.orange { background: rgba(255,149,0,0.12); color: #FF9500; }
+    .tag.purple { background: rgba(175,82,222,0.12); color: #AF52DE; }
+    .tag.red { background: rgba(255,59,48,0.12); color: #FF3B30; }
+    .tag.teal { background: rgba(90,200,250,0.18); color: #32ADE6; }
+    .modal-bg { background: rgba(0,0,0,0.35); }
+    .modal { background: #fff; }
+    .modal-header { border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .detail-row { border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .detail-icon-bg { background: rgba(0,122,255,0.1); }
+    .empty-state { color: #86868b; }
+    .add-btn { background: #007AFF; }
+    .form-input { background: rgba(118,118,128,0.1); border: 1px solid rgba=
+(0,0,0,0.1); color: #1d1d1f; }
+    .form-input:focus { border-color: #007AFF; background: #fff; }
+    .cancel-btn { background: rgba(118,118,128,0.15); color: #1d1d1f; }
+    .bank-chip { background: rgba(0,0,0,0.06); color: #3c3c43; }
+    .coupon-item { background: rgba(255,149,0,0.08); border-left: 3px solid=
+ #FF9500; }
+    .coupon-item.used { opacity: 0.45; }
+    .nav-bar { background: rgba(255,255,255,0.9); border-top: 1px solid rgb=
+a(0,0,0,0.1); }
+    .nav-btn.active { color: #007AFF; }
+    .nav-btn { color: #86868b; }
+    .fab { background: #007AFF; box-shadow: 0 4px 16px rgba(0,122,255,0.4);=
+ }
+    .summary-card { background: linear-gradient(135deg, #007AFF, #5AC8FA); =
+color: #fff; }
+    .progress-bar-bg { background: rgba(0,0,0,0.08); }
+    .redemption-item { background: rgba(0,0,0,0.03); border: 1px solid rgba=
+(0,0,0,0.06); }
+    .tab-pill { background: rgba(118,118,128,0.12); color: #3c3c43; }
+    .tab-pill.active { background: #007AFF; color: #fff; }
+    .emoji-btn { background: rgba(118,118,128,0.1); }
+    .emoji-btn.selected { background: rgba(0,122,255,0.2); outline: 2px sol=
+id #007AFF; }
+    .coupon-check { background: rgba(255,149,0,0.2); color: #FF9500; }
+    .coupon-check.done { background: #34C759; color: #fff; }
+    .owner-me { background: rgba(0,122,255,0.13); color: #007AFF; }
+    .owner-wife { background: rgba(255,45,85,0.13); color: #FF2D55; }
+    .owner-shared { background: rgba(52,199,89,0.13); color: #34C759; }
+  }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1c1c1e; color: #f5f5f7; }
+    .top-bar { background: rgba(28,28,30,0.92); border-bottom: 1px solid rg=
+ba(255,255,255,0.08); }
+    .search-box { background: rgba(118,118,128,0.24); color: #f5f5f7; }
+    .search-box::placeholder { color: #636366; }
+    .card-tile { background: #2c2c2e; border: 1px solid rgba(255,255,255,0.=
+08); }
+    .section-label { color: #636366; }
+    .tag { background: rgba(10,132,255,0.2); color: #0A84FF; }
+    .tag.green { background: rgba(48,209,88,0.18); color: #30D158; }
+    .tag.orange { background: rgba(255,159,10,0.18); color: #FF9F0A; }
+    .tag.purple { background: rgba(191,90,242,0.18); color: #BF5AF2; }
+    .tag.red { background: rgba(255,69,58,0.18); color: #FF453A; }
+    .tag.teal { background: rgba(100,210,255,0.18); color: #64D2FF; }
+    .modal-bg { background: rgba(0,0,0,0.6); }
+    .modal { background: #2c2c2e; }
+    .modal-header { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .detail-row { border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .detail-icon-bg { background: rgba(10,132,255,0.2); }
+    .empty-state { color: #636366; }
+    .add-btn { background: #0A84FF; }
+    .form-input { background: rgba(118,118,128,0.2); border: 1px solid rgba=
+(255,255,255,0.1); color: #f5f5f7; }
+    .form-input:focus { border-color: #0A84FF; }
+    .cancel-btn { background: rgba(118,118,128,0.25); color: #f5f5f7; }
+    .bank-chip { background: rgba(255,255,255,0.1); color: #ebebf5; }
+    .coupon-item { background: rgba(255,159,10,0.1); border-left: 3px solid=
+ #FF9F0A; }
+    .coupon-item.used { opacity: 0.35; }
+    .nav-bar { background: rgba(28,28,30,0.95); border-top: 1px solid rgba(=
+255,255,255,0.08); }
+    .nav-btn.active { color: #0A84FF; }
+    .nav-btn { color: #636366; }
+    .fab { background: #0A84FF; box-shadow: 0 4px 20px rgba(10,132,255,0.45=
+); }
+    .summary-card { background: linear-gradient(135deg, #0A84FF, #30D158); =
+color: #fff; }
+    .progress-bar-bg { background: rgba(255,255,255,0.1); }
+    .redemption-item { background: rgba(255,255,255,0.04); border: 1px soli=
+d rgba(255,255,255,0.08); }
+    .tab-pill { background: rgba(118,118,128,0.25); color: #ebebf5; }
+    .tab-pill.active { background: #0A84FF; color: #fff; }
+    .emoji-btn { background: rgba(118,118,128,0.2); }
+    .emoji-btn.selected { background: rgba(10,132,255,0.25); outline: 2px s=
+olid #0A84FF; }
+    .coupon-check { background: rgba(255,159,10,0.2); color: #FF9F0A; }
+    .coupon-check.done { background: #30D158; color: #fff; }
+    .owner-me { background: rgba(10,132,255,0.2); color: #0A84FF; }
+    .owner-wife { background: rgba(255,69,58,0.2); color: #FF453A; }
+    .owner-shared { background: rgba(48,209,88,0.2); color: #30D158; }
+  }
+
+  #app { max-width: 430px; margin: 0 auto; }
+  .top-bar { position: sticky; top: 0; z-index: 100; padding: 16px 16px 12p=
+x; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .top-bar h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; =
+margin-bottom: 10px; }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: trans=
+lateY(-50%); font-size: 15px; pointer-events: none; opacity: 0.5; }
+  .search-box { width: 100%; padding: 8px 12px 8px 34px; border: none; bord=
+er-radius: 12px; font-size: 15px; outline: none; }
+  .tab-row { display: flex; gap: 6px; padding: 10px 16px 0; overflow-x: aut=
+o; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tab-row::-webkit-scrollbar { display: none; }
+  .tab-pill { flex-shrink: 0; padding: 5px 14px; border-radius: 20px; borde=
+r: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: al=
+l 0.2s; }
+  .content-area { padding: 12px 16px 100px; }
+  .section-label { font-size: 12px; font-weight: 600; letter-spacing: 0.5px=
+; text-transform: uppercase; margin: 14px 0 8px; }
+  .card-tile { border-radius: 16px; padding: 16px; margin-bottom: 10px; cur=
+sor: pointer; transition: transform 0.15s; }
+  .card-tile:active { transform: scale(0.98); }
+  .card-tile-header { display: flex; align-items: center; gap: 12px; margin=
+-bottom: 12px; }
+  .card-icon { width: 44px; height: 44px; border-radius: 12px; display: fle=
+x; align-items: center; justify-content: center; font-size: 22px; flex-shri=
+nk: 0; }
+  .card-title-block { flex: 1; min-width: 0; }
+  .card-name { font-size: 16px; font-weight: 600; }
+  .card-bank { font-size: 12px; margin-top: 2px; }
+  .bank-chip { display: inline-block; padding: 2px 8px; border-radius: 6px;=
+ font-size: 11px; font-weight: 500; }
+  .owner-chip { display: inline-block; padding: 1px 7px; border-radius: 6px=
+; font-size: 11px; font-weight: 600; margin-left: 3px; }
+  .points-badge { text-align: right; flex-shrink: 0; }
+  .points-num { font-size: 20px; font-weight: 700; }
+  .points-unit { font-size: 11px; opacity: 0.6; }
+  .tags-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px=
+; }
+  .tag { padding: 3px 10px; border-radius: 8px; font-size: 12px; font-weigh=
+t: 500; }
+  .progress-section { margin-top: 4px; }
+  .progress-label { display: flex; justify-content: space-between; font-siz=
+e: 11px; opacity: 0.65; margin-bottom: 4px; }
+  .progress-bar-bg { border-radius: 4px; height: 5px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 4px; background: linear=
+-gradient(90deg, #007AFF, #5AC8FA); transition: width 0.6s ease; }
+  .summary-card { border-radius: 20px; padding: 20px; margin-bottom: 16px; =
+position: relative; overflow: hidden; }
+  .summary-title { font-size: 13px; font-weight: 500; opacity: 0.85; }
+  .summary-num { font-size: 36px; font-weight: 800; letter-spacing: -1px; m=
+argin: 4px 0; }
+  .summary-sub { font-size: 12px; opacity: 0.75; }
+  .fab { position: fixed; bottom: 90px; right: calc(50% - 215px + 16px); wi=
+dth: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;=
+ font-size: 26px; display: flex; align-items: center; justify-content: cent=
+er; color: #fff; z-index: 200; transition: transform 0.2s; }
+  .fab:active { transform: scale(0.92); }
+  .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-=
+50%); width: 100%; max-width: 430px; display: flex; padding: 8px 0 20px; ba=
+ckdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 15=
+0; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: c=
+enter; gap: 2px; background: none; border: none; cursor: pointer; font-size=
+: 11px; font-weight: 500; transition: color 0.2s; }
+  .nav-btn .nav-icon { font-size: 22px; }
+  .modal-bg { position: fixed; inset: 0; z-index: 300; display: flex; align=
+-items: flex-end; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur=
+(4px); }
+  .modal-bg.hidden { display: none; }
+  .modal { width: 100%; max-width: 430px; margin: 0 auto; border-radius: 24=
+px 24px 0 0; max-height: 88vh; overflow-y: auto; animation: slideUp 0.3s cu=
+bic-bezier(0.34,1.56,0.64,1); }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform=
+: translateY(0); } }
+  .modal-handle { width: 36px; height: 4px; border-radius: 2px; background:=
+ rgba(128,128,128,0.3); margin: 10px auto 4px; }
+  .modal-header { display: flex; align-items: center; justify-content: spac=
+e-between; padding: 12px 20px 14px; }
+  .modal-title { font-size: 20px; font-weight: 700; }
+  .close-btn { width: 30px; height: 30px; border-radius: 50%; border: none;=
+ cursor: pointer; font-size: 16px; display: flex; align-items: center; just=
+ify-content: center; background: rgba(128,128,128,0.2); color: inherit; }
+  .modal-body { padding: 0 20px 24px; }
+  .detail-row { display: flex; align-items: flex-start; gap: 12px; padding:=
+ 14px 0; }
+  .detail-icon-bg { width: 36px; height: 36px; border-radius: 10px; display=
+: flex; align-items: center; justify-content: center; font-size: 18px; flex=
+-shrink: 0; }
+  .detail-content { flex: 1; }
+  .detail-label { font-size: 12px; opacity: 0.6; margin-bottom: 3px; }
+  .detail-value { font-size: 14px; font-weight: 500; }
+  .coupon-item { padding: 10px 12px; border-radius: 10px; margin-bottom: 6p=
+x; display: flex; align-items: center; gap: 10px; transition: opacity 0.2s;=
+ }
+  .coupon-check { width: 20px; height: 20px; border-radius: 50%; border: no=
+ne; cursor: pointer; font-size: 13px; display: flex; align-items: center; j=
+ustify-content: center; flex-shrink: 0; transition: all 0.2s; }
+  .coupon-text { flex: 1; font-size: 13px; font-weight: 500; }
+  .coupon-expiry { font-size: 11px; opacity: 0.55; }
+  .redemption-item { border-radius: 12px; padding: 12px; margin-bottom: 8px=
+; display: flex; justify-content: space-between; align-items: center; }
+  .redemption-name { font-size: 14px; font-weight: 600; }
+  .redemption-ratio { font-size: 13px; opacity: 0.7; }
+  .redemption-value { font-size: 15px; font-weight: 700; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; opac=
+ity: 0.8; display: block; }
+  .form-input { width: 100%; padding: 10px 14px; border-radius: 12px; font-=
+size: 14px; outline: none; transition: all 0.2s; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .add-btn, .cancel-btn { flex: 1; padding: 13px; border-radius: 14px; bord=
+er: none; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .add-btn { color: #fff; }
+  .emoji-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 6=
+px; margin-top: 6px; }
+  .emoji-btn { aspect-ratio: 1; border-radius: 10px; border: none; font-siz=
+e: 20px; cursor: pointer; display: flex; align-items: center; justify-conte=
+nt: center; transition: all 0.15s; }
+  .color-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .color-btn { width: 32px; height: 32px; border-radius: 50%; border: 3px s=
+olid transparent; cursor: pointer; transition: all 0.15s; }
+  .color-btn.selected { border-color: #fff; transform: scale(1.15); box-sha=
+dow: 0 0 0 2px #007AFF; }
+  .empty-state { text-align: center; padding: 60px 20px; font-size: 15px; l=
+ine-height: 1.6; }
+  .empty-state .big-emoji { font-size: 56px; display: block; margin-bottom:=
+ 12px; }
+  .empty-state strong { font-size: 18px; display: block; margin-bottom: 6px=
+; }
+
+  /* =00=00 Backup =00=00 */
+  .backup-btn { display:flex; align-items:center; justify-content:center; g=
+ap:8px; width:100%; padding:14px; border-radius:16px; border:none; cursor:p=
+ointer; font-size:15px; font-weight:600; transition:all 0.2s; margin-bottom=
+:10px; }
+  .backup-export { background:rgba(0,122,255,0.1); color:#007AFF; }
+  .backup-import { background:rgba(52,199,89,0.1); color:#34C759; }
+  @media (prefers-color-scheme: dark) {
+    .backup-export { background:rgba(10,132,255,0.15); color:#0A84FF; }
+    .backup-import { background:rgba(48,209,88,0.15); color:#30D158; }
+  }
+  .backup-info { font-size:12px; opacity:0.5; text-align:center; line-heigh=
+t:1.6; margin-bottom:16px; }
+  #restore-input { display:none; }
+  .hist-item { display:flex; align-items:flex-start; gap:12px; padding:10px=
+ 0; border-bottom:1px solid rgba(128,128,128,0.1); }
+  .hist-dot { width:32px; height:32px; border-radius:50%; display:flex; ali=
+gn-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .hist-earned .hist-dot { background:rgba(52,199,89,0.15); color:#34C759; }
+  .hist-spent  .hist-dot { background:rgba(255,59,48,0.12);  color:#FF3B30;=
+ }
+  .hist-body { flex:1; }
+  .hist-amount { font-size:15px; font-weight:700; }
+  .hist-earned .hist-amount { color:#34C759; }
+  .hist-spent  .hist-amount { color:#FF3B30; }
+  .hist-meta { font-size:11px; opacity:0.55; margin-top:2px; }
+  .hist-note { font-size:12px; opacity:0.7; margin-top:3px; font-style:ital=
+ic; }
+  .log-btn { width:100%; padding:12px; border-radius:14px; border:none; cur=
+sor:pointer; font-size:15px; font-weight:600; margin-top:6px; background:rg=
+ba(0,122,255,0.1); color:#007AFF; transition:all 0.2s; }
+  @media (prefers-color-scheme: dark) {
+    .log-btn { background:rgba(10,132,255,0.15); color:#0A84FF; }
+    .hist-earned .hist-dot { background:rgba(48,209,88,0.18); color:#30D158=
+; }
+    .hist-spent  .hist-dot { background:rgba(255,69,58,0.18);  color:#FF453=
+A; }
+    .hist-earned .hist-amount { color:#30D158; }
+    .hist-spent  .hist-amount { color:#FF453A; }
+  }
+
+  /* v1.6 Card Dropdown */
+  .card-dropdown { margin-top:8px; border-radius:12px; overflow:hidden; ani=
+mation:fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { =
+opacity:1; transform:translateY(0); } }
+  .card-dropdown-item { display:flex; align-items:center; gap:10px; padding=
+:10px 12px; cursor:pointer; transition:background 0.15s; }
+  .card-dropdown-item:active { transform:scale(0.98); }
+  .card-dropdown-icon { width:32px; height:32px; border-radius:8px; display=
+:flex; align-items:center; justify-content:center; font-size:14px; flex-shr=
+ink:0; }
+  .card-dropdown-info { flex:1; min-width:0; }
+  .card-dropdown-name { font-size:13px; font-weight:600; white-space:nowrap=
+; overflow:hidden; text-overflow:ellipsis; }
+  .card-dropdown-perks { font-size:10px; opacity:0.6; margin-top:1px; white=
+-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .card-dropdown-arrow { font-size:14px; opacity:0.4; }
+  @media (prefers-color-scheme: light) {
+    .card-dropdown { background:rgba(0,0,0,0.03); border:1px solid rgba(0,0=
+,0,0.06); }
+    .card-dropdown-item:hover { background:rgba(0,122,255,0.08); }
+    .card-dropdown-item + .card-dropdown-item { border-top:1px solid rgba(0=
+,0,0,0.04); }
+  }
+  @media (prefers-color-scheme: dark) {
+    .card-dropdown { background:rgba(255,255,255,0.04); border:1px solid rg=
+ba(255,255,255,0.08); }
+    .card-dropdown-item:hover { background:rgba(10,132,255,0.12); }
+    .card-dropdown-item + .card-dropdown-item { border-top:1px solid rgba(2=
+55,255,255,0.06); }
+  }
+</style>
+</head>
+<body>
+<div id=3D"app">
+  <div class=3D"top-bar">
+    <h1>=00 Card Points</h1>
+    <div class=3D"search-wrap">
+      <span class=3D"search-icon">=00</span>
+      <input class=3D"search-box" id=3D"searchBox" type=3D"text" placeholde=
+r=3D"Search cards, airlines, rewards=00" oninput=3D"handleSearch(this.value=
+)">
+    </div>
+  </div>
+  <div class=3D"tab-row" id=3D"tabRow"></div>
+  <div class=3D"content-area" id=3D"contentArea"></div>
+  <button class=3D"fab" onclick=3D"openAddModal()">=00</button>
+  <div class=3D"nav-bar">
+    <button class=3D"nav-btn active" id=3D"nav-cards" onclick=3D"switchNav(=
+'cards')"><span class=3D"nav-icon">=00</span>Cards</button>
+    <button class=3D"nav-btn" id=3D"nav-miles" onclick=3D"switchNav('miles'=
+)"><span class=3D"nav-icon">=00</span>Miles</button>
+    <button class=3D"nav-btn" id=3D"nav-coupons" onclick=3D"switchNav('coup=
+ons')"><span class=3D"nav-icon">=00</span>Perks</button>
+    <button class=3D"nav-btn" id=3D"nav-summary" onclick=3D"switchNav('summ=
+ary')"><span class=3D"nav-icon">=00</span>Summary</button>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class=3D"modal-bg hidden" id=3D"detailModal">
+  <div class=3D"modal" id=3D"detailModalContent"></div>
+</div>
+
+<!-- Add Card Modal -->
+<div class=3D"modal-bg hidden" id=3D"addModal">
+  <div class=3D"modal">
+    <div class=3D"modal-handle"></div>
+    <div class=3D"modal-header">
+      <span class=3D"modal-title">Add Credit Card</span>
+      <button class=3D"close-btn" onclick=3D"closeAddModal()">=00</button>
+    </div>
+    <div class=3D"modal-body">
+      <div class=3D"form-group">
+        <label class=3D"form-label">Card Name</label>
+        <input class=3D"form-input" id=3D"f-name" placeholder=3D"e.g. Chase=
+ Sapphire Preferred" oninput=3D"autofillCard(this.value)" />
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Bank</label>
+        <div id=3D"bankGrid" style=3D"display:grid;grid-template-columns:re=
+peat(4,1fr);gap:8px;margin-bottom:10px"></div>
+        <input class=3D"form-input" id=3D"f-bank" placeholder=3D"Or type ba=
+nk name=00" oninput=3D"autofillCard(document.getElementById('f-name').value=
+)" />
+        <div id=3D"cardDropdown"></div>
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Owner</label>
+        <select class=3D"form-input" id=3D"f-owner">
+          <option value=3D"Me">=00 Me</option>
+          <option value=3D"Wife">=00 Wife</option>
+          <option value=3D"Shared">=00 Shared</option>
+        </select>
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Statement Date</label>
+        <input class=3D"form-input" id=3D"f-due" type=3D"date" />
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Reward Categories <span style=3D"opacit=
+y:0.5;font-weight:400">(auto-filled)</span></label>
+        <input class=3D"form-input" id=3D"f-perks" placeholder=3D"e.g. Dini=
+ng, Travel, Groceries" />
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Transfer Partners <span style=3D"opacit=
+y:0.5;font-weight:400">(auto-filled)</span></label>
+        <input class=3D"form-input" id=3D"f-redeem" placeholder=3D"e.g. Uni=
+ted, Hyatt, Southwest" />
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Transfer Ratio</label>
+        <input class=3D"form-input" id=3D"f-ratio" placeholder=3D"e.g. 1:1"=
+ />
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Annual Benefits <span style=3D"opacity:=
+0.5;font-weight:400">(auto-filled)</span></label>
+        <input class=3D"form-input" id=3D"f-coupons" placeholder=3D"e.g. $3=
+00 travel credit, Priority Pass" />
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Current Points</label>
+        <input class=3D"form-input" id=3D"f-points" type=3D"number" placeho=
+lder=3D"0" />
+      </div>
+      <div class=3D"form-actions">
+        <button class=3D"cancel-btn" onclick=3D"closeAddModal()">Cancel</bu=
+tton>
+        <button class=3D"add-btn" onclick=3D"saveCard()">Save Card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Log Points Modal -->
+<div class=3D"modal-bg hidden" id=3D"logModal">
+  <div class=3D"modal">
+    <div class=3D"modal-handle"></div>
+    <div class=3D"modal-header">
+      <span class=3D"modal-title">=00 Log Points</span>
+      <button class=3D"close-btn" onclick=3D"closeLogModal()">=00</button>
+    </div>
+    <div class=3D"modal-body">
+      <div class=3D"form-group">
+        <label class=3D"form-label">Type</label>
+        <div style=3D"display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button id=3D"log-type-earned" onclick=3D"setLogType('earned')" s=
+tyle=3D"padding:10px;border-radius:12px;border:2px solid #34C759;background=
+:rgba(52,199,89,0.12);color:#34C759;font-size:14px;font-weight:600;cursor:p=
+ointer">+ Earned</button>
+          <button id=3D"log-type-spent"  onclick=3D"setLogType('spent')"  s=
+tyle=3D"padding:10px;border-radius:12px;border:2px solid rgba(128,128,128,0=
+.3);background:transparent;color:inherit;font-size:14px;font-weight:600;cur=
+sor:pointer">=00 Spent / Redeemed</button>
+        </div>
+      </div>
+      <div class=3D"form-row">
+        <div class=3D"form-group">
+          <label class=3D"form-label">Points</label>
+          <input class=3D"form-input" id=3D"log-amount" type=3D"number" pla=
+ceholder=3D"0" min=3D"0" />
+        </div>
+        <div class=3D"form-group">
+          <label class=3D"form-label">Date</label>
+          <input class=3D"form-input" id=3D"log-date" type=3D"date" />
+        </div>
+      </div>
+      <div class=3D"form-group">
+        <label class=3D"form-label">Note <span style=3D"opacity:0.5;font-we=
+ight:400">(optional)</span></label>
+        <input class=3D"form-input" id=3D"log-note" placeholder=3D"e.g. Mon=
+thly spend, Transferred to United" />
+      </div>
+      <div class=3D"form-actions">
+        <button class=3D"cancel-btn" onclick=3D"closeLogModal()">Cancel</bu=
+tton>
+        <button class=3D"add-btn" onclick=3D"saveLog()">Save Entry</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =00=00 Constants =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00
+const EMOJIS =3D ['=00','=00','=00','=00','=00','=00','=00','=00','=00','=
+=00','=00','=00','=00','=00','=00','=00'];
+const COLORS  =3D ['#FF6B6B','#FF9500','#FFCC02','#34C759','#00C7BE','#007A=
+FF','#5856D6','#AF52DE','#FF2D55','#8E8E93'];
+const TC      =3D ['','green','orange','purple','red','teal','','green','or=
+ange','purple'];
+
+// =00=00 Bank Logo Map =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00
+const BANK_BRANDS =3D {
+  'chase':            { bg:'#117ACA', fg:'#fff', abbr:'CHASE' },
+  'american express': { bg:'#016FD0', fg:'#fff', abbr:'AMEX'  },
+  'amex':             { bg:'#016FD0', fg:'#fff', abbr:'AMEX'  },
+  'citi':             { bg:'#C01933', fg:'#fff', abbr:'citi'  },
+  'citibank':         { bg:'#C01933', fg:'#fff', abbr:'citi'  },
+  'capital one':      { bg:'#D03027', fg:'#fff', abbr:'C1'    },
+  'discover':         { bg:'#FF6600', fg:'#fff', abbr:'DISC'  },
+  'wells fargo':      { bg:'#D71E28', fg:'#fff', abbr:'WF'    },
+  'bank of america':  { bg:'#E31837', fg:'#fff', abbr:'BofA'  },
+  'us bank':          { bg:'#003087', fg:'#fff', abbr:'USB'   },
+  'barclays':         { bg:'#00AEEF', fg:'#fff', abbr:'BARC'  },
+  'navy federal':     { bg:'#002F6C', fg:'#fff', abbr:'NFCU'  },
+  'pnc':              { bg:'#F58025', fg:'#fff', abbr:'PNC'   },
+  'td bank':          { bg:'#34A853', fg:'#fff', abbr:'TD'    },
+  'synchrony':        { bg:'#6E2B8B', fg:'#fff', abbr:'SYF'   },
+};
+
+function cardIconHtml(c) {
+  const key   =3D (c.bank || '').toLowerCase();
+  const brand =3D Object.entries(BANK_BRANDS).find(([k]) =3D> key.includes(=
+k))?.[1];
+  if (brand) {
+    return `<div style=3D"width:36px;height:36px;border-radius:8px;backgrou=
+nd:${brand.bg};display:flex;align-items:center;justify-content:center;font-=
+size:${brand.abbr.length>4?8:9}px;font-weight:800;color:${brand.fg};letter-=
+spacing:0.2px;font-family:-apple-system,sans-serif">${brand.abbr}</div>`;
+  }
+  return `<span style=3D"font-size:22px">${c.icon}</span>`;
+}
+
+// =00=00 Persistence =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00
+function saveCards() { localStorage.setItem('cpCards', JSON.stringify(cards=
+)); }
+
+// =00=00 Hard reset corrupted data =00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00
+(function(){
+  try {
+    const raw =3D localStorage.getItem('cpCards');
+    if (!raw) return;
+    const p =3D JSON.parse(raw);
+    if (!Array.isArray(p) || p.length =3D=3D=3D 0) { localStorage.removeIte=
+m('cpCards'); return; }
+    const bad =3D p.some(c =3D>
+      !c || typeof c !=3D=3D 'object' ||
+      typeof c.name !=3D=3D 'string' ||
+      typeof c.bank !=3D=3D 'string' ||
+      !Array.isArray(c.redeem) ||
+      !Array.isArray(c.perks) ||
+      !Array.isArray(c.coupons) ||
+      /[\u4e00-\u9fff]/.test(c.name + c.bank)
+    );
+    if (bad) localStorage.removeItem('cpCards');
+  } catch(e) { localStorage.removeItem('cpCards'); }
+})();
+
+function loadCards() {
+  try {
+    const raw =3D localStorage.getItem('cpCards');
+    if (!raw) return null;
+    const parsed =3D JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.length) return null;
+    // wipe if any card looks like old Taiwan data or is malformed
+    if (parsed.some(c =3D> !c.name || !c.bank || !Array.isArray(c.redeem) |=
+| /[\u4e00-\u9fff]/.test(c.name + c.bank))) {
+      localStorage.removeItem('cpCards');
+      return null;
+    }
+    return parsed.map(c =3D> ({
+      id:      c.id      ?? Date.now(),
+      name:    c.name    ?? 'Unknown',
+      bank:    c.bank    ?? 'Unknown',
+      icon:    c.icon    ?? '=00',
+      color:   c.color   ?? '#007AFF',
+      points:  typeof c.points =3D=3D=3D 'number' ? c.points : 0,
+      due:     c.due     ?? '',
+      owner:   c.owner   ?? 'Me',
+      perks:   Array.isArray(c.perks)   ? c.perks   : [],
+      redeem:  Array.isArray(c.redeem)  ? c.redeem  : [],
+      coupons: Array.isArray(c.coupons) ? c.coupons : [],
+      history: Array.isArray(c.history) ? c.history : [],
+    }));
+  } catch(e) { localStorage.removeItem('cpCards'); return null; }
+}
+
+const DEFAULTS =3D [
+  { id:1, name:'Chase Sapphire Reserve', bank:'Chase', icon:'=00', color:'#=
+007AFF', points:85000, due:'2025-09-15', owner:'Me',
+    perks:['3x Dining','3x Travel','1.5x Everything','Priority Pass Lounge'=
+],
+    redeem:[{name:'United MileagePlus',ratio:'1:1',est:85000},{name:'World =
+of Hyatt',ratio:'1:1',est:85000},{name:'Southwest Rapid Rewards',ratio:'1:1=
+',est:85000},{name:'Air Canada Aeroplan',ratio:'1:1',est:85000}],
+    coupons:[{text:'$300 Annual Travel Credit',expiry:'2026-01-01',done:fal=
+se},{text:'Global Entry / TSA PreCheck Credit',expiry:'2026-01-01',done:tru=
+e},{text:'DoorDash DashPass',expiry:'2025-12-31',done:false}],
+    history:[] },
+  { id:2, name:'Amex Platinum', bank:'American Express', icon:'=00', color:=
+'#AF52DE', points:120000, due:'2025-09-20', owner:'Wife',
+    perks:['5x Flights booked directly','5x Prepaid Hotels via Amex','Centu=
+rion Lounge Access','Fine Hotels & Resorts'],
+    redeem:[{name:'Delta SkyMiles',ratio:'1:1',est:120000},{name:'British A=
+irways Avios',ratio:'1:1',est:120000},{name:'Air France/KLM Flying Blue',ra=
+tio:'1:1',est:120000},{name:'Marriott Bonvoy',ratio:'1:2',est:240000}],
+    coupons:[{text:'$200 Airline Fee Credit',expiry:'2025-12-31',done:false=
+},{text:'$200 Fine Hotels Credit',expiry:'2025-12-31',done:false},{text:'$2=
+40 Digital Entertainment Credit',expiry:'2025-12-31',done:true},{text:'Cent=
+urion Lounge Access',expiry:'2026-01-01',done:false},{text:'$189 CLEAR Plus=
+ Credit',expiry:'2025-12-31',done:false}],
+    history:[] },
+  { id:3, name:'Chase Freedom Unlimited', bank:'Chase', icon:'=00', color:'=
+#34C759', points:22000, due:'2025-09-05', owner:'Me',
+    perks:['1.5x Everything','3x Dining','3x Drugstores','5x Travel via Cha=
+se Portal'],
+    redeem:[{name:'Chase Ultimate Rewards (cash)',ratio:'1:1',est:22000}],
+    coupons:[{text:'No Annual Fee',expiry:'',done:false}],
+    history:[] },
+  { id:4, name:'Amex Gold', bank:'American Express', icon:'=00', color:'#FF=
+9500', points:45000, due:'2025-09-28', owner:'Wife',
+    perks:['4x Dining worldwide','4x US Supermarkets (up to $25k/yr)','3x F=
+lights','1x Everything else'],
+    redeem:[{name:'Delta SkyMiles',ratio:'1:1',est:45000},{name:'Air Canada=
+ Aeroplan',ratio:'1:1',est:45000},{name:'British Airways Avios',ratio:'1:1'=
+,est:45000},{name:'Marriott Bonvoy',ratio:'1:2',est:90000}],
+    coupons:[{text:'$120 Dining Credit ($10/mo)',expiry:'2025-12-31',done:f=
+alse},{text:'$120 Uber Cash ($10/mo)',expiry:'2025-12-31',done:false}],
+    history:[] },
+];
+
+let cards =3D loadCards() || DEFAULTS;
+if (!loadCards()) saveCards();
+
+let currentTab  =3D 'all';
+let currentNav  =3D 'cards';
+let selEmoji    =3D '=00';
+let selColor    =3D '#007AFF';
+let searchQuery =3D '';
+
+// =00=00 Nav & Tabs =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00
+function switchNav(n) {
+  currentNav =3D n;
+  document.querySelectorAll('.nav-btn').forEach(b =3D> b.classList.remove('=
+active'));
+  document.getElementById('nav-' + n).classList.add('active');
+  renderAll();
+}
+
+function buildTabs() {
+  const opts   =3D ['all','Me','Wife','Shared', ...new Set(cards.map(c =3D>=
+ c.bank))];
+  const labels =3D { all:'All Cards', Me:'=00 Mine', Wife:'=00 Wife', Share=
+d:'=00 Shared' };
+  document.getElementById('tabRow').innerHTML =3D opts.map(o =3D>
+    `<button class=3D"tab-pill ${o=3D=3D=3DcurrentTab?'active':''}" onclick=
+=3D"setTab('${o}')">${labels[o]||o}</button>`
+  ).join('');
+}
+
+function setTab(t) { currentTab =3D t; renderAll(); }
+
+function handleSearch(v) { searchQuery =3D v.toLowerCase(); renderAll(); }
+
+function filtered() {
+  let list =3D cards;
+  if (['Me','Wife','Shared'].includes(currentTab)) list =3D cards.filter(c =
+=3D> (c.owner||'Me') =3D=3D=3D currentTab);
+  else if (currentTab !=3D=3D 'all') list =3D cards.filter(c =3D> c.bank =
+=3D=3D=3D currentTab);
+  if (searchQuery) list =3D list.filter(c =3D>
+    c.name.toLowerCase().includes(searchQuery) ||
+    c.bank.toLowerCase().includes(searchQuery) ||
+    c.perks.some(p =3D> p.toLowerCase().includes(searchQuery)) ||
+    c.redeem.some(r =3D> r.name.toLowerCase().includes(searchQuery)) ||
+    (c.coupons||[]).some(x =3D> x.text.toLowerCase().includes(searchQuery))
+  );
+  return list;
+}
+
+// =00=00 Render =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00
+function renderAll() {
+  buildTabs();
+  const area =3D document.getElementById('contentArea');
+  const list =3D filtered();
+  if (currentNav=3D=3D=3D'cards')   renderCards(area, list);
+  else if (currentNav=3D=3D=3D'miles')   renderMiles(area, list);
+  else if (currentNav=3D=3D=3D'coupons') renderCoupons(area, list);
+  else renderSummary(area);
+}
+
+function tc(i) { return TC[i % TC.length]; }
+
+function renderCards(area, list) {
+  if (!list.length) { area.innerHTML =3D `<div class=3D"empty-state"><span =
+class=3D"big-emoji">=00</span><strong>No cards yet</strong>Tap + to add you=
+r first card</div>`; return; }
+  area.innerHTML =3D list.map(c =3D> {
+    const due      =3D c.due ? new Date(c.due).toLocaleDateString('en-US',{=
+month:'short',day:'numeric'}) : '';
+    const daysLeft =3D c.due ? Math.ceil((new Date(c.due)-new Date())/86400=
+000) : 99;
+    const prog     =3D Math.max(0, Math.min(100, (1-daysLeft/30)*100));
+    const owner    =3D (c.owner||'Me').toLowerCase();
+    return `<div class=3D"card-tile" onclick=3D"openDetail(${c.id})">
+      <div class=3D"card-tile-header">
+        <div class=3D"card-icon" style=3D"background:${c.color}22">${cardIc=
+onHtml(c)}</div>
+        <div class=3D"card-title-block">
+          <div class=3D"card-name">${c.name}</div>
+          <div class=3D"card-bank"><span class=3D"bank-chip">${c.bank}</spa=
+n> <span class=3D"owner-chip owner-${owner}">${c.owner||'Me'}</span></div>
+        </div>
+        <div class=3D"points-badge"><div class=3D"points-num">${c.points.to=
+LocaleString()}</div><div class=3D"points-unit">pts</div></div>
+      </div>
+      <div class=3D"tags-row">${c.perks.slice(0,4).map((p,i)=3D>`<span clas=
+s=3D"tag ${tc(i)}">${p}</span>`).join('')}</div>
+      ${c.due ? `<div class=3D"progress-section">
+        <div class=3D"progress-label"><span>Statement ${due}</span><span>${=
+daysLeft>0?daysLeft+' days':'Today!'}</span></div>
+        <div class=3D"progress-bar-bg"><div class=3D"progress-bar-fill" sty=
+le=3D"width:${prog}%"></div></div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderMiles(area, list) {
+  if (!list.length) { area.innerHTML =3D `<div class=3D"empty-state"><span =
+class=3D"big-emoji">=00</span><strong>No cards found</strong></div>`; retur=
+n; }
+  const pm =3D {};
+  list.forEach(c =3D> c.redeem.forEach(r =3D> { if (!pm[r.name]) pm[r.name]=
+=3D[]; pm[r.name].push({card:c,ratio:r.ratio,est:r.est}); }));
+  let html =3D `<div class=3D"section-label">Transfer Partners by Card</div=
+>`;
+  list.forEach(c =3D> {
+    html +=3D `<div class=3D"card-tile">
+      <div class=3D"card-tile-header">
+        <div class=3D"card-icon" style=3D"background:${c.color}22">${cardIc=
+onHtml(c)}</div>
+        <div class=3D"card-title-block"><div class=3D"card-name">${c.name}<=
+/div><div class=3D"card-bank"><span class=3D"bank-chip">${c.bank}</span></d=
+iv></div>
+        <div class=3D"points-badge"><div class=3D"points-num">${c.points.to=
+LocaleString()}</div><div class=3D"points-unit">pts</div></div>
+      </div>
+      ${c.redeem.map(r=3D>`<div class=3D"redemption-item"><div><div class=
+=3D"redemption-name">${r.name}</div><div class=3D"redemption-ratio">Ratio $=
+{r.ratio}</div></div><div class=3D"redemption-value">${r.est.toLocaleString=
+()} mi</div></div>`).join('')}
+    </div>`;
+  });
+  html +=3D `<div class=3D"section-label" style=3D"margin-top:20px">Combine=
+d by Partner</div>`;
+  Object.entries(pm).forEach(([name, es]) =3D> {
+    const tot  =3D es.reduce((s,e)=3D>s+e.est,0);
+    const from =3D es.map(e=3D>`${e.card.icon} ${e.card.name}`).join(', ');
+    html +=3D `<div class=3D"redemption-item" style=3D"display:block;margin=
+-bottom:10px">
+      <div style=3D"font-size:15px;font-weight:700;margin-bottom:4px">=00 $=
+{name}</div>
+      <div style=3D"font-size:12px;opacity:0.6;margin-bottom:6px">From: ${f=
+rom}</div>
+      <div style=3D"font-size:22px;font-weight:800">${tot.toLocaleString()}=
+ <span style=3D"font-size:13px;font-weight:500;opacity:0.7">miles</span></d=
+iv>
+    </div>`;
+  });
+  area.innerHTML =3D html;
+}
+
+function renderCoupons(area, list) {
+  let html =3D '', has =3D false;
+  list.forEach(c =3D> {
+    if (!c.coupons||!c.coupons.length) return;
+    has =3D true;
+    html +=3D `<div class=3D"card-tile" style=3D"cursor:default">
+      <div class=3D"card-tile-header" style=3D"margin-bottom:10px">
+        <div class=3D"card-icon" style=3D"background:${c.color}22">${cardIc=
+onHtml(c)}</div>
+        <div class=3D"card-title-block"><div class=3D"card-name">${c.name}<=
+/div><div class=3D"card-bank"><span class=3D"bank-chip">${c.bank}</span></d=
+iv></div>
+        <div class=3D"points-badge"><div class=3D"points-num">${c.coupons.f=
+ilter(x=3D>!x.done).length}</div><div class=3D"points-unit">unused</div></d=
+iv>
+      </div>
+      ${c.coupons.map((x,xi)=3D>`<div class=3D"coupon-item ${x.done?'used':=
+''}">
+        <button class=3D"coupon-check ${x.done?'done':''}" onclick=3D"toggl=
+eCoupon(${c.id},${xi})">${x.done?'=00':'!'}</button>
+        <div style=3D"flex:1"><div class=3D"coupon-text">${x.text}</div>
+        ${x.expiry?`<div class=3D"coupon-expiry">Expires ${new Date(x.expir=
+y).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})=
+}</div>`:''}</div>
+      </div>`).join('')}
+    </div>`;
+  });
+  if (!has) html =3D `<div class=3D"empty-state"><span class=3D"big-emoji">=
+=00</span><strong>No perks yet</strong>Add benefits when creating a card</d=
+iv>`;
+  area.innerHTML =3D html;
+}
+
+function renderSummary(area) {
+  const totalPts   =3D cards.reduce((s,c)=3D>s+(c.points||0),0);
+  const totalMiles =3D cards.reduce((s,c)=3D>s+c.redeem.reduce((a,r)=3D>a+r=
+.est,0),0);
+  const totalPerks =3D cards.reduce((s,c)=3D>s+(c.coupons||[]).filter(x=3D>=
+!x.done).length,0);
+  const expiring   =3D cards.filter(c=3D>c.due&&Math.ceil((new Date(c.due)-=
+new Date())/86400000)<=3D7);
+  area.innerHTML =3D `
+    <div class=3D"summary-card">
+      <div class=3D"summary-title">=00 Total Points =00 All Cards</div>
+      <div class=3D"summary-num">${totalPts.toLocaleString()}</div>
+      <div class=3D"summary-sub">${cards.length} cards tracked</div>
+    </div>
+    <div style=3D"display:grid;grid-template-columns:1fr 1fr;gap:10px;margi=
+n-bottom:14px">
+      <div class=3D"redemption-item" style=3D"display:block;text-align:cent=
+er">
+        <div style=3D"font-size:28px;font-weight:800">${totalMiles.toLocale=
+String()}</div>
+        <div style=3D"font-size:12px;opacity:0.6;margin-top:2px">=00 Est. M=
+iles</div>
+      </div>
+      <div class=3D"redemption-item" style=3D"display:block;text-align:cent=
+er">
+        <div style=3D"font-size:28px;font-weight:800">${totalPerks}</div>
+        <div style=3D"font-size:12px;opacity:0.6;margin-top:2px">=00 Unused=
+ Perks</div>
+      </div>
+    </div>
+    ${expiring.length?`<div class=3D"section-label">=00 Statement Due Soon<=
+/div>${expiring.map(c=3D>`
+    <div class=3D"card-tile" onclick=3D"openDetail(${c.id})" style=3D"borde=
+r-left:3px solid #FF9500">
+      <div class=3D"card-tile-header" style=3D"margin-bottom:0">
+        <div class=3D"card-icon" style=3D"background:${c.color}22">${cardIc=
+onHtml(c)}</div>
+        <div class=3D"card-title-block"><div class=3D"card-name">${c.name}<=
+/div></div>
+        <div class=3D"points-badge"><div class=3D"points-num" style=3D"colo=
+r:#FF9500">${Math.ceil((new Date(c.due)-new Date())/86400000)}</div><div cl=
+ass=3D"points-unit">days</div></div>
+      </div>
+    </div>`).join('')}`:''}
+    <div class=3D"section-label" style=3D"margin-top:20px">=00 iCloud Backu=
+p</div>
+    <p class=3D"backup-info">Export saves your cards & history as a JSON fi=
+le.<br>On iPhone, tap Share =00 Save to Files =00 iCloud Drive.</p>
+    <button class=3D"backup-btn backup-export" onclick=3D"exportBackup()">=
+=00 Export Backup</button>
+    <button class=3D"backup-btn backup-import" onclick=3D"document.getEleme=
+ntById('restore-input').click()">=00 Import Backup</button>
+    <input type=3D"file" id=3D"restore-input" accept=3D".json" onchange=3D"=
+importBackup(event)" />
+
+    <div class=3D"section-label">Points Distribution</div>    ${cards.map(c=
+=3D>{
+      const pct =3D totalPts>0?(c.points/totalPts*100).toFixed(1):0;
+      return `<div class=3D"redemption-item" style=3D"display:block;margin-=
+bottom:8px">
+        <div style=3D"display:flex;justify-content:space-between;align-item=
+s:center;margin-bottom:6px">
+          <span style=3D"font-size:14px;font-weight:600;display:flex;align-=
+items:center;gap:6px"><span style=3D"width:22px;height:22px;border-radius:5=
+px;background:${c.color}22;display:inline-flex;align-items:center;justify-c=
+ontent:center;overflow:hidden">${cardIconHtml(c)}</span> ${c.name}</span>
+          <span style=3D"font-size:15px;font-weight:700">${c.points.toLocal=
+eString()}</span>
+        </div>
+        <div class=3D"progress-bar-bg"><div class=3D"progress-bar-fill" sty=
+le=3D"width:${pct}%;background:${c.color}"></div></div>
+        <div style=3D"font-size:11px;opacity:0.55;margin-top:3px;text-align=
+:right">${pct}%</div>
+      </div>`;
+    }).join('')}`;
+}
+
+// =00=00 Detail Modal =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00
+function openDetail(id) {
+  const c =3D cards.find(x=3D>x.id=3D=3D=3Did); if (!c) return;
+  const due   =3D c.due ? new Date(c.due).toLocaleDateString('en-US',{year:=
+'numeric',month:'long',day:'numeric'}) : 'Not set';
+  const owner =3D (c.owner||'Me').toLowerCase();
+  document.getElementById('detailModalContent').innerHTML =3D `
+    <div class=3D"modal-handle"></div>
+    <div class=3D"modal-header">
+      <span class=3D"modal-title">${cardIconHtml(c)} ${c.name}</span>
+      <div style=3D"display:flex;gap:8px">
+        <button class=3D"close-btn" onclick=3D"deleteCard(${c.id})" style=
+=3D"background:rgba(255,59,48,0.15);color:#FF3B30">=00</button>
+        <button class=3D"close-btn" onclick=3D"closeDetailModal()">=00</but=
+ton>
+      </div>
+    </div>
+    <div class=3D"modal-body">
+      <div class=3D"detail-row"><div class=3D"detail-icon-bg">=00</div><div=
+ class=3D"detail-content"><div class=3D"detail-label">Bank</div><div class=
+=3D"detail-value">${c.bank}</div></div></div>
+      <div class=3D"detail-row"><div class=3D"detail-icon-bg">=00</div><div=
+ class=3D"detail-content"><div class=3D"detail-label">Owner</div><div class=
+=3D"detail-value"><span class=3D"owner-chip owner-${owner}">${c.owner||'Me'=
+}</span></div></div></div>
+      <div class=3D"detail-row"><div class=3D"detail-icon-bg">=00</div><div=
+ class=3D"detail-content"><div class=3D"detail-label">Current Points</div><=
+div class=3D"detail-value" style=3D"font-size:20px;font-weight:700">${c.poi=
+nts.toLocaleString()} pts</div></div></div>
+      <div class=3D"detail-row"><div class=3D"detail-icon-bg">=00</div><div=
+ class=3D"detail-content"><div class=3D"detail-label">Statement Date</div><=
+div class=3D"detail-value">${due}</div></div></div>
+      <div class=3D"detail-row" style=3D"border:none"><div class=3D"detail-=
+icon-bg">=00</div><div class=3D"detail-content"><div class=3D"detail-label"=
+>Reward Categories</div>
+        <div class=3D"tags-row" style=3D"margin-top:6px">${c.perks.map((p,i=
+)=3D>`<span class=3D"tag ${tc(i)}">${p}</span>`).join(' ')}</div>
+      </div></div>
+      ${c.redeem.length?`<div style=3D"font-size:14px;font-weight:700;margi=
+n:10px 0 8px">=00 Transfer Partners</div>
+        ${c.redeem.map(r=3D>`<div class=3D"redemption-item"><div><div class=
+=3D"redemption-name">${r.name}</div><div class=3D"redemption-ratio">Ratio $=
+{r.ratio}</div></div><div class=3D"redemption-value">${r.est.toLocaleString=
+()} mi</div></div>`).join('')}`:''}
+      ${(c.coupons||[]).length?`<div style=3D"font-size:14px;font-weight:70=
+0;margin:14px 0 8px">=00 Annual Benefits</div>
+        ${c.coupons.map((x,xi)=3D>`<div class=3D"coupon-item ${x.done?'used=
+':''}">
+          <button class=3D"coupon-check ${x.done?'done':''}" onclick=3D"tog=
+gleCouponDetail(${c.id},${xi})">${x.done?'=00':'!'}</button>
+          <div style=3D"flex:1"><div class=3D"coupon-text">${x.text}</div>$=
+{x.expiry?`<div class=3D"coupon-expiry">Expires ${new Date(x.expiry).toLoca=
+leDateString('en-US')}</div>`:''}</div>
+        </div>`).join('')}`:''}
+
+      <button class=3D"log-btn" onclick=3D"openLogModal(${c.id})">=00 Log P=
+oints</button>
+
+      ${(c.history||[]).length ? `
+        <div style=3D"font-size:14px;font-weight:700;margin:18px 0 8px">=00=
+ Point History</div>
+        ${c.history.slice(0,20).map(h=3D>`
+          <div class=3D"hist-item hist-${h.type}">
+            <div class=3D"hist-dot">${h.type=3D=3D=3D'earned'?'=00':'=00'}<=
+/div>
+            <div class=3D"hist-body">
+              <div class=3D"hist-amount">${h.type=3D=3D=3D'earned'?'+':'=00=
+'}${h.amount.toLocaleString()} pts</div>
+              <div class=3D"hist-meta">${new Date(h.date).toLocaleDateStrin=
+g('en-US',{year:'numeric',month:'short',day:'numeric'})}</div>
+              ${h.note?`<div class=3D"hist-note">"${h.note}"</div>`:''}
+            </div>
+          </div>`).join('')}
+      ` : `<div style=3D"font-size:13px;opacity:0.45;text-align:center;padd=
+ing:16px 0">No history yet =00 tap Log Points to start tracking</div>`}
+    </div>`;
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+function closeDetailModal() { document.getElementById('detailModal').classL=
+ist.add('hidden'); }
+
+function toggleCouponDetail(cid,idx) {
+  const c=3Dcards.find(x=3D>x.id=3D=3D=3Dcid);
+  if(c&&c.coupons[idx]){c.coupons[idx].done=3D!c.coupons[idx].done;saveCard=
+s();openDetail(cid);renderAll();}
+}
+function toggleCoupon(cid,idx) {
+  const c=3Dcards.find(x=3D>x.id=3D=3D=3Dcid);
+  if(c&&c.coupons[idx]){c.coupons[idx].done=3D!c.coupons[idx].done;saveCard=
+s();renderAll();}
+}
+function deleteCard(id) {
+  if(confirm('Delete this card?')){cards=3Dcards.filter(c=3D>c.id!=3D=3Did)=
+;saveCards();closeDetailModal();renderAll();}
+}
+
+// =00=00 Add Card =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00
+const BANK_LIST =3D [
+  { name:'Chase',            ...BANK_BRANDS['chase']           },
+  { name:'American Express', ...BANK_BRANDS['american express'] },
+  { name:'Citi',             ...BANK_BRANDS['citi']            },
+  { name:'Capital One',      ...BANK_BRANDS['capital one']     },
+  { name:'Discover',         ...BANK_BRANDS['discover']        },
+  { name:'Wells Fargo',      ...BANK_BRANDS['wells fargo']     },
+  { name:'Bank of America',  ...BANK_BRANDS['bank of america'] },
+  { name:'US Bank',          ...BANK_BRANDS['us bank']         },
+  { name:'Barclays',         ...BANK_BRANDS['barclays']        },
+  { name:'Navy Federal',     ...BANK_BRANDS['navy federal']    },
+  { name:'PNC',              ...BANK_BRANDS['pnc']             },
+  { name:'TD Bank',          ...BANK_BRANDS['td bank']         },
+];
+
+function openAddModal() {
+  // Render bank badge grid
+  document.getElementById('bankGrid').innerHTML =3D BANK_LIST.map(b =3D>
+    `<button type=3D"button" class=3D"bank-badge-btn" data-bank=3D"${b.name=
+}" onclick=3D"selectBank('${b.name}')"
+      style=3D"padding:8px 4px;border-radius:12px;border:2px solid transpar=
+ent;background:rgba(128,128,128,0.08);cursor:pointer;display:flex;flex-dire=
+ction:column;align-items:center;gap:5px;transition:all 0.15s">
+      <div style=3D"width:40px;height:40px;border-radius:10px;background:${=
+b.bg};display:flex;align-items:center;justify-content:center;font-size:${b.=
+abbr.length>4?8:10}px;font-weight:800;color:${b.fg};letter-spacing:0.2px">$=
+{b.abbr}</div>
+      <span style=3D"font-size:9px;font-weight:500;opacity:0.7;text-align:c=
+enter;line-height:1.2">${b.name.replace('American Express','Amex').replace(=
+'Bank of America','BofA').replace('Navy Federal','Navy Fed')}</span>
+    </button>`
+  ).join('');
+  // Reset all fields
+  ['f-name','f-points','f-due','f-perks','f-redeem','f-ratio','f-coupons'].=
+forEach(id =3D> document.getElementById(id).value =3D '');
+  document.getElementById('f-bank').value =3D '';
+  document.getElementById('cardDropdown').innerHTML =3D ''; // v1.6: Clear =
+dropdown
+  selColor =3D '#007AFF';
+  selEmoji =3D '=00';
+  document.getElementById('addModal').classList.remove('hidden');
+}
+
+function selectBank(name) {
+  // Highlight selected badge
+  document.querySelectorAll('.bank-badge-btn').forEach(b =3D> {
+    const isSelected =3D b.dataset.bank =3D=3D=3D name;
+    b.style.borderColor =3D isSelected ? '#007AFF' : 'transparent';
+    b.style.background  =3D isSelected ? 'rgba(0,122,255,0.1)' : 'rgba(128,=
+128,128,0.08)';
+  });
+  document.getElementById('f-bank').value =3D name;
+  // Set color from brand
+  const key   =3D name.toLowerCase();
+  const brand =3D Object.entries(BANK_BRANDS).find(([k]) =3D> key.includes(=
+k))?.[1];
+  if (brand) selColor =3D brand.bg;
+  // v1.6: Show card dropdown for this bank
+  showCardDropdown(name);
+}
+
+// v1.6: Get cards by bank from CARD_DB
+function getCardsByBank(bankName) {
+  const results =3D [];
+  const bankLower =3D bankName.toLowerCase();
+  for (const [cardKey, cardData] of Object.entries(CARD_DB)) {
+    if (cardData.bank && cardData.bank.toLowerCase().includes(bankLower.spl=
+it(' ')[0])) {
+      results.push({ key: cardKey, ...cardData, displayName: cardKey.split(=
+' ').map(w =3D> w.charAt(0).toUpperCase() + w.slice(1)).join(' ') });
+    }
+  }
+  return results;
+}
+
+// v1.6: Show card dropdown when bank is selected
+function showCardDropdown(bankName) {
+  const dropdown =3D document.getElementById('cardDropdown');
+  const cards =3D getCardsByBank(bankName);
+  if (!cards.length) {
+    dropdown.innerHTML =3D '';
+    return;
+  }
+  dropdown.innerHTML =3D `
+    <div class=3D"card-dropdown">
+      ${cards.map(c =3D> `
+        <div class=3D"card-dropdown-item" onclick=3D"selectCardFromDropdown=
+('${c.key}')">
+          <div class=3D"card-dropdown-icon" style=3D"background:${c.color}2=
+2;color:${c.color}">${c.icon || '=F0=9F=92=B3'}</div>
+          <div class=3D"card-dropdown-info">
+            <div class=3D"card-dropdown-name">${c.displayName}</div>
+            <div class=3D"card-dropdown-perks">${c.perks.slice(0,2).join(' =
+=C2=B7 ')}</div>
+          </div>
+          <div class=3D"card-dropdown-arrow">=E2=86=92</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// v1.6: Select card from dropdown and autofill
+function selectCardFromDropdown(cardKey) {
+  const card =3D CARD_DB[cardKey];
+  if (!card) return;
+  document.getElementById('f-name').value =3D cardKey.split(' ').map(w =3D>=
+ w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  autofillCard(cardKey);
+  document.getElementById('cardDropdown').innerHTML =3D '';
+}
+
+function closeAddModal() { document.getElementById('addModal').classList.ad=
+d('hidden'); }
+function selE(e) { selEmoji=3De; }
+function selC(c) { selColor=3Dc; }
+
+// =00=00 Card DB for autofill =00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00
+const CARD_DB =3D {
+  'chase sapphire reserve':   {bank:'Chase',icon:'=00',color:'#007AFF',perk=
+s:['3x Dining','3x Travel','1.5x Everything','Priority Pass Lounge'],redeem=
+:['United MileagePlus','World of Hyatt','Southwest Rapid Rewards','Air Cana=
+da Aeroplan'],ratio:'1:1',coupons:['$300 Annual Travel Credit','Global Entr=
+y / TSA PreCheck Credit','DoorDash DashPass']},
+  'chase sapphire preferred': {bank:'Chase',icon:'=00',color:'#5856D6',perk=
+s:['3x Dining','3x Travel','2x Everything','$50 Hotel Credit'],redeem:['Uni=
+ted MileagePlus','World of Hyatt','Southwest Rapid Rewards','Air Canada Aer=
+oplan'],ratio:'1:1',coupons:['$50 Annual Hotel Credit','DoorDash DashPass']=
+},
+  'chase freedom unlimited':  {bank:'Chase',icon:'=00',color:'#34C759',perk=
+s:['1.5x Everything','3x Dining','3x Drugstores','5x Travel via Chase Porta=
+l'],redeem:['Chase Ultimate Rewards (cash)'],ratio:'1:1',coupons:['No Annua=
+l Fee']},
+  'chase freedom flex':       {bank:'Chase',icon:'=00',color:'#00C7BE',perk=
+s:['5x Rotating Categories','3x Dining','3x Drugstores','1x Everything'],re=
+deem:['Chase Ultimate Rewards (cash)'],ratio:'1:1',coupons:['No Annual Fee'=
+]},
+  'amex platinum':            {bank:'American Express',icon:'=00',color:'#A=
+F52DE',perks:['5x Flights booked directly','5x Prepaid Hotels via Amex','Ce=
+nturion Lounge Access','Fine Hotels & Resorts'],redeem:['Delta SkyMiles','B=
+ritish Airways Avios','Air France/KLM Flying Blue','Marriott Bonvoy','ANA M=
+ileage Club'],ratio:'1:1',coupons:['$200 Airline Fee Credit','$200 Fine Hot=
+els Credit','$240 Digital Entertainment Credit','$189 CLEAR Plus Credit','C=
+enturion Lounge Access']},
+  'amex gold':                {bank:'American Express',icon:'=00',color:'#F=
+F9500',perks:['4x Dining worldwide','4x US Supermarkets (up to $25k/yr)','3=
+x Flights','1x Everything else'],redeem:['Delta SkyMiles','Air Canada Aerop=
+lan','British Airways Avios','Marriott Bonvoy'],ratio:'1:1',coupons:['$120 =
+Dining Credit ($10/mo)','$120 Uber Cash ($10/mo)']},
+  'amex blue cash preferred': {bank:'American Express',icon:'=00',color:'#0=
+07AFF',perks:['6x US Supermarkets','6x Select Streaming','3x Gas & Transit'=
+,'1x Everything'],redeem:['Cash back (statement credit)'],ratio:'1:1',coupo=
+ns:['$84 Disney Bundle Credit']},
+  'citi premier':             {bank:'Citi',icon:'=00',color:'#FF6B6B',perks=
+:['3x Restaurants','3x Supermarkets','3x Gas Stations','3x Air & Hotels'],r=
+edeem:['Turkish Miles&Smiles','Virgin Atlantic Flying Club','Air France/KLM=
+ Flying Blue','Singapore Airlines KrisFlyer'],ratio:'1:1',coupons:['$100 An=
+nual Hotel Savings']},
+  'citi double cash':         {bank:'Citi',icon:'=00',color:'#FF2D55',perks=
+:['2% on Everything'],redeem:['Cash back'],ratio:'1:1',coupons:['No Annual =
+Fee']},
+  'capital one venture x':    {bank:'Capital One',icon:'=00',color:'#FF9500=
+',perks:['10x Hotels via C1 Travel','5x Flights via C1 Travel','2x Everythi=
+ng'],redeem:['Air Canada Aeroplan','British Airways Avios','Turkish Miles&S=
+miles','Avianca LifeMiles'],ratio:'1:1',coupons:['$300 Annual Travel Credit=
+','10,000 Anniversary Miles','Priority Pass Lounge']},
+  'capital one venture':      {bank:'Capital One',icon:'=00',color:'#FFCC02=
+',perks:['5x Hotels & Rental Cars via C1 Travel','2x Everything'],redeem:['=
+Air Canada Aeroplan','British Airways Avios','Turkish Miles&Smiles'],ratio:=
+'1:1',coupons:['Global Entry / TSA PreCheck Credit']},
+  'discover it cash back':    {bank:'Discover',icon:'=00',color:'#FF9500',p=
+erks:['5x Rotating Categories','1x Everything'],redeem:['Cash back'],ratio:=
+'1:1',coupons:['No Annual Fee','Cashback Match first year']},
+  'wells fargo active cash':  {bank:'Wells Fargo',icon:'=00',color:'#FF6B6B=
+',perks:['2% on Everything'],redeem:['Cash back'],ratio:'1:1',coupons:['No =
+Annual Fee','Cell Phone Protection']},
+  'bank of america travel rewards':{bank:'Bank of America',icon:'=00',color=
+:'#007AFF',perks:['1.5x Everything'],redeem:['Travel statement credit'],rat=
+io:'1:1',coupons:['No Annual Fee']},
+};
+
+function autofillCard(val) {
+  const key =3D val.toLowerCase().trim();
+  const match =3D Object.keys(CARD_DB).find(k =3D> key.includes(k)||k.inclu=
+des(key));
+  if (!match) return;
+  const d =3D CARD_DB[match];
+  document.getElementById('f-bank').value    =3D d.bank    || '';
+  document.getElementById('f-perks').value   =3D d.perks   ? d.perks.join('=
+, ')   : '';
+  document.getElementById('f-redeem').value  =3D d.redeem  ? d.redeem.join(=
+', ')  : '';
+  document.getElementById('f-ratio').value   =3D d.ratio   || '1:1';
+  document.getElementById('f-coupons').value =3D d.coupons ? d.coupons.join=
+(', ') : '';
+  if (d.icon)  selE(d.icon);
+  if (d.color) selC(d.color);
+}
+
+function saveCard() {
+  const name  =3D document.getElementById('f-name').value.trim();
+  const bank  =3D document.getElementById('f-bank').value.trim();
+  if (!name||!bank) { alert('Please enter card name and bank'); return; }
+  const pts   =3D parseInt(document.getElementById('f-points').value)||0;
+  const due   =3D document.getElementById('f-due').value;
+  const owner =3D document.getElementById('f-owner')?.value||'Me';
+  const perks =3D document.getElementById('f-perks').value.split(',').map(s=
+=3D>s.trim()).filter(Boolean);
+  const rNames=3D document.getElementById('f-redeem').value.split(',').map(=
+s=3D>s.trim()).filter(Boolean);
+  const ratio =3D document.getElementById('f-ratio').value.trim()||'1:1';
+  const [a,b] =3D ratio.split(':').map(Number);
+  const est   =3D b&&a?Math.floor(pts/a*b):pts;
+  const cRaw  =3D document.getElementById('f-coupons').value.split(',').map=
+(s=3D>s.trim()).filter(Boolean);
+  cards.push({
+    id:Date.now(), name, bank, icon:selEmoji, color:selColor,
+    points:pts, due, owner,
+    perks: perks.length?perks:['General spending'],
+    redeem: rNames.map(r=3D>({name:r,ratio,est})),
+    coupons: cRaw.map(t=3D>({text:t,expiry:'',done:false})),
+    history:[],
+  });
+  saveCards(); closeAddModal(); renderAll();
+}
+
+// =00=00 iCloud Backup =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00
+function exportBackup() {
+  const data     =3D { version: 2, exported: new Date().toISOString(), card=
+s };
+  const json     =3D JSON.stringify(data, null, 2);
+  const blob     =3D new Blob([json], { type: 'application/json' });
+  const url      =3D URL.createObjectURL(blob);
+  const date     =3D new Date().toISOString().slice(0,10);
+  const filename =3D `CardPoints_backup_${date}.json`;
+  // On iOS Safari this triggers the Share Sheet
+  const a  =3D document.createElement('a');
+  a.href   =3D url;
+  a.download =3D filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importBackup(event) {
+  const file =3D event.target.files[0];
+  if (!file) return;
+  const reader =3D new FileReader();
+  reader.onload =3D function(e) {
+    try {
+      const data   =3D JSON.parse(e.target.result);
+      const parsed =3D data.cards || (Array.isArray(data) ? data : null);
+      if (!parsed || !Array.isArray(parsed) || !parsed.length) {
+        alert('Invalid backup file =00 no cards found.'); return;
+      }
+      if (!confirm(`Import ${parsed.length} cards? This will replace your c=
+urrent data.`)) return;
+      cards =3D parsed.map(c =3D> ({
+        id:      c.id      ?? Date.now(),
+        name:    c.name    ?? 'Unknown',
+        bank:    c.bank    ?? 'Unknown',
+        icon:    c.icon    ?? '=00',
+        color:   c.color   ?? '#007AFF',
+        points:  typeof c.points =3D=3D=3D 'number' ? c.points : 0,
+        due:     c.due     ?? '',
+        owner:   c.owner   ?? 'Me',
+        perks:   Array.isArray(c.perks)   ? c.perks   : [],
+        redeem:  Array.isArray(c.redeem)  ? c.redeem  : [],
+        coupons: Array.isArray(c.coupons) ? c.coupons : [],
+        history: Array.isArray(c.history) ? c.history : [],
+      }));
+      saveCards();
+      renderAll();
+      alert(`=00 Imported ${cards.length} cards successfully!`);
+    } catch(err) {
+      alert('Could not read file =00 make sure it\'s a valid CardPoints bac=
+kup JSON.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value =3D ''; // reset so same file can be re-imported
+}
+
+// =00=00 Log Points =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00
+let logCardId  =3D null;
+let logType    =3D 'earned';
+
+function openLogModal(id) {
+  logCardId =3D id;
+  logType   =3D 'earned';
+  setLogType('earned');
+  document.getElementById('log-amount').value =3D '';
+  document.getElementById('log-note').value   =3D '';
+  document.getElementById('log-date').value   =3D new Date().toISOString().=
+slice(0,10);
+  document.getElementById('logModal').classList.remove('hidden');
+}
+function closeLogModal() { document.getElementById('logModal').classList.ad=
+d('hidden'); }
+
+function setLogType(t) {
+  logType =3D t;
+  const eBtn =3D document.getElementById('log-type-earned');
+  const sBtn =3D document.getElementById('log-type-spent');
+  eBtn.style.borderColor  =3D t=3D=3D=3D'earned' ? '#34C759' : 'rgba(128,12=
+8,128,0.3)';
+  eBtn.style.background   =3D t=3D=3D=3D'earned' ? 'rgba(52,199,89,0.12)' :=
+ 'transparent';
+  eBtn.style.color        =3D t=3D=3D=3D'earned' ? '#34C759' : 'inherit';
+  sBtn.style.borderColor  =3D t=3D=3D=3D'spent'  ? '#FF3B30' : 'rgba(128,12=
+8,128,0.3)';
+  sBtn.style.background   =3D t=3D=3D=3D'spent'  ? 'rgba(255,59,48,0.08)' :=
+ 'transparent';
+  sBtn.style.color        =3D t=3D=3D=3D'spent'  ? '#FF3B30' : 'inherit';
+}
+
+function saveLog() {
+  const amt  =3D parseInt(document.getElementById('log-amount').value);
+  const date =3D document.getElementById('log-date').value;
+  const note =3D document.getElementById('log-note').value.trim();
+  if (!amt || amt <=3D 0) { alert('Please enter a valid point amount'); ret=
+urn; }
+  if (!date)            { alert('Please select a date'); return; }
+  const c =3D cards.find(x =3D> x.id =3D=3D=3D logCardId);
+  if (!c) return;
+  if (!c.history) c.history =3D [];
+  c.history.unshift({ type: logType, amount: amt, date, note });
+  c.points =3D logType =3D=3D=3D 'earned' ? c.points + amt : Math.max(0, c.=
+points - amt);
+  // Update redeem estimates based on new balance
+  const ratio =3D c.redeem[0]?.ratio || '1:1';
+  const [a, b] =3D ratio.split(':').map(Number);
+  c.redeem =3D c.redeem.map(r =3D> ({ ...r, est: Math.floor(c.points / (a||=
+1) * (b||1)) }));
+  saveCards();
+  closeLogModal();
+  openDetail(logCardId);
+  renderAll();
+}
+
+// =00=00 Background close =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00
+document.getElementById('detailModal').addEventListener('click',function(e)=
+{if(e.target=3D=3D=3Dthis)closeDetailModal();});
+document.getElementById('addModal').addEventListener('click',function(e){if=
+(e.target=3D=3D=3Dthis)closeAddModal();});
+document.getElementById('logModal').addEventListener('click',function(e){if=
+(e.target=3D=3D=3Dthis)closeLogModal();});
+
+// =00=00 Init =00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=00=
+=00=00=00=00=00=00=00=00=00=00=00=00
+renderAll();
+</script>
+</body>
+</html>
+
+

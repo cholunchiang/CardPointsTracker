@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>💳 Card Points Tracker</title>
+    <!-- CSS -->
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar">
+            <h1>💳 Card Points Tracker</h1>
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input class="search-box" id="searchBox" type="text" placeholder="Search cards, airlines, rewards" oninput="handleSearch(this.value)">
+            </div>
+        </div>
+
+        <div class="tab-row" id="tabRow"></div>
+
+        <div class="category-filter-wrap">
+            <select id="categoryFilter" onchange="filterByCategory(this.value)"></select>
+            <select id="sortFilter" onchange="setSortOrder(this.value)">
+                <option value="recent">Recently Added</option>
+                <option value="points">Points (High→Low)</option>
+                <option value="due">Due Date (Soon→Later)</option>
+                <option value="name">Name (A→Z)</option>
+            </select>
+        </div>
+
+        <div class="content-area" id="contentArea"></div>
+
+        <button class="fab" onclick="openAddModal()">➕</button>
+
+        <div class="nav-bar">
+            <button class="nav-btn active" id="nav-cards" onclick="switchNav('cards')">
+                <span class="nav-icon">💳</span>
+                Cards
+            </button>
+            <button class="nav-btn" id="nav-miles" onclick="switchNav('miles')">
+                <span class="nav-icon">✈️</span>
+                Miles
+            </button>
+            <button class="nav-btn" id="nav-coupons" onclick="switchNav('coupons')">
+                <span class="nav-icon">🎁</span>
+                Perks
+            </button>
+            <button class="nav-btn" id="nav-summary" onclick="switchNav('summary')">
+                <span class="nav-icon">📊</span>
+                Summary
+            </button>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-bg hidden" id="detailModal">
+        <div class="modal" id="detailModalContent"></div>
+    </div>
+
+    <!-- Add Card Modal -->
+    <div class="modal-bg hidden" id="addModal">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <span class="modal-title">Add Credit Card</span>
+                <button class="close-btn" onclick="closeAddModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Card Name</label>
+                    <input class="form-input" id="f-name" placeholder="e.g. Chase Sapphire Preferred" oninput="autofillCard(this.value)" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bank</label>
+                    <div id="bankGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px"></div>
+                    <div id="customBankInputWrapper" style="display:none;margin-bottom:0">
+                        <label class="form-label" for="f-bank-custom" style="margin-top:8px;margin-bottom:6px;font-size:13px">Enter Custom Bank Name</label>
+                        <input class="form-input" id="f-bank-custom" placeholder="e.g. Local Credit Union, AMCU" oninput="updateCustomBank()" />
+                    </div>
+                    <input class="form-input" id="f-bank" placeholder="Or type bank name" style="display:none" oninput="autofillCard(document.getElementById('f-name').value)" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Owner</label>
+                    <select class="form-input" id="f-owner">
+                        <option value="Me">👤 Me</option>
+                        <option value="Wife">👩 Wife</option>
+                        <option value="Shared">🤝 Shared</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Card Opened</label>
+                    <input class="form-input" id="f-open-date" type="date" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Statement Date</label>
+                    <input class="form-input" id="f-due" type="date" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reward Categories <span style="opacity:0.5;font-weight:400">(auto-filled, editable)</span></label>
+                    <div id="f-perks-container" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:rgba(0,122,255,0.05);border-radius:12px;border:1px solid rgba(0,122,255,0.15);margin-bottom:8px;min-height:44px;align-items:center"></div>
+                    <div style="display:flex;gap:8px">
+                        <input class="form-input" id="f-perks-input" placeholder="Add new category (e.g., 3x Dining)" style="flex:1" oninput="handlePerkInput(event)" />
+                        <button type="button" class="form-btn" onclick="addPerk()" style="padding:10px 16px;border-radius:10px;border:none;background:#007AFF;color:white;font-weight:600;cursor:pointer;white-space:nowrap">+ Add</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transfer Partners <span style="opacity:0.5;font-weight:400">(auto-filled)</span></label>
+                    <div id="f-redeem-container"></div>
+                    <button type="button" class="redeem-add-btn" onclick="addRedeemRow()">+ Add Partner</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Annual Benefits <span style="opacity:0.5;font-weight:400">(auto-filled)</span></label>
+                    <div id="f-benefits-container"></div>
+                    <button type="button" class="benefit-add-btn" onclick="addBenefitRow()">+ Add Benefit</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Annual Fee</label>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:14px;font-weight:600;color:#666">$</span>
+                        <input class="form-input" id="f-annual-fee" type="number" placeholder="0" style="flex:1" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current Points</label>
+                    <input class="form-input" id="f-points" type="number" placeholder="0" />
+                </div>
+                <div class="form-actions">
+                    <button class="cancel-btn" onclick="closeAddModal()">Cancel</button>
+                    <button class="add-btn" onclick="saveCard()">Save Card</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Points Modal -->
+    <div class="modal-bg hidden" id="logModal">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <span class="modal-title">📝 Log Points</span>
+                <button class="close-btn" onclick="closeLogModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                        <button id="log-type-earned" onclick="setLogType('earned')" style="padding:10px;border-radius:12px;border:2px solid #34C759;background:rgba(52,199,89,0.12);color:#34C759;font-size:14px;font-weight:600;cursor:pointer">➕ Earned</button>
+                        <button id="log-type-spent"  onclick="setLogType('spent')"  style="padding:10px;border-radius:12px;border:2px solid rgba(128,128,128,0.3);background:transparent;color:inherit;font-size:14px;font-weight:600;cursor:pointer">➖ Spent / Redeemed</button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Points</label>
+                        <input class="form-input" id="log-amount" type="number" placeholder="0" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input class="form-input" id="log-date" type="date" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Note <span style="opacity:0.5;font-weight:400">(optional)</span></label>
+                    <input class="form-input" id="log-note" placeholder="e.g. Monthly spend, Transferred to United" />
+                </div>
+                <div class="form-actions">
+                    <button class="cancel-btn" onclick="closeLogModal()">Cancel</button>
+                    <button class="add-btn" onclick="saveLog()">Save Entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS -->
+</body>
+</html>

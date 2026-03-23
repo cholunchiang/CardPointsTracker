@@ -1,0 +1,21 @@
+# Personal backup files (NEVER upload card data!)
+*_Backup.json
+*_MyCards*.json
+*.backup.json
+
+# Temp files
+*.log
+*.tmp
+.DS_Store
+
+# OS files
+Thumbs.db
+
+# Node modules (if any)
+node_modules/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo

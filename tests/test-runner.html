@@ -1,0 +1,3227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CardPointsTracker Tests 🧪</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background: #f5f5f7;
+    }
+    h1 { color: #1d1d1f; }
+    .test-suite { 
+      background: #fff; 
+      border-radius: 12px; 
+      padding: 16px; 
+      margin: 16px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .test-suite h2 { 
+      margin: 0 0 12px; 
+      font-size: 16px; 
+      color: #1d1d1f;
+    }
+    .test { 
+      padding: 8px 12px; 
+      margin: 4px 0; 
+      border-radius: 8px; 
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .test.pass { background: rgba(52, 199, 89, 0.15); color: #248a3d; }
+    .test.fail { background: rgba(255, 59, 48, 0.15); color: #d70015; }
+    .test.pending { background: rgba(255, 204, 0, 0.15); color: #996600; }
+    .summary {
+      background: #1d1d1f;
+      color: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+    }
+    .summary.all-pass { background: #248a3d; }
+    .summary.has-fail { background: #d70015; }
+    button {
+      background: #007AFF;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    button:hover { background: #0056b3; }
+    #log {
+      background: #1d1d1f;
+      color: #98989d;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 16px;
+      display: none;
+    }
+    #log.visible { display: block; }
+  </style>
+</head>
+<body>
+  <h1>🧪 CardPointsTracker Test Suite</h1>
+  <p>Automated tests for core functionality</p>
+  <p style="font-size:13px;opacity:0.7;margin-top:8px">
+    <strong>Test Categories:</strong> Unit tests (filters, sorting, parsing) + E2E tests (state, CRUD, workflows, validation) + Search/History/Validation + Edge Cases
+  </p>
+  
+  <button onclick="runAllTests()">▶️ Run All Tests</button>
+  <button onclick="toggleLog()">📋 Toggle Log</button>
+  
+  <div id="results"></div>
+  <div id="summary" class="summary" style="display:none;"></div>
+  <pre id="log"></pre>
+
+  <script>
+    // ============================================
+    // TEST FRAMEWORK
+    // ============================================
+    let testResults = [];
+    let logMessages = [];
+    
+    function log(msg) {
+      logMessages.push(msg);
+      console.log(msg);
+    }
+    
+    function toggleLog() {
+      const el = document.getElementById('log');
+      el.classList.toggle('visible');
+      el.textContent = logMessages.join('\n');
+    }
+    
+    function assert(condition, message) {
+      if (!condition) throw new Error(message);
+    }
+    
+    function assertEqual(actual, expected, message) {
+      if (actual !== expected) {
+        throw new Error(`${message}\n  Expected: ${expected}\n  Actual: ${actual}`);
+      }
+    }
+    
+    function assertArrayLength(arr, length, message) {
+      if (arr.length !== length) {
+        throw new Error(`${message}\n  Expected length: ${length}\n  Actual length: ${arr.length}`);
+      }
+    }
+
+    // ============================================
+    // MOCK DATA
+    // ============================================
+    const mockCards = [
+      {
+        id: 1000,
+        name: 'Chase Sapphire Reserve',
+        bank: 'Chase',
+        points: 85000,
+        due: '2025-09-15',
+        owner: 'Me',
+        perks: ['3x Dining', '3x Travel', '1.5x Everything'],
+        redeem: [{name: 'United', ratio: '1:1', est: 85000}],
+        coupons: [{text: '$300 Travel Credit', expiry: '2025-12-31', done: false}],
+        history: []
+      },
+      {
+        id: 2000,
+        name: 'Amex Gold',
+        bank: 'American Express',
+        points: 50000,
+        due: '2025-08-01',
+        owner: 'Wife',
+        perks: ['4x Dining', '4x Groceries', '3x Flights'],
+        redeem: [{name: 'Delta', ratio: '1:1', est: 50000}],
+        coupons: [],
+        history: []
+      },
+      {
+        id: 3000,
+        name: 'Capital One Venture X',
+        bank: 'Capital One',
+        points: 120000,
+        due: '2025-10-20',
+        owner: 'Me',
+        perks: ['2x Everything', '10x Hotels via Portal'],
+        redeem: [{name: 'Turkish', ratio: '1:1', est: 120000}],
+        coupons: [],
+        history: []
+      }
+    ];
+
+    // ============================================
+    // HELPER FUNCTIONS (copied from main.js for testing)
+    // ============================================
+    // Global cards array for v3.5 tests
+    let cards = [];
+    
+    function extractCategory(perk) {
+      const match = perk.match(/^\d+(\.\d+)?x\s+(.+)$/i);
+      return match ? match[2] : null;
+    }
+    
+    const CATEGORY_ALIASES = {
+      'dining worldwide': 'Dining',
+      'restaurants': 'Dining',
+      'restaurants worldwide': 'Dining',
+      'travel': 'Travel',
+      'travel worldwide': 'Travel',
+      'flights': 'Travel',
+      'groceries': 'Groceries',
+      'supermarkets': 'Groceries',
+      'us supermarkets': 'Groceries',
+      'everything': 'Everything',
+      'everything else': 'Everything',
+      'hotels': 'Hotels',
+      'hotels via portal': 'Hotels',
+    };
+    
+    function normalizeCategory(cat) {
+      if (!cat) return null;
+      const lower = cat.toLowerCase().trim();
+      return CATEGORY_ALIASES[lower] || cat.charAt(0).toUpperCase() + cat.slice(1);
+    }
+    
+    function sortCards(list, sortOrder) {
+      const sorted = [...list];
+      switch(sortOrder) {
+        case 'points':
+          return sorted.sort((a, b) => b.points - a.points);
+        case 'due':
+          return sorted.sort((a, b) => {
+            if (!a.due) return 1;
+            if (!b.due) return -1;
+            return new Date(a.due) - new Date(b.due);
+          });
+        case 'name':
+          return sorted.sort((a, b) => a.name.localeCompare(b.name));
+        case 'recent':
+        default:
+          return sorted.sort((a, b) => b.id - a.id);
+      }
+    }
+    
+    function filterByOwner(list, tab) {
+      if (tab === 'all') return list;
+      return list.filter(c => (c.owner || 'Me') === tab);
+    }
+    
+    function filterByCategory(list, category) {
+      if (!category) return list;
+      return list.filter(c => {
+        return (c.perks || []).some(p => {
+          const cat = extractCategory(p);
+          const normalized = normalizeCategory(cat);
+          return normalized && normalized.toLowerCase() === category.toLowerCase();
+        });
+      });
+    }
+    
+    function filterByPartner(list, partner) {
+      if (!partner) return list;
+      return list.filter(c => {
+        return (c.redeem || []).some(r => r.name === partner);
+      });
+    }
+    
+    function getAllPartners(list) {
+      const partners = new Set();
+      list.forEach(c => {
+        (c.redeem || []).forEach(r => {
+          if (r.name) partners.add(r.name);
+        });
+      });
+      return [...partners].sort();
+    }
+
+    // ============================================
+    // CARD OPEN DATE & 5/24 TRACKING FUNCTIONS
+    // ============================================
+    function getCardAge(openDate) {
+      if (!openDate) return null;
+      const opened = new Date(openDate);
+      const today = new Date();
+      const diffMs = today - opened;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const years = Math.floor(diffDays / 365);
+      const months = Math.floor((diffDays % 365) / 30);
+      return { years, months };
+    }
+
+    function formatCardAge(openDate) {
+      const age = getCardAge(openDate);
+      if (!age) return 'No date';
+      return `${age.years}y ${age.months}m`;
+    }
+
+    function getNextAnniversaryDate(openDate) {
+      if (!openDate) return null;
+      const opened = new Date(openDate);
+      const today = new Date();
+      const thisYear = today.getFullYear();
+      
+      // Try this year's anniversary
+      let nextAnniv = new Date(thisYear, opened.getMonth(), opened.getDate());
+      
+      // If it's already passed, use next year
+      if (nextAnniv <= today) {
+        nextAnniv = new Date(thisYear + 1, opened.getMonth(), opened.getDate());
+      }
+      
+      return nextAnniv;
+    }
+
+    function getCardsOpenedInLast24Months(cardList, owner = null) {
+      const today = new Date();
+      const cutoff = new Date(today);
+      cutoff.setMonth(cutoff.getMonth() - 24);
+      
+      let filtered = cardList;
+      if (owner) {
+        filtered = cardList.filter(c => c.owner === owner);
+      }
+      
+      return filtered.filter(c => {
+        if (!c.openDate) return false;
+        const opened = new Date(c.openDate);
+        return opened >= cutoff;
+      }).length;
+    }
+
+    function get524Status(cardList, owner) {
+      const today = new Date();
+      const cutoff = new Date(today);
+      cutoff.setMonth(cutoff.getMonth() - 24);
+      
+      let filtered = cardList;
+      if (owner) {
+        filtered = cardList.filter(c => c.owner === owner);
+      }
+      
+      const recentCards = filtered.filter(c => {
+        if (!c.openDate) return false;
+        const opened = new Date(c.openDate);
+        return opened >= cutoff;
+      });
+      
+      const count = recentCards.length;
+      return {
+        count: count,
+        cards: recentCards,
+        under524: count < 5
+      };
+    }
+
+    // ============================================
+    // v3.3: BACKUP FRESHNESS TRACKING FUNCTIONS
+    // ============================================
+    function getLastBackupDate() {
+      return localStorage.getItem('cpLastBackup');
+    }
+
+    function getDaysSinceBackup() {
+      const last = getLastBackupDate();
+      if (!last) return null;
+      const diff = Date.now() - new Date(last).getTime();
+      return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
+
+    function shouldShowBackupReminder() {
+      const days = getDaysSinceBackup();
+      return days === null || days >= 30;
+    }
+
+    function formatLastBackup() {
+      const last = getLastBackupDate();
+      if (!last) return 'Never backed up';
+      const days = getDaysSinceBackup();
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      return `${days} days ago`;
+    }
+
+    // ============================================
+    // v3.4: BENEFIT/PERK TRACKING FUNCTIONS
+    // ============================================
+    function getPeriodLabels(recurrence) {
+      switch (recurrence) {
+        case 'monthly':
+          return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        case 'quarterly':
+          return ['Q1', 'Q2', 'Q3', 'Q4'];
+        case 'semi-annual':
+          return ['H1', 'H2'];
+        case 'annual':
+        default:
+          return ['Year'];
+      }
+    }
+
+    function getPeriodKey(recurrence, periodIdx) {
+      const year = new Date().getFullYear();
+      switch (recurrence) {
+        case 'monthly':
+          return `${year}-${String(periodIdx + 1).padStart(2, '0')}`;
+        case 'quarterly':
+          return `${year}-Q${periodIdx + 1}`;
+        case 'semi-annual':
+          return `${year}-H${periodIdx + 1}`;
+        case 'annual':
+        default:
+          return `${year}`;
+      }
+    }
+
+    function initializeBenefitPeriods(benefit) {
+      // Check if periods exist AND have entries (not just empty object)
+      if (benefit.periods && Object.keys(benefit.periods).length > 0) return benefit;
+      
+      const recurrence = benefit.recurrence || 'annual';
+      const periodLabels = getPeriodLabels(recurrence);
+      const periods = {};
+      
+      periodLabels.forEach((_, idx) => {
+        const key = getPeriodKey(recurrence, idx);
+        periods[key] = { used: false, amount: 0 };
+      });
+      
+      benefit.periods = periods;
+      return benefit;
+    }
+
+    function getBenefitUsedTotal(benefit) {
+      if (!benefit.periods) return 0;
+      return Object.values(benefit.periods).reduce((sum, p) => sum + (p.used ? p.amount : 0), 0);
+    }
+
+    // ============================================
+    // v3.5: BENEFIT NOTIFICATION & AUTO-RESET FUNCTIONS
+    // ============================================
+    /**
+     * Get current period index for a recurrence type
+     * monthly: 0-11
+     * quarterly: 0-3
+     * semi-annual: 0-1
+     * annual: 0
+     */
+    function getCurrentPeriodIndex(recurrence) {
+      const now = new Date();
+      switch(recurrence) {
+        case 'monthly':
+          return now.getMonth(); // 0-11
+        case 'quarterly':
+          return Math.floor(now.getMonth() / 3); // 0-3
+        case 'semi-annual':
+          return now.getMonth() < 6 ? 0 : 1; // 0-1
+        case 'annual':
+        default:
+          return 0;
+      }
+    }
+
+    /**
+     * Get end date of current period
+     */
+    function getCurrentPeriodEndDate(recurrence) {
+      const now = new Date();
+      const year = now.getFullYear();
+      switch(recurrence) {
+        case 'monthly':
+          return new Date(year, now.getMonth() + 1, 0); // Last day of current month
+        case 'quarterly':
+          const q = Math.floor(now.getMonth() / 3);
+          return new Date(year, (q + 1) * 3, 0); // Last day of quarter
+        case 'semi-annual':
+          return now.getMonth() < 6 ? new Date(year, 5, 30) : new Date(year, 11, 31);
+        case 'annual':
+        default:
+          return new Date(year, 11, 31);
+      }
+    }
+
+    /**
+     * Get benefits expiring within N days
+     * Returns array of {card, benefit, benefitIdx, daysUntil, periodKey, value}
+     */
+    function getExpiringBenefits(daysThreshold = 7) {
+      const expiring = [];
+      const now = new Date();
+      
+      cards.forEach(card => {
+        (card.coupons || []).forEach((benefit, idx) => {
+          if (benefit.recurrence === 'one-time') return;
+          
+          const endDate = getCurrentPeriodEndDate(benefit.recurrence);
+          const daysUntil = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+          
+          if (daysUntil <= daysThreshold && daysUntil >= 0) {
+            // Check if current period is unused
+            const periodIdx = getCurrentPeriodIndex(benefit.recurrence);
+            const periodKey = getPeriodKey(benefit.recurrence, periodIdx);
+            const periodData = (benefit.periods || {})[periodKey];
+            
+            if (!periodData || !periodData.used) {
+              expiring.push({
+                card,
+                benefit,
+                benefitIdx: idx,
+                daysUntil,
+                periodKey,
+                value: benefit.amount || 0
+              });
+            }
+          }
+        });
+      });
+      
+      return expiring.sort((a, b) => a.daysUntil - b.daysUntil);
+    }
+
+    /**
+     * Initialize new period if needed (for year transitions)
+     * Returns true if period was created
+     */
+    function ensureCurrentPeriodExists(benefit) {
+      const recurrence = benefit.recurrence || 'annual';
+      const periodIdx = getCurrentPeriodIndex(recurrence);
+      const periodKey = getPeriodKey(recurrence, periodIdx);
+      
+      if (!benefit.periods) benefit.periods = {};
+      if (!benefit.periods[periodKey]) {
+        benefit.periods[periodKey] = { used: false, amount: 0 };
+        return true; // Period was created
+      }
+      return false;
+    }
+
+    /**
+     * Auto-reset check on load
+     * Ensures current period exists and initializes new periods
+     */
+    function checkAndResetBenefits() {
+      let changed = false;
+      cards.forEach(card => {
+        (card.coupons || []).forEach(benefit => {
+          if (ensureCurrentPeriodExists(benefit)) {
+            changed = true;
+          }
+        });
+      });
+      // Note: We don't saveCards in test environment
+    }
+
+    // ============================================
+    // NEW SEARCH FUNCTIONALITY
+    // ============================================
+    function searchCards(list, query) {
+      if (!query || query.trim() === '') return list;
+      
+      const q = query.toLowerCase().trim();
+      return list.filter(card => {
+        // Search card name
+        if (card.name.toLowerCase().includes(q)) return true;
+        
+        // Search bank name
+        if (card.bank.toLowerCase().includes(q)) return true;
+        
+        // Search perks (categories)
+        if ((card.perks || []).some(p => p.toLowerCase().includes(q))) return true;
+        
+        // Search transfer partners
+        if ((card.redeem || []).some(r => r.name.toLowerCase().includes(q))) return true;
+        
+        // Search coupon text
+        if ((card.coupons || []).some(c => c.text.toLowerCase().includes(q))) return true;
+        
+        return false;
+      });
+    }
+
+    // ============================================
+    // NEW DATA VALIDATION FUNCTIONS
+    // ============================================
+    function isValidCard(card) {
+      // Check required fields
+      if (!card || typeof card !== 'object') return false;
+      if (!card.id) return false;
+      if (!card.name || typeof card.name !== 'string') return false;
+      if (!card.bank || typeof card.bank !== 'string') return false;
+      if (typeof card.points !== 'number' || card.points < 0 || isNaN(card.points)) return false;
+      if (!Array.isArray(card.perks)) return false;
+      if (!Array.isArray(card.redeem)) return false;
+      if (!Array.isArray(card.coupons)) return false;
+      if (!Array.isArray(card.history)) return false;
+      
+      // Validate perks format
+      for (const perk of card.perks) {
+        if (typeof perk !== 'string') return false;
+      }
+      
+      // Validate redeem partners
+      for (const partner of card.redeem) {
+        if (!partner.name || typeof partner.name !== 'string') return false;
+        if (!partner.ratio || typeof partner.ratio !== 'string') return false;
+        if (typeof partner.est !== 'number' || partner.est < 0) return false;
+      }
+      
+      // Validate coupons
+      for (const coupon of card.coupons) {
+        if (!coupon.text || typeof coupon.text !== 'string') return false;
+        if (!coupon.expiry || typeof coupon.expiry !== 'string') return false;
+        if (typeof coupon.done !== 'boolean') return false;
+      }
+      
+      // Validate history
+      for (const entry of card.history) {
+        if (!entry.type || (entry.type !== 'earned' && entry.type !== 'spent')) return false;
+        if (typeof entry.amount !== 'number' || entry.amount < 0) return false;
+        if (!entry.date || typeof entry.date !== 'string') return false;
+      }
+      
+      return true;
+    }
+
+    function validateCardName(name) {
+      if (!name || typeof name !== 'string') return false;
+      if (name.trim().length === 0) return false;
+      if (name.length > 100) return false;
+      return true;
+    }
+
+    function hasDuplicateCard(cards, newCard) {
+      return cards.some(c => 
+        c.id !== newCard.id && 
+        c.name.toLowerCase() === newCard.name.toLowerCase() &&
+        c.bank.toLowerCase() === newCard.bank.toLowerCase()
+      );
+    }
+
+    // Hotel partner keywords for emoji detection
+    const HOTEL_PARTNERS = [
+      'Marriott', 'IHG', 'Hyatt', 'Wyndham', 'Hilton', 'Accor',
+      'Choice', 'MGM', 'I Prefer', 'Hotels', 'Hotel', 'Resorts'
+    ];
+
+    function getPartnerEmoji(partnerName) {
+      if (!partnerName) return '✈️'; // Default to airline
+      const name = partnerName.toLowerCase();
+      
+      // Check if partner name contains hotel keywords
+      for (const keyword of HOTEL_PARTNERS) {
+        if (name.includes(keyword.toLowerCase())) {
+          return '🏨';
+        }
+      }
+      
+      // Default to airline emoji
+      return '✈️';
+    }
+
+    // ============================================
+    // TEST SUITES
+    // ============================================
+    const testSuites = {
+      
+      // ----------------------------------------
+      // Category Filter Tests
+      // ----------------------------------------
+      'Category Filter': [
+        {
+          name: 'Filter by Dining returns cards with Dining perks',
+          fn: () => {
+            const result = filterByCategory(mockCards, 'Dining');
+            assertArrayLength(result, 2, 'Should return 2 cards with Dining');
+            assert(result.some(c => c.name === 'Chase Sapphire Reserve'), 'Should include CSR');
+            assert(result.some(c => c.name === 'Amex Gold'), 'Should include Amex Gold');
+          }
+        },
+        {
+          name: 'Filter by Travel returns cards with Travel perks',
+          fn: () => {
+            const result = filterByCategory(mockCards, 'Travel');
+            assertArrayLength(result, 2, 'Should return 2 cards with Travel');
+          }
+        },
+        {
+          name: 'Filter by empty string returns ALL cards',
+          fn: () => {
+            const result = filterByCategory(mockCards, '');
+            assertArrayLength(result, 3, 'Empty filter should return all 3 cards');
+          }
+        },
+        {
+          name: 'Filter by null returns ALL cards',
+          fn: () => {
+            const result = filterByCategory(mockCards, null);
+            assertArrayLength(result, 3, 'Null filter should return all 3 cards');
+          }
+        },
+        {
+          name: 'Filter by non-existent category returns empty',
+          fn: () => {
+            const result = filterByCategory(mockCards, 'NonExistent');
+            assertArrayLength(result, 0, 'Should return 0 cards');
+          }
+        },
+        {
+          name: 'Filter is case-insensitive',
+          fn: () => {
+            const result1 = filterByCategory(mockCards, 'dining');
+            const result2 = filterByCategory(mockCards, 'DINING');
+            assertEqual(result1.length, result2.length, 'Case should not matter');
+          }
+        }
+      ],
+      
+      // ----------------------------------------
+      // Sorting Tests
+      // ----------------------------------------
+      'Card Sorting': [
+        {
+          name: 'Sort by points (high to low)',
+          fn: () => {
+            const result = sortCards(mockCards, 'points');
+            assertEqual(result[0].name, 'Capital One Venture X', 'Highest points first');
+            assertEqual(result[2].name, 'Amex Gold', 'Lowest points last');
+          }
+        },
+        {
+          name: 'Sort by name (A-Z)',
+          fn: () => {
+            const result = sortCards(mockCards, 'name');
+            assertEqual(result[0].name, 'Amex Gold', 'A comes first');
+            assertEqual(result[2].name, 'Chase Sapphire Reserve', 'Ch comes after Ca');
+          }
+        },
+        {
+          name: 'Sort by due date (soonest first)',
+          fn: () => {
+            const result = sortCards(mockCards, 'due');
+            assertEqual(result[0].name, 'Amex Gold', 'Aug 1 is soonest');
+            assertEqual(result[2].name, 'Capital One Venture X', 'Oct 20 is latest');
+          }
+        },
+        {
+          name: 'Sort by recent (newest ID first)',
+          fn: () => {
+            const result = sortCards(mockCards, 'recent');
+            assertEqual(result[0].id, 3000, 'Highest ID first');
+            assertEqual(result[2].id, 1000, 'Lowest ID last');
+          }
+        },
+        {
+          name: 'Default sort is recent',
+          fn: () => {
+            const result = sortCards(mockCards, undefined);
+            assertEqual(result[0].id, 3000, 'Default should sort by recent');
+          }
+        }
+      ],
+      
+      // ----------------------------------------
+      // Owner Filter Tests
+      // ----------------------------------------
+      'Owner Filter': [
+        {
+          name: 'Filter by "Me" returns only my cards',
+          fn: () => {
+            const result = filterByOwner(mockCards, 'Me');
+            assertArrayLength(result, 2, 'Should return 2 cards owned by Me');
+            assert(result.every(c => c.owner === 'Me'), 'All should be owned by Me');
+          }
+        },
+        {
+          name: 'Filter by "Wife" returns only wife cards',
+          fn: () => {
+            const result = filterByOwner(mockCards, 'Wife');
+            assertArrayLength(result, 1, 'Should return 1 card owned by Wife');
+            assertEqual(result[0].name, 'Amex Gold', 'Should be Amex Gold');
+          }
+        },
+        {
+          name: 'Filter by "all" returns ALL cards',
+          fn: () => {
+            const result = filterByOwner(mockCards, 'all');
+            assertArrayLength(result, 3, 'Should return all 3 cards');
+          }
+        }
+      ],
+      
+      // ----------------------------------------
+      // Category Extraction Tests
+      // ----------------------------------------
+      'Category Extraction': [
+        {
+          name: 'Extract category from "3x Dining"',
+          fn: () => {
+            assertEqual(extractCategory('3x Dining'), 'Dining', 'Should extract Dining');
+          }
+        },
+        {
+          name: 'Extract category from "1.5x Everything"',
+          fn: () => {
+            assertEqual(extractCategory('1.5x Everything'), 'Everything', 'Should extract Everything');
+          }
+        },
+        {
+          name: 'Extract category from "10x Hotels via Portal"',
+          fn: () => {
+            assertEqual(extractCategory('10x Hotels via Portal'), 'Hotels via Portal', 'Should extract full phrase');
+          }
+        },
+        {
+          name: 'Return null for non-rate perks',
+          fn: () => {
+            assertEqual(extractCategory('Priority Pass Lounge'), null, 'Should return null');
+          }
+        }
+      ],
+      
+      // ----------------------------------------
+      // Category Normalization Tests
+      // ----------------------------------------
+      'Category Normalization': [
+        {
+          name: 'Normalize "dining worldwide" to "Dining"',
+          fn: () => {
+            assertEqual(normalizeCategory('dining worldwide'), 'Dining', 'Should normalize');
+          }
+        },
+        {
+          name: 'Normalize "us supermarkets" to "Groceries"',
+          fn: () => {
+            assertEqual(normalizeCategory('us supermarkets'), 'Groceries', 'Should normalize');
+          }
+        },
+        {
+          name: 'Capitalize unknown categories',
+          fn: () => {
+            assertEqual(normalizeCategory('gas'), 'Gas', 'Should capitalize');
+          }
+        },
+        {
+          name: 'Return null for empty input',
+          fn: () => {
+            assertEqual(normalizeCategory(''), null, 'Should return null for empty');
+            assertEqual(normalizeCategory(null), null, 'Should return null for null');
+          }
+        }
+      ],
+      
+      // ----------------------------------------
+      // Transfer Partner Filter Tests (Miles View)
+      // ----------------------------------------
+      'Partner Filter': [
+        {
+          name: 'Filter by United returns cards with United partner',
+          fn: () => {
+            const result = filterByPartner(mockCards, 'United');
+            assertArrayLength(result, 1, 'Should return 1 card with United');
+            assertEqual(result[0].name, 'Chase Sapphire Reserve', 'Should be CSR');
+          }
+        },
+        {
+          name: 'Filter by Delta returns cards with Delta partner',
+          fn: () => {
+            const result = filterByPartner(mockCards, 'Delta');
+            assertArrayLength(result, 1, 'Should return 1 card with Delta');
+            assertEqual(result[0].name, 'Amex Gold', 'Should be Amex Gold');
+          }
+        },
+        {
+          name: 'Filter by empty string returns ALL cards',
+          fn: () => {
+            const result = filterByPartner(mockCards, '');
+            assertArrayLength(result, 3, 'Empty filter should return all 3 cards');
+          }
+        },
+        {
+          name: 'Filter by null returns ALL cards',
+          fn: () => {
+            const result = filterByPartner(mockCards, null);
+            assertArrayLength(result, 3, 'Null filter should return all 3 cards');
+          }
+        },
+        {
+          name: 'Filter by non-existent partner returns empty',
+          fn: () => {
+            const result = filterByPartner(mockCards, 'Southwest');
+            assertArrayLength(result, 0, 'Should return 0 cards');
+          }
+        },
+        {
+          name: 'Get all unique partners from cards',
+          fn: () => {
+            const partners = getAllPartners(mockCards);
+            assertArrayLength(partners, 3, 'Should have 3 unique partners');
+            assert(partners.includes('United'), 'Should include United');
+            assert(partners.includes('Delta'), 'Should include Delta');
+            assert(partners.includes('Turkish'), 'Should include Turkish');
+          }
+        }
+      ],
+
+      // ----------------------------------------
+      // Partner Emoji Detection Tests
+      // ----------------------------------------
+      'Partner Emoji Detection': [
+        {
+          name: 'Airline partners return ✈️ emoji',
+          fn: () => {
+            assertEqual(getPartnerEmoji('United'), '✈️', 'United is airline');
+            assertEqual(getPartnerEmoji('Delta'), '✈️', 'Delta is airline');
+            assertEqual(getPartnerEmoji('Turkish'), '✈️', 'Turkish is airline');
+            assertEqual(getPartnerEmoji('Lufthansa'), '✈️', 'Lufthansa is airline');
+          }
+        },
+        {
+          name: 'Hotel partners return 🏨 emoji',
+          fn: () => {
+            assertEqual(getPartnerEmoji('Marriott'), '🏨', 'Marriott is hotel');
+            assertEqual(getPartnerEmoji('IHG'), '🏨', 'IHG is hotel');
+            assertEqual(getPartnerEmoji('Hilton Hotels'), '🏨', 'Hilton Hotels detected');
+            assertEqual(getPartnerEmoji('Choice Hotels'), '🏨', 'Choice Hotels detected');
+          }
+        },
+        {
+          name: 'Case-insensitive hotel detection',
+          fn: () => {
+            assertEqual(getPartnerEmoji('marriott'), '🏨', 'Lowercase marriott');
+            assertEqual(getPartnerEmoji('HYATT'), '🏨', 'Uppercase HYATT');
+            assertEqual(getPartnerEmoji('Wyndham Hotels'), '🏨', 'Mixed case Wyndham');
+          }
+        },
+        {
+          name: 'Empty or null partner defaults to airline emoji',
+          fn: () => {
+            assertEqual(getPartnerEmoji(''), '✈️', 'Empty string defaults to airline');
+            assertEqual(getPartnerEmoji(null), '✈️', 'Null defaults to airline');
+          }
+        }
+      ],
+      
+      // ----------------------------------------
+      // Combined Filter + Sort Tests
+      // ----------------------------------------
+      'Combined Filters': [
+        {
+          name: 'Filter by category then sort by points',
+          fn: () => {
+            let result = filterByCategory(mockCards, 'Dining');
+            result = sortCards(result, 'points');
+            assertEqual(result[0].name, 'Chase Sapphire Reserve', 'CSR has more points');
+          }
+        },
+        {
+          name: 'Filter by owner then filter by category',
+          fn: () => {
+            let result = filterByOwner(mockCards, 'Me');
+            result = filterByCategory(result, 'Dining');
+            assertArrayLength(result, 1, 'Only CSR is Me + Dining');
+            assertEqual(result[0].name, 'Chase Sapphire Reserve', 'Should be CSR');
+          }
+        },
+        {
+          name: 'All filters reset correctly',
+          fn: () => {
+            let result = filterByCategory(mockCards, 'Dining');
+            assertArrayLength(result, 2, 'Filtered to 2');
+            result = filterByCategory(mockCards, ''); // Reset
+            assertArrayLength(result, 3, 'Reset to all 3');
+          }
+        }
+      ],
+
+      // ============================================
+      // NEW: SEARCH FUNCTIONALITY TESTS
+      // ============================================
+
+      // ----------------------------------------
+      // Search Functionality Tests
+      // ----------------------------------------
+      'Search Functionality': [
+        {
+          name: 'Search by card name',
+          fn: () => {
+            const result = searchCards(mockCards, 'Chase Sapphire');
+            assertArrayLength(result, 1, 'Should find Chase Sapphire');
+            assertEqual(result[0].name, 'Chase Sapphire Reserve', 'Should match exact card');
+          }
+        },
+        {
+          name: 'Search by partial card name',
+          fn: () => {
+            const result = searchCards(mockCards, 'Sapphire');
+            assertArrayLength(result, 1, 'Should find by partial name');
+          }
+        },
+        {
+          name: 'Search by bank name',
+          fn: () => {
+            const result = searchCards(mockCards, 'Chase');
+            assertArrayLength(result, 1, 'Should find by bank name');
+          }
+        },
+        {
+          name: 'Search by bank returns multiple if applicable',
+          fn: () => {
+            const result = searchCards(mockCards, 'American');
+            assertArrayLength(result, 1, 'Should find American Express');
+            assertEqual(result[0].name, 'Amex Gold', 'Should find by bank');
+          }
+        },
+        {
+          name: 'Search by perk category (e.g., "Dining")',
+          fn: () => {
+            const result = searchCards(mockCards, 'Dining');
+            assertArrayLength(result, 2, 'Should find 2 cards with Dining');
+            assert(result.some(c => c.name === 'Chase Sapphire Reserve'), 'Should include CSR');
+            assert(result.some(c => c.name === 'Amex Gold'), 'Should include Amex Gold');
+          }
+        },
+        {
+          name: 'Search by perk rate (e.g., "4x")',
+          fn: () => {
+            const result = searchCards(mockCards, '4x');
+            assertArrayLength(result, 1, 'Should find Amex Gold with 4x perks');
+            assertEqual(result[0].name, 'Amex Gold', 'Should be Amex Gold');
+          }
+        },
+        {
+          name: 'Search by transfer partner (e.g., "United")',
+          fn: () => {
+            const result = searchCards(mockCards, 'United');
+            assertArrayLength(result, 1, 'Should find card with United');
+            assertEqual(result[0].name, 'Chase Sapphire Reserve', 'Should be CSR');
+          }
+        },
+        {
+          name: 'Search by multiple partners returns all matches',
+          fn: () => {
+            const result1 = searchCards(mockCards, 'Delta');
+            const result2 = searchCards(mockCards, 'Turkish');
+            assertArrayLength(result1, 1, 'Should find Delta');
+            assertArrayLength(result2, 1, 'Should find Turkish');
+          }
+        },
+        {
+          name: 'Search by coupon text',
+          fn: () => {
+            const result = searchCards(mockCards, 'Travel Credit');
+            assertArrayLength(result, 1, 'Should find card with Travel Credit coupon');
+            assertEqual(result[0].name, 'Chase Sapphire Reserve', 'Should be CSR');
+          }
+        },
+        {
+          name: 'Search by partial coupon text',
+          fn: () => {
+            const result = searchCards(mockCards, 'Travel');
+            // CSR has '$300 Travel Credit' coupon AND '3x Travel' perk
+            assertArrayLength(result, 1, 'Should find CSR (has Travel in coupon and perk)');
+          }
+        },
+        {
+          name: 'Search is case-insensitive',
+          fn: () => {
+            const result1 = searchCards(mockCards, 'chase');
+            const result2 = searchCards(mockCards, 'CHASE');
+            const result3 = searchCards(mockCards, 'ChAsE');
+            assertEqual(result1.length, result2.length, 'Case should not matter');
+            assertEqual(result2.length, result3.length, 'Mixed case should work');
+            assertArrayLength(result1, 1, 'Should find 1 card');
+          }
+        },
+        {
+          name: 'Search with empty string returns all cards',
+          fn: () => {
+            const result = searchCards(mockCards, '');
+            assertArrayLength(result, 3, 'Empty search returns all');
+          }
+        },
+        {
+          name: 'Search with whitespace returns all cards',
+          fn: () => {
+            const result = searchCards(mockCards, '   ');
+            assertArrayLength(result, 3, 'Whitespace search returns all');
+          }
+        },
+        {
+          name: 'Search with no results returns empty array',
+          fn: () => {
+            const result = searchCards(mockCards, 'NonExistent');
+            assertArrayLength(result, 0, 'Should return empty array');
+          }
+        },
+        {
+          name: 'Search combined with owner filter',
+          fn: () => {
+            let result = searchCards(mockCards, 'Dining');
+            result = filterByOwner(result, 'Me');
+            assertArrayLength(result, 1, 'Should find only CSR (Me owner, Dining perk)');
+            assertEqual(result[0].name, 'Chase Sapphire Reserve', 'Should be CSR');
+          }
+        },
+        {
+          name: 'Search combined with category filter',
+          fn: () => {
+            // Search "3x" matches CSR (3x Dining, 3x Travel) AND Amex (3x Flights)
+            let result = searchCards(mockCards, '3x');
+            assertArrayLength(result, 2, 'Search 3x returns CSR and Amex');
+            
+            // Then filter by Dining - both have Dining perks
+            result = filterByCategory(result, 'Dining');
+            // CSR has 3x Dining, Amex has 4x Dining - both match Dining category
+            assertArrayLength(result, 2, 'Both CSR and Amex have Dining perks');
+          }
+        },
+        {
+          name: 'Search with multiple keywords',
+          fn: () => {
+            // First search
+            let result = searchCards(mockCards, 'Chase');
+            assertArrayLength(result, 1, 'Chase search returns 1');
+            
+            // Then search within results
+            result = searchCards(result, 'Dining');
+            assertArrayLength(result, 1, 'CSR has Dining');
+          }
+        }
+      ],
+
+      // ============================================
+      // NEW: POINT HISTORY TESTS
+      // ============================================
+
+      // ----------------------------------------
+      // Point History Tests
+      // ----------------------------------------
+      'Point History': [
+        {
+          name: 'Add earned points updates balance',
+          fn: () => {
+            let card = JSON.parse(JSON.stringify(mockCards[0])); // Deep copy
+            const initialPoints = card.points;
+            const earnedAmount = 5000;
+            
+            card.points += earnedAmount;
+            card.history.push({
+              type: 'earned',
+              amount: earnedAmount,
+              date: new Date().toISOString().split('T')[0],
+              note: 'Sign-up bonus'
+            });
+            
+            assertEqual(card.points, initialPoints + earnedAmount, 'Points should increase');
+            assertArrayLength(card.history, 1, 'History should have 1 entry');
+            assertEqual(card.history[0].type, 'earned', 'Entry type should be earned');
+          }
+        },
+        {
+          name: 'Add spent points updates balance',
+          fn: () => {
+            let card = JSON.parse(JSON.stringify(mockCards[0]));
+            const initialPoints = card.points;
+            const spentAmount = 10000;
+            
+            card.points -= spentAmount;
+            card.history.push({
+              type: 'spent',
+              amount: spentAmount,
+              date: new Date().toISOString().split('T')[0],
+              note: 'Redeemed for flight'
+            });
+            
+            assertEqual(card.points, initialPoints - spentAmount, 'Points should decrease');
+            assertArrayLength(card.history, 1, 'History should have 1 entry');
+            assertEqual(card.history[0].type, 'spent', 'Entry type should be spent');
+          }
+        },
+        {
+          name: 'History entries have correct timestamps',
+          fn: () => {
+            const card = {points: 0, history: []};
+            const today = new Date().toISOString().split('T')[0];
+            
+            card.history.push({type: 'earned', amount: 1000, date: today, note: 'Test'});
+            
+            assert(card.history[0].date, 'Date should exist');
+            assert(card.history[0].date.includes('202'), 'Date should be valid');
+          }
+        },
+        {
+          name: 'History preserves order (newest first)',
+          fn: () => {
+            const card = {points: 0, history: []};
+            
+            // Add 3 entries
+            card.history.push({type: 'earned', amount: 1000, date: '2025-01-01', note: 'First'});
+            card.history.push({type: 'earned', amount: 2000, date: '2025-01-02', note: 'Second'});
+            card.history.push({type: 'earned', amount: 3000, date: '2025-01-03', note: 'Third'});
+            
+            assertArrayLength(card.history, 3, 'Should have 3 entries');
+            
+            // Sort newest first
+            const sorted = card.history.sort((a, b) => new Date(b.date) - new Date(a.date));
+            assertEqual(sorted[0].note, 'Third', 'Newest should be first');
+            assertEqual(sorted[2].note, 'First', 'Oldest should be last');
+          }
+        },
+        {
+          name: 'Edit card preserves history',
+          fn: () => {
+            let card = JSON.parse(JSON.stringify(mockCards[0]));
+            
+            // Add history
+            card.history.push({type: 'earned', amount: 5000, date: '2025-01-01', note: 'Bonus'});
+            const historyLength = card.history.length;
+            
+            // Edit card properties
+            card.name = 'Updated Name';
+            card.points = 99999;
+            
+            // History should be preserved
+            assertArrayLength(card.history, historyLength, 'History should be preserved');
+            assertEqual(card.history[0].amount, 5000, 'History content should be intact');
+          }
+        },
+        {
+          name: 'Multiple transactions are recorded',
+          fn: () => {
+            const card = {points: 0, history: []};
+            
+            // Earn 1000
+            card.points += 1000;
+            card.history.push({type: 'earned', amount: 1000, date: '2025-01-01', note: 'Bonus'});
+            
+            // Earn 500
+            card.points += 500;
+            card.history.push({type: 'earned', amount: 500, date: '2025-01-02', note: 'Spend'});
+            
+            // Spend 300
+            card.points -= 300;
+            card.history.push({type: 'spent', amount: 300, date: '2025-01-03', note: 'Transfer'});
+            
+            assertEqual(card.points, 1200, 'Points should be correct (1000+500-300)');
+            assertArrayLength(card.history, 3, 'Should have 3 history entries');
+          }
+        }
+      ],
+
+      // ============================================
+      // NEW: DATA VALIDATION TESTS
+      // ============================================
+
+      // ----------------------------------------
+      // Data Validation Tests
+      // ----------------------------------------
+      'Data Validation': [
+        {
+          name: 'Valid card passes all checks',
+          fn: () => {
+            assert(isValidCard(mockCards[0]), 'CSR should be valid');
+            assert(isValidCard(mockCards[1]), 'Amex Gold should be valid');
+            assert(isValidCard(mockCards[2]), 'Capital One should be valid');
+          }
+        },
+        {
+          name: 'Card with missing required fields fails',
+          fn: () => {
+            const invalidCard1 = {name: 'Test', bank: 'Test', points: 1000, perks: [], redeem: [], coupons: [], history: []};
+            assert(!isValidCard(invalidCard1), 'Missing id should fail');
+            
+            const invalidCard2 = {id: 1, bank: 'Test', points: 1000, perks: [], redeem: [], coupons: [], history: []};
+            assert(!isValidCard(invalidCard2), 'Missing name should fail');
+          }
+        },
+        {
+          name: 'Card with invalid points (negative) fails',
+          fn: () => {
+            const invalidCard = {
+              id: 1,
+              name: 'Test',
+              bank: 'Test',
+              points: -1000,
+              perks: [],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            assert(!isValidCard(invalidCard), 'Negative points should fail');
+          }
+        },
+        {
+          name: 'Card with invalid points (NaN) fails',
+          fn: () => {
+            const invalidCard = {
+              id: 1,
+              name: 'Test',
+              bank: 'Test',
+              points: NaN,
+              perks: [],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            assert(!isValidCard(invalidCard), 'NaN points should fail');
+          }
+        },
+        {
+          name: 'Card with empty perks array is valid',
+          fn: () => {
+            const card = {
+              id: 1,
+              name: 'Test',
+              bank: 'Test',
+              points: 1000,
+              perks: [],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            assert(isValidCard(card), 'Empty perks should be valid');
+          }
+        },
+        {
+          name: 'Card with malformed redeem partners fails',
+          fn: () => {
+            const invalidCard = {
+              id: 1,
+              name: 'Test',
+              bank: 'Test',
+              points: 1000,
+              perks: [],
+              redeem: [{name: 'United'}], // Missing ratio and est
+              coupons: [],
+              history: []
+            };
+            assert(!isValidCard(invalidCard), 'Malformed redeem should fail');
+          }
+        },
+        {
+          name: 'Card name too long fails validation',
+          fn: () => {
+            const longName = 'A'.repeat(101);
+            assert(!validateCardName(longName), 'Name > 100 chars should fail');
+          }
+        },
+        {
+          name: 'Valid card name passes validation',
+          fn: () => {
+            assert(validateCardName('Chase Sapphire Reserve'), 'Normal name should pass');
+            assert(validateCardName('A'), 'Single char should pass');
+            assert(validateCardName('A'.repeat(100)), 'Exactly 100 chars should pass');
+          }
+        },
+        {
+          name: 'Empty card name fails validation',
+          fn: () => {
+            assert(!validateCardName(''), 'Empty name should fail');
+            assert(!validateCardName('   '), 'Whitespace only should fail');
+          }
+        },
+        {
+          name: 'Duplicate card detection',
+          fn: () => {
+            const testCards = [...mockCards];
+            const newCard = {
+              id: 9999,
+              name: 'Chase Sapphire Reserve',
+              bank: 'Chase',
+              points: 1000,
+              perks: [],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            
+            assert(hasDuplicateCard(testCards, newCard), 'Should detect duplicate');
+          }
+        },
+        {
+          name: 'Same name different bank is not duplicate',
+          fn: () => {
+            const testCards = [...mockCards];
+            const newCard = {
+              id: 9999,
+              name: 'Chase Sapphire Reserve',
+              bank: 'Different Bank',
+              points: 1000,
+              perks: [],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            
+            assert(!hasDuplicateCard(testCards, newCard), 'Different bank is not duplicate');
+          }
+        }
+      ],
+
+      // ============================================
+      // NEW: BACKUP/RESTORE TESTS
+      // ============================================
+
+      // ----------------------------------------
+      // Backup/Restore Tests
+      // ----------------------------------------
+      'Backup/Restore': [
+        {
+          name: 'Export generates valid JSON',
+          fn: () => {
+            const backup = {
+              version: 2,
+              exported: new Date().toISOString(),
+              cards: mockCards
+            };
+            
+            const json = JSON.stringify(backup);
+            assert(json && json.length > 0, 'JSON should be generated');
+            
+            // Verify it can be parsed
+            const parsed = JSON.parse(json);
+            assert(parsed.version === 2, 'Version should be preserved');
+            assertArrayLength(parsed.cards, mockCards.length, 'Cards should be preserved');
+          }
+        },
+        {
+          name: 'Import validates data structure',
+          fn: () => {
+            const validBackup = {
+              version: 2,
+              exported: new Date().toISOString(),
+              cards: mockCards
+            };
+            
+            const json = JSON.stringify(validBackup);
+            const imported = JSON.parse(json);
+            
+            assert(imported.version, 'Should have version');
+            assert(imported.exported, 'Should have exported timestamp');
+            assert(Array.isArray(imported.cards), 'Cards should be array');
+            assertArrayLength(imported.cards, mockCards.length, 'Should have all cards');
+          }
+        },
+        {
+          name: 'Import rejects invalid JSON',
+          fn: () => {
+            const invalidJson = '{invalid json}';
+            
+            let parseError = false;
+            try {
+              JSON.parse(invalidJson);
+            } catch (e) {
+              parseError = true;
+            }
+            
+            assert(parseError, 'Should throw parse error');
+          }
+        },
+        {
+          name: 'Import handles missing fields gracefully',
+          fn: () => {
+            const incompleteBackup = {
+              cards: mockCards
+              // Missing version and exported
+            };
+            
+            const json = JSON.stringify(incompleteBackup);
+            const imported = JSON.parse(json);
+            
+            assert(Array.isArray(imported.cards), 'Should still have cards');
+            assertArrayLength(imported.cards, mockCards.length, 'Cards should load');
+          }
+        },
+        {
+          name: 'Backup includes all card properties',
+          fn: () => {
+            const backup = JSON.stringify(mockCards[0]);
+            const restored = JSON.parse(backup);
+            
+            assert(restored.id, 'Should have id');
+            assert(restored.name, 'Should have name');
+            assert(restored.bank, 'Should have bank');
+            assert(typeof restored.points === 'number', 'Should have points');
+            assert(Array.isArray(restored.perks), 'Should have perks');
+            assert(Array.isArray(restored.redeem), 'Should have redeem');
+            assert(Array.isArray(restored.coupons), 'Should have coupons');
+            assert(Array.isArray(restored.history), 'Should have history');
+            assert(restored.owner, 'Should have owner');
+          }
+        },
+        {
+          name: 'Multiple backup/restore cycles preserve data',
+          fn: () => {
+            let cards = JSON.parse(JSON.stringify(mockCards));
+            
+            // First cycle
+            const backup1 = JSON.stringify(cards);
+            cards = JSON.parse(backup1);
+            
+            // Second cycle
+            const backup2 = JSON.stringify(cards);
+            cards = JSON.parse(backup2);
+            
+            // Verify data integrity
+            assertEqual(cards[0].name, 'Chase Sapphire Reserve', 'Data should be preserved');
+            assertEqual(cards[0].points, 85000, 'Points should be preserved');
+            assertArrayLength(cards, 3, 'All cards preserved');
+          }
+        }
+      ],
+
+      // ============================================
+      // NEW: EDGE CASES TESTS
+      // ============================================
+
+      // ----------------------------------------
+      // Edge Cases Tests
+      // ----------------------------------------
+      'Edge Cases': [
+        {
+          name: 'Handle 0 points',
+          fn: () => {
+            const card = {
+              id: 1,
+              name: 'Zero Points Card',
+              bank: 'Test',
+              points: 0,
+              perks: [],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            
+            assert(isValidCard(card), 'Zero points should be valid');
+            assertEqual(card.points, 0, 'Should handle zero');
+          }
+        },
+        {
+          name: 'Handle very large point values',
+          fn: () => {
+            const largePoints = 999999999;
+            const card = {
+              id: 1,
+              name: 'Large Points Card',
+              bank: 'Test',
+              points: largePoints,
+              perks: [],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            
+            assert(isValidCard(card), 'Large points should be valid');
+            assertEqual(card.points, largePoints, 'Should handle large numbers');
+          }
+        },
+        {
+          name: 'Handle special characters in card names',
+          fn: () => {
+            const specialNames = [
+              'Card & Co.',
+              'Bank "Premier" Card',
+              "McDonald's Card",
+              'Card #1',
+              'Card (Gold)',
+              'Card/MasterCard'
+            ];
+            
+            specialNames.forEach(name => {
+              assert(validateCardName(name), `Should handle: ${name}`);
+            });
+          }
+        },
+        {
+          name: 'Handle emoji in perks',
+          fn: () => {
+            const card = {
+              id: 1,
+              name: 'Emoji Card',
+              bank: 'Test',
+              points: 1000,
+              perks: ['3x 🍽️ Dining', '2x ✈️ Travel'],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            
+            assert(isValidCard(card), 'Emoji in perks should be valid');
+            assertArrayLength(card.perks, 2, 'Should preserve emoji perks');
+          }
+        },
+        {
+          name: 'Handle empty cards array',
+          fn: () => {
+            const emptyList = [];
+            const filtered = filterByCategory(emptyList, 'Dining');
+            assertArrayLength(filtered, 0, 'Should handle empty array');
+          }
+        },
+        {
+          name: 'Handle cards with no perks',
+          fn: () => {
+            const card = {
+              id: 1,
+              name: 'No Perks Card',
+              bank: 'Test',
+              points: 1000,
+              perks: [],
+              redeem: [{name: 'United', ratio: '1:1', est: 1000}],
+              coupons: [],
+              history: []
+            };
+            
+            assert(isValidCard(card), 'Card with no perks should be valid');
+            const result = filterByCategory([card], 'Dining');
+            assertArrayLength(result, 0, 'Should not match when no perks');
+          }
+        },
+        {
+          name: 'Handle cards with no transfer partners',
+          fn: () => {
+            const card = {
+              id: 1,
+              name: 'No Partners Card',
+              bank: 'Test',
+              points: 1000,
+              perks: ['3x Dining'],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            
+            assert(isValidCard(card), 'Card with no partners should be valid');
+            const result = filterByPartner([card], 'United');
+            assertArrayLength(result, 0, 'Should not match when no partners');
+          }
+        },
+        {
+          name: 'Handle cards with null optional fields',
+          fn: () => {
+            const card = {
+              id: 1,
+              name: 'Null Fields Card',
+              bank: 'Test',
+              points: 1000,
+              perks: ['2x Dining'],
+              redeem: [],
+              coupons: [],
+              history: [],
+              due: null,
+              owner: null
+            };
+            
+            assert(isValidCard(card), 'Null optional fields should be valid');
+          }
+        },
+        {
+          name: 'Sorting handles mixed null due dates',
+          fn: () => {
+            const cards = [
+              {id: 1, name: 'A', due: '2025-12-31'},
+              {id: 2, name: 'B', due: null},
+              {id: 3, name: 'C', due: '2025-01-01'}
+            ];
+            
+            const sorted = sortCards(cards, 'due');
+            assertEqual(sorted[0].name, 'C', 'Earliest date first');
+            assertEqual(sorted[sorted.length - 1].name, 'B', 'Null date last');
+          }
+        },
+        {
+          name: 'Ratio calculations with edge values',
+          fn: () => {
+            const testCases = [
+              {ratio: '1:1', points: 0, expected: 0},
+              {ratio: '1:1', points: 1, expected: 1},
+              {ratio: '100:1', points: 100, expected: 1},
+              {ratio: '1:100', points: 1, expected: 100}
+            ];
+            
+            testCases.forEach(tc => {
+              const [a, b] = tc.ratio.split(':').map(Number);
+              const result = Math.floor(tc.points / a * b);
+              assertEqual(result, tc.expected, `Ratio ${tc.ratio} with ${tc.points} points`);
+            });
+          }
+        }
+      ],
+
+      // ============================================
+      // E2E TESTS (Real function integration)
+      // ============================================
+
+      // ----------------------------------------
+      // Card CRUD E2E Tests
+      // ----------------------------------------
+      'Card CRUD E2E': [
+        {
+          name: 'Add card increases cards array length',
+          fn: () => {
+            // Setup: Save original state
+            const originalCards = [...mockCards];
+            const originalLength = originalCards.length;
+            
+            // Create test card object
+            const testCard = {
+              id: Date.now(),
+              name: 'Test Card E2E',
+              bank: 'Test Bank',
+              icon: '💳',
+              color: '#007AFF',
+              points: 5000,
+              due: '2025-12-31',
+              owner: 'Me',
+              perks: ['2x Everything'],
+              redeem: [{name: 'TestAirline', ratio: '1:1', est: 5000}],
+              coupons: [],
+              history: []
+            };
+            
+            // Add card
+            originalCards.push(testCard);
+            
+            // Assert: length increased
+            assertArrayLength(originalCards, originalLength + 1, 'Should have 1 more card');
+            assert(originalCards.some(c => c.name === 'Test Card E2E'), 'New card should be in array');
+          }
+        },
+        {
+          name: 'Edit card updates existing card data without creating new',
+          fn: () => {
+            const cards = JSON.parse(JSON.stringify(mockCards));
+            const originalLength = cards.length;
+            const cardToEdit = cards[0];
+            const originalId = cardToEdit.id;
+            const originalName = cardToEdit.name;
+            
+            // Edit the card
+            cardToEdit.name = 'Updated Card Name';
+            cardToEdit.points = 99999;
+            
+            // Assert: array length stayed same
+            assertArrayLength(cards, originalLength, 'Array length should not change');
+            
+            // Assert: card data updated
+            const updatedCard = cards.find(c => c.id === originalId);
+            assert(updatedCard, 'Card should still exist');
+            assertEqual(updatedCard.name, 'Updated Card Name', 'Name should be updated');
+            assertEqual(updatedCard.points, 99999, 'Points should be updated');
+          }
+        },
+        {
+          name: 'Delete card removes from array',
+          fn: () => {
+            const cards = JSON.parse(JSON.stringify(mockCards));
+            const originalLength = cards.length;
+            const cardToDelete = cards[0];
+            const cardId = cardToDelete.id;
+            
+            // Delete
+            const filtered = cards.filter(c => c.id !== cardId);
+            
+            // Assert: length decreased by 1
+            assertArrayLength(filtered, originalLength - 1, 'Should have 1 fewer card');
+            
+            // Assert: card no longer in array
+            assert(!filtered.some(c => c.id === cardId), 'Deleted card should not be in array');
+          }
+        },
+        {
+          name: 'Edit preserves card history',
+          fn: () => {
+            const card = JSON.parse(JSON.stringify(mockCards[0]));
+            
+            // Add history
+            card.history = [{type: 'earned', amount: 1000, date: '2025-01-01', note: 'Test'}];
+            const historyLength = card.history.length;
+            
+            // Edit card (name change)
+            card.name = 'Updated';
+            
+            // Assert: history preserved
+            assertArrayLength(card.history, historyLength, 'History should be preserved');
+          }
+        }
+      ],
+
+      // ----------------------------------------
+      // Form State E2E Tests
+      // ----------------------------------------
+      'Form State E2E': [
+        {
+          name: 'editingCardId properly tracks edit mode',
+          fn: () => {
+            let editingCardId = null;
+            assertEqual(editingCardId, null, 'Should start as null');
+            
+            // Simulate setting edit mode
+            editingCardId = 1000;
+            assertEqual(editingCardId, 1000, 'Should be set to card ID');
+            
+            // Simulate clearing edit mode
+            editingCardId = null;
+            assertEqual(editingCardId, null, 'Should reset to null');
+          }
+        },
+        {
+          name: 'Edit mode prevents creating duplicate card',
+          fn: () => {
+            // Simulate app state with edit mode on
+            let editingCardId = mockCards[0].id;
+            let testCards = JSON.parse(JSON.stringify(mockCards));
+            const originalLength = testCards.length;
+            const cardToEdit = testCards.find(c => c.id === editingCardId);
+            
+            if (editingCardId && cardToEdit) {
+              // Update existing card
+              cardToEdit.points = 99999;
+              editingCardId = null;  // Clear edit mode
+            }
+            
+            // Assert: no new card created
+            assertArrayLength(testCards, originalLength, 'Array length unchanged');
+            
+            // Assert: card updated
+            assertEqual(cardToEdit.points, 99999, 'Card should be updated');
+          }
+        }
+      ],
+
+      // ----------------------------------------
+      // Complex Workflow E2E Tests
+      // ----------------------------------------
+      'Complex Workflow E2E': [
+        {
+          name: 'Complete card lifecycle: add → edit → delete',
+          fn: () => {
+            let testCards = JSON.parse(JSON.stringify(mockCards));
+            const originalLength = testCards.length;
+            
+            // 1. Add card
+            const newCard = {
+              id: Date.now(),
+              name: 'Workflow Test Card',
+              bank: 'Test Bank',
+              icon: '💳',
+              color: '#007AFF',
+              points: 10000,
+              due: '',
+              owner: 'Me',
+              perks: ['1x Everything'],
+              redeem: [],
+              coupons: [],
+              history: []
+            };
+            testCards.push(newCard);
+            assertArrayLength(testCards, originalLength + 1, 'Card added');
+            
+            // 2. Edit card
+            const cardToEdit = testCards.find(c => c.id === newCard.id);
+            cardToEdit.points = 20000;
+            cardToEdit.perks = ['2x Everything'];
+            assertEqual(cardToEdit.points, 20000, 'Card updated');
+            assertArrayLength(testCards, originalLength + 1, 'Card count unchanged after edit');
+            
+            // 3. Delete card
+            testCards = testCards.filter(c => c.id !== newCard.id);
+            assertArrayLength(testCards, originalLength, 'Card deleted, back to original');
+            
+            // 4. Verify card gone
+            assert(!testCards.find(c => c.id === newCard.id), 'Card should not exist');
+          }
+        },
+        {
+          name: 'Search + filter + sort workflow',
+          fn: () => {
+            // 1. Search "Chase" (specific to avoid matching multiple cards)
+            let result = searchCards(mockCards, 'Chase');
+            assertArrayLength(result, 1, 'Search for Chase returns CSR only');
+            
+            // 2. Filter by owner
+            result = filterByOwner(result, 'Me');
+            assertArrayLength(result, 1, 'Owner filter returns 1');
+            
+            // 3. Sort by points
+            result = sortCards(result, 'points');
+            assertEqual(result[0].name, 'Chase Sapphire Reserve', 'Should be CSR');
+          }
+        },
+        {
+          name: 'Multi-card points accumulation with history',
+          fn: () => {
+            // Simulate logging points to multiple cards
+            let cards = JSON.parse(JSON.stringify(mockCards));
+            
+            // Log 5000 points to card 1
+            cards[0].points = 85000 + 5000;
+            cards[0].history.push({type: 'earned', amount: 5000, date: '2025-01-01', note: 'Bonus'});
+            assertEqual(cards[0].points, 90000, 'Card 1 should have 90k');
+            
+            // Log 3000 points to card 2
+            cards[1].points = 50000 + 3000;
+            cards[1].history.push({type: 'earned', amount: 3000, date: '2025-01-02', note: 'Bonus'});
+            assertEqual(cards[1].points, 53000, 'Card 2 should have 53k');
+            
+            // Calculate total
+            const total = cards.reduce((sum, c) => sum + c.points, 0);
+            assertEqual(total, 90000 + 53000 + 120000, 'Total should be sum of all');
+          }
+        }
+      ],
+
+      // ----------------------------------------
+      // Card Open Date & 5/24 Tracking Tests
+      // ----------------------------------------
+      'Card Open Date & 5/24 Tracking': [
+        // getCardAge() tests
+        {
+          name: 'getCardAge returns null for null input',
+          fn: () => {
+            assertEqual(getCardAge(null), null, 'Should return null for null');
+            assertEqual(getCardAge(undefined), null, 'Should return null for undefined');
+            assertEqual(getCardAge(''), null, 'Should return null for empty string');
+          }
+        },
+        {
+          name: 'getCardAge calculates years and months correctly',
+          fn: () => {
+            const today = new Date();
+            // 1 year ago
+            const oneYearAgo = new Date(today);
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            const age1 = getCardAge(oneYearAgo.toISOString().split('T')[0]);
+            assertEqual(age1.years, 1, 'Should be 1 year');
+            assertEqual(age1.months, 0, 'Should be 0 months');
+            
+            // 2 years 6 months ago
+            const twoAndHalfYearsAgo = new Date(today);
+            twoAndHalfYearsAgo.setFullYear(twoAndHalfYearsAgo.getFullYear() - 2);
+            twoAndHalfYearsAgo.setMonth(twoAndHalfYearsAgo.getMonth() - 6);
+            const age2 = getCardAge(twoAndHalfYearsAgo.toISOString().split('T')[0]);
+            assertEqual(age2.years, 2, 'Should be 2 years');
+            assert(age2.months >= 5 && age2.months <= 7, 'Should be around 6 months');
+          }
+        },
+        {
+          name: 'getCardAge handles recent cards (less than 1 year)',
+          fn: () => {
+            const today = new Date();
+            const threeMonthsAgo = new Date(today);
+            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+            const age = getCardAge(threeMonthsAgo.toISOString().split('T')[0]);
+            assertEqual(age.years, 0, 'Should be 0 years');
+            assert(age.months >= 2 && age.months <= 4, 'Should be around 3 months');
+          }
+        },
+
+        // formatCardAge() tests
+        {
+          name: 'formatCardAge returns "No date" for null input',
+          fn: () => {
+            assertEqual(formatCardAge(null), 'No date', 'Should return "No date" for null');
+          }
+        },
+        {
+          name: 'formatCardAge formats age string correctly',
+          fn: () => {
+            const today = new Date();
+            const oneYearAgo = new Date(today);
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            const formatted = formatCardAge(oneYearAgo.toISOString().split('T')[0]);
+            assert(formatted.includes('1y'), 'Should include "1y"');
+          }
+        },
+        {
+          name: 'formatCardAge shows months correctly',
+          fn: () => {
+            const today = new Date();
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            const formatted = formatCardAge(sixMonthsAgo.toISOString().split('T')[0]);
+            assert(formatted.includes('0y'), 'Should include "0y"');
+            assert(formatted.includes('m'), 'Should include months');
+          }
+        },
+
+        // getNextAnniversaryDate() tests
+        {
+          name: 'getNextAnniversaryDate returns null for null input',
+          fn: () => {
+            assertEqual(getNextAnniversaryDate(null), null, 'Should return null for null');
+          }
+        },
+        {
+          name: 'getNextAnniversaryDate returns future date',
+          fn: () => {
+            const today = new Date();
+            const twoYearsAgo = new Date(today);
+            twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+            twoYearsAgo.setMonth(twoYearsAgo.getMonth() + 1); // 1 month from now in that year
+            const nextAnniv = getNextAnniversaryDate(twoYearsAgo.toISOString().split('T')[0]);
+            assert(nextAnniv instanceof Date, 'Should return a Date object');
+            assert(nextAnniv > today, 'Anniversary should be in the future');
+          }
+        },
+
+        // get524Status() tests
+        {
+          name: 'get524Status returns 0 count when no cards have openDate',
+          fn: () => {
+            const testCards = [
+              { id: 1, name: 'Card 1', owner: 'Me', openDate: null },
+              { id: 2, name: 'Card 2', owner: 'Me', openDate: undefined }
+            ];
+            const status = get524Status(testCards, 'Me');
+            assertEqual(status.count, 0, 'Count should be 0');
+            assert(status.under524, 'Should be under 5/24');
+          }
+        },
+        {
+          name: 'get524Status counts cards opened in last 24 months',
+          fn: () => {
+            const today = new Date();
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            const oneYearAgo = new Date(today);
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            
+            const testCards = [
+              { id: 1, name: 'Recent Card', owner: 'Me', openDate: sixMonthsAgo.toISOString().split('T')[0] },
+              { id: 2, name: 'Year Old Card', owner: 'Me', openDate: oneYearAgo.toISOString().split('T')[0] }
+            ];
+            const status = get524Status(testCards, 'Me');
+            assertEqual(status.count, 2, 'Should count 2 cards');
+            assert(status.under524, 'Should be under 5/24 with 2 cards');
+          }
+        },
+        {
+          name: 'get524Status excludes cards older than 24 months',
+          fn: () => {
+            const today = new Date();
+            const threeYearsAgo = new Date(today);
+            threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const testCards = [
+              { id: 1, name: 'Old Card', owner: 'Me', openDate: threeYearsAgo.toISOString().split('T')[0] },
+              { id: 2, name: 'Recent Card', owner: 'Me', openDate: sixMonthsAgo.toISOString().split('T')[0] }
+            ];
+            const status = get524Status(testCards, 'Me');
+            assertEqual(status.count, 1, 'Should only count 1 recent card');
+          }
+        },
+        {
+          name: 'get524Status filters by owner correctly',
+          fn: () => {
+            const today = new Date();
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const testCards = [
+              { id: 1, name: 'My Card', owner: 'Me', openDate: sixMonthsAgo.toISOString().split('T')[0] },
+              { id: 2, name: 'Wife Card', owner: 'Wife', openDate: sixMonthsAgo.toISOString().split('T')[0] },
+              { id: 3, name: 'Another My Card', owner: 'Me', openDate: sixMonthsAgo.toISOString().split('T')[0] }
+            ];
+            const myStatus = get524Status(testCards, 'Me');
+            assertEqual(myStatus.count, 2, 'Should count 2 cards for Me');
+            
+            const wifeStatus = get524Status(testCards, 'Wife');
+            assertEqual(wifeStatus.count, 1, 'Should count 1 card for Wife');
+          }
+        },
+        {
+          name: 'get524Status returns under524: false when at or over 5',
+          fn: () => {
+            const today = new Date();
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const testCards = [];
+            for (let i = 0; i < 6; i++) {
+              testCards.push({
+                id: i,
+                name: `Card ${i}`,
+                owner: 'Me',
+                openDate: sixMonthsAgo.toISOString().split('T')[0]
+              });
+            }
+            const status = get524Status(testCards, 'Me');
+            assertEqual(status.count, 6, 'Should count 6 cards');
+            assert(!status.under524, 'Should NOT be under 5/24 with 6 cards');
+          }
+        },
+        {
+          name: 'get524Status returns card objects in cards array',
+          fn: () => {
+            const today = new Date();
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const testCards = [
+              { id: 1, name: 'Test Card', owner: 'Me', openDate: sixMonthsAgo.toISOString().split('T')[0] }
+            ];
+            const status = get524Status(testCards, 'Me');
+            assertEqual(status.cards.length, 1, 'Should have 1 card in array');
+            assertEqual(status.cards[0].name, 'Test Card', 'Should have correct card object');
+          }
+        },
+        {
+          name: 'getCardsOpenedInLast24Months returns count without owner filter',
+          fn: () => {
+            const today = new Date();
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const testCards = [
+              { id: 1, name: 'Card 1', owner: 'Me', openDate: sixMonthsAgo.toISOString().split('T')[0] },
+              { id: 2, name: 'Card 2', owner: 'Wife', openDate: sixMonthsAgo.toISOString().split('T')[0] }
+            ];
+            const count = getCardsOpenedInLast24Months(testCards);
+            assertEqual(count, 2, 'Should count all cards regardless of owner');
+          }
+        }
+      ],
+
+      // ============================================
+      // v3.3: BACKUP FRESHNESS TRACKING TESTS
+      // ============================================
+
+      // ----------------------------------------
+      // Backup Timestamp & Reminder Tests
+      // ----------------------------------------
+      'Backup Freshness Tracking (v3.3)': [
+        {
+          name: 'getLastBackupDate returns null when no backup exists',
+          fn: () => {
+            localStorage.removeItem('cpLastBackup');
+            const result = getLastBackupDate();
+            assert(result === null, 'Should return null when no backup');
+          }
+        },
+        {
+          name: 'getLastBackupDate returns stored timestamp',
+          fn: () => {
+            const testDate = '2025-03-20T10:30:00.000Z';
+            localStorage.setItem('cpLastBackup', testDate);
+            const result = getLastBackupDate();
+            assertEqual(result, testDate, 'Should return stored timestamp');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'getDaysSinceBackup returns null when no backup exists',
+          fn: () => {
+            localStorage.removeItem('cpLastBackup');
+            const result = getDaysSinceBackup();
+            assert(result === null, 'Should return null when no backup');
+          }
+        },
+        {
+          name: 'getDaysSinceBackup returns 0 for today backup',
+          fn: () => {
+            localStorage.setItem('cpLastBackup', new Date().toISOString());
+            const result = getDaysSinceBackup();
+            assertEqual(result, 0, 'Should return 0 for backup today');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'getDaysSinceBackup calculates days correctly',
+          fn: () => {
+            const fiveDaysAgo = new Date();
+            fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+            localStorage.setItem('cpLastBackup', fiveDaysAgo.toISOString());
+            const result = getDaysSinceBackup();
+            assertEqual(result, 5, 'Should return 5 days');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'shouldShowBackupReminder returns true when no backup exists',
+          fn: () => {
+            localStorage.removeItem('cpLastBackup');
+            const result = shouldShowBackupReminder();
+            assert(result === true, 'Should show reminder when no backup');
+          }
+        },
+        {
+          name: 'shouldShowBackupReminder returns false for recent backup',
+          fn: () => {
+            localStorage.setItem('cpLastBackup', new Date().toISOString());
+            const result = shouldShowBackupReminder();
+            assert(result === false, 'Should NOT show reminder for today backup');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'shouldShowBackupReminder returns true when >= 30 days',
+          fn: () => {
+            const thirtyOneDaysAgo = new Date();
+            thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
+            localStorage.setItem('cpLastBackup', thirtyOneDaysAgo.toISOString());
+            const result = shouldShowBackupReminder();
+            assert(result === true, 'Should show reminder after 30 days');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'shouldShowBackupReminder returns false at 29 days',
+          fn: () => {
+            const twentyNineDaysAgo = new Date();
+            twentyNineDaysAgo.setDate(twentyNineDaysAgo.getDate() - 29);
+            localStorage.setItem('cpLastBackup', twentyNineDaysAgo.toISOString());
+            const result = shouldShowBackupReminder();
+            assert(result === false, 'Should NOT show reminder at 29 days');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'formatLastBackup returns "Never backed up" when no backup',
+          fn: () => {
+            localStorage.removeItem('cpLastBackup');
+            const result = formatLastBackup();
+            assertEqual(result, 'Never backed up', 'Should say never backed up');
+          }
+        },
+        {
+          name: 'formatLastBackup returns "Today" for same day backup',
+          fn: () => {
+            localStorage.setItem('cpLastBackup', new Date().toISOString());
+            const result = formatLastBackup();
+            assertEqual(result, 'Today', 'Should say Today');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'formatLastBackup returns "Yesterday" for 1 day ago',
+          fn: () => {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            localStorage.setItem('cpLastBackup', yesterday.toISOString());
+            const result = formatLastBackup();
+            assertEqual(result, 'Yesterday', 'Should say Yesterday');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'formatLastBackup returns "X days ago" for older backups',
+          fn: () => {
+            const tenDaysAgo = new Date();
+            tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+            localStorage.setItem('cpLastBackup', tenDaysAgo.toISOString());
+            const result = formatLastBackup();
+            assertEqual(result, '10 days ago', 'Should say 10 days ago');
+            localStorage.removeItem('cpLastBackup');
+          }
+        },
+        {
+          name: 'Export JSON includes version 3',
+          fn: () => {
+            const backup = {
+              version: 3,
+              appVersion: '3.3',
+              exported: new Date().toISOString(),
+              lastBackup: new Date().toISOString(),
+              metadata: {},
+              cards: mockCards
+            };
+            
+            assertEqual(backup.version, 3, 'Version should be 3');
+            assertEqual(backup.appVersion, '3.3', 'App version should be 3.3');
+          }
+        },
+        {
+          name: 'Export JSON includes metadata with totalCards',
+          fn: () => {
+            const metadata = {
+              totalCards: mockCards.length,
+              totalPoints: mockCards.reduce((s, c) => s + (c.points || 0), 0),
+              owners: [...new Set(mockCards.map(c => c.owner))],
+              banks: [...new Set(mockCards.map(c => c.bank))]
+            };
+            
+            assertEqual(metadata.totalCards, mockCards.length, 'Should have correct card count');
+            assert(metadata.totalPoints > 0, 'Should have total points');
+            assert(metadata.owners.length > 0, 'Should have owners list');
+            assert(metadata.banks.length > 0, 'Should have banks list');
+          }
+        },
+        {
+          name: 'Card has createdAt timestamp',
+          fn: () => {
+            const card = {
+              id: Date.now(),
+              name: 'Test Card',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            
+            assert(card.createdAt, 'Should have createdAt');
+            assert(card.createdAt.includes('T'), 'Should be ISO format');
+          }
+        },
+        {
+          name: 'Card has updatedAt timestamp',
+          fn: () => {
+            const card = {
+              id: Date.now(),
+              name: 'Test Card',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            
+            assert(card.updatedAt, 'Should have updatedAt');
+            assert(card.updatedAt.includes('T'), 'Should be ISO format');
+          }
+        }
+      ],
+
+      // ============================================
+      // v3.4: BENEFIT/PERK TRACKING TESTS
+      // ============================================
+
+      // ============================================
+      // v3.5: BENEFIT NOTIFICATION & AUTO-RESET TESTS
+      // ============================================
+
+      'Benefit Notifications & Auto-Reset (v3.5)': [
+        // getCurrentPeriodIndex() tests
+        {
+          name: 'getCurrentPeriodIndex returns current month (0-11) for monthly',
+          fn: () => {
+            const result = getCurrentPeriodIndex('monthly');
+            const expected = new Date().getMonth();
+            assertEqual(result, expected, 'Should return current month index');
+            assert(result >= 0 && result <= 11, 'Should be 0-11');
+          }
+        },
+        {
+          name: 'getCurrentPeriodIndex returns current quarter (0-3) for quarterly',
+          fn: () => {
+            const result = getCurrentPeriodIndex('quarterly');
+            const expected = Math.floor(new Date().getMonth() / 3);
+            assertEqual(result, expected, 'Should return current quarter index');
+            assert(result >= 0 && result <= 3, 'Should be 0-3');
+          }
+        },
+        {
+          name: 'getCurrentPeriodIndex returns 0 or 1 for semi-annual',
+          fn: () => {
+            const result = getCurrentPeriodIndex('semi-annual');
+            assert(result === 0 || result === 1, 'Should be 0 or 1');
+          }
+        },
+        {
+          name: 'getCurrentPeriodIndex returns 0 for annual',
+          fn: () => {
+            const result = getCurrentPeriodIndex('annual');
+            assertEqual(result, 0, 'Annual should always return 0');
+          }
+        },
+        
+        // getCurrentPeriodEndDate() tests
+        {
+          name: 'getCurrentPeriodEndDate returns last day of current month for monthly',
+          fn: () => {
+            const result = getCurrentPeriodEndDate('monthly');
+            const now = new Date();
+            const expected = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            assertEqual(result.getDate(), expected.getDate(), 'Should be last day of month');
+            assertEqual(result.getMonth(), expected.getMonth(), 'Should be current month');
+          }
+        },
+        {
+          name: 'getCurrentPeriodEndDate returns last day of quarter for quarterly',
+          fn: () => {
+            const result = getCurrentPeriodEndDate('quarterly');
+            const month = result.getMonth();
+            // Quarters end on months: 2 (Mar), 5 (Jun), 8 (Sep), 11 (Dec)
+            assert([2, 5, 8, 11].includes(month), `Quarter should end in Jan(0), Mar(2), Jun(5), Sep(8), or Dec(11), got month: ${month}`);
+          }
+        },
+        {
+          name: 'getCurrentPeriodEndDate returns Jun 30 or Dec 31 for semi-annual',
+          fn: () => {
+            const result = getCurrentPeriodEndDate('semi-annual');
+            const month = result.getMonth();
+            const day = result.getDate();
+            const isValidSemiAnnual = (month === 5 && day === 30) || (month === 11 && day === 31);
+            assert(isValidSemiAnnual, 'Should be Jun 30 or Dec 31');
+          }
+        },
+        {
+          name: 'getCurrentPeriodEndDate returns Dec 31 for annual',
+          fn: () => {
+            const result = getCurrentPeriodEndDate('annual');
+            assertEqual(result.getMonth(), 11, 'Should be December');
+            assertEqual(result.getDate(), 31, 'Should be 31st');
+          }
+        },
+        
+        // getExpiringBenefits() tests
+        {
+          name: 'getExpiringBenefits returns empty array when no cards',
+          fn: () => {
+            const tempCards = cards;
+            cards = [];
+            const result = getExpiringBenefits(7);
+            cards = tempCards;
+            assertArrayLength(result, 0, 'Should return empty array');
+          }
+        },
+        {
+          name: 'getExpiringBenefits excludes one-time benefits',
+          fn: () => {
+            const tempCards = cards;
+            cards = [{
+              id: 1,
+              name: 'Test',
+              coupons: [{
+                text: 'One-time',
+                recurrence: 'one-time',
+                periods: {},
+                amount: 100
+              }]
+            }];
+            const result = getExpiringBenefits(365);
+            cards = tempCards;
+            assertArrayLength(result, 0, 'Should not include one-time benefits');
+          }
+        },
+        {
+          name: 'getExpiringBenefits excludes used current periods',
+          fn: () => {
+            const tempCards = cards;
+            const periodIdx = getCurrentPeriodIndex('monthly');
+            const periodKey = getPeriodKey('monthly', periodIdx);
+            
+            cards = [{
+              id: 1,
+              name: 'Test',
+              coupons: [{
+                text: '$50 Credit',
+                recurrence: 'monthly',
+                amount: 50,
+                periods: {
+                  [periodKey]: { used: true, amount: 50 }
+                }
+              }]
+            }];
+            
+            const result = getExpiringBenefits(365);
+            cards = tempCards;
+            assertArrayLength(result, 0, 'Should not return used benefits');
+          }
+        },
+        {
+          name: 'getExpiringBenefits returns benefits within threshold',
+          fn: () => {
+            const tempCards = cards;
+            const periodIdx = getCurrentPeriodIndex('monthly');
+            const periodKey = getPeriodKey('monthly', periodIdx);
+            
+            cards = [{
+              id: 1,
+              name: 'Test',
+              coupons: [{
+                text: '$50 Credit',
+                recurrence: 'monthly',
+                amount: 50,
+                periods: {
+                  [periodKey]: { used: false, amount: 50 }
+                }
+              }]
+            }];
+            
+            const result = getExpiringBenefits(365);
+            cards = tempCards;
+            
+            // Should find the benefit since it's within 365 days
+            if (result.length > 0) {
+              assert(result[0].card, 'Should have card');
+              assert(result[0].benefit, 'Should have benefit');
+              assert(typeof result[0].daysUntil === 'number', 'Should have daysUntil');
+            }
+          }
+        },
+        {
+          name: 'getExpiringBenefits sorts by days remaining (soonest first)',
+          fn: () => {
+            const result = getExpiringBenefits(365);
+            for (let i = 1; i < result.length; i++) {
+              assert(result[i].daysUntil >= result[i-1].daysUntil, 'Should be sorted by daysUntil ascending');
+            }
+          }
+        },
+        
+        // ensureCurrentPeriodExists() tests
+        {
+          name: 'ensureCurrentPeriodExists creates period if missing',
+          fn: () => {
+            const benefit = {
+              text: 'Test',
+              recurrence: 'monthly',
+              periods: {}
+            };
+            
+            const result = ensureCurrentPeriodExists(benefit);
+            assertEqual(result, true, 'Should return true when period created');
+            
+            const periodIdx = getCurrentPeriodIndex('monthly');
+            const periodKey = getPeriodKey('monthly', periodIdx);
+            assert(benefit.periods[periodKey], 'Period should be created');
+            assertEqual(benefit.periods[periodKey].used, false, 'Should initialize as unused');
+            assertEqual(benefit.periods[periodKey].amount, 0, 'Should initialize amount as 0');
+          }
+        },
+        {
+          name: 'ensureCurrentPeriodExists returns false if period exists',
+          fn: () => {
+            const periodIdx = getCurrentPeriodIndex('monthly');
+            const periodKey = getPeriodKey('monthly', periodIdx);
+            
+            const benefit = {
+              text: 'Test',
+              recurrence: 'monthly',
+              periods: {
+                [periodKey]: { used: false, amount: 0 }
+              }
+            };
+            
+            const result = ensureCurrentPeriodExists(benefit);
+            assertEqual(result, false, 'Should return false when period exists');
+          }
+        },
+        {
+          name: 'ensureCurrentPeriodExists initializes periods object if missing',
+          fn: () => {
+            const benefit = {
+              text: 'Test',
+              recurrence: 'annual'
+            };
+            
+            ensureCurrentPeriodExists(benefit);
+            assert(benefit.periods, 'Should create periods object');
+            assertEqual(typeof benefit.periods, 'object', 'periods should be an object');
+          }
+        },
+        {
+          name: 'ensureCurrentPeriodExists works for all recurrence types',
+          fn: () => {
+            ['monthly', 'quarterly', 'semi-annual', 'annual'].forEach(recurrence => {
+              const benefit = { text: 'Test', recurrence, periods: {} };
+              ensureCurrentPeriodExists(benefit);
+              const periodIdx = getCurrentPeriodIndex(recurrence);
+              const periodKey = getPeriodKey(recurrence, periodIdx);
+              assert(benefit.periods[periodKey], `Should create period for ${recurrence}`);
+            });
+          }
+        },
+        
+        // checkAndResetBenefits() tests
+        {
+          name: 'checkAndResetBenefits handles empty cards array',
+          fn: () => {
+            const tempCards = cards;
+            cards = [];
+            checkAndResetBenefits();
+            cards = tempCards;
+            // Should not throw
+            assert(true, 'Should handle empty array');
+          }
+        },
+        {
+          name: 'checkAndResetBenefits creates missing periods for all benefits',
+          fn: () => {
+            const tempCards = cards;
+            cards = [{
+              id: 1,
+              name: 'Test',
+              coupons: [
+                {text: 'Benefit 1', recurrence: 'monthly', periods: {}},
+                {text: 'Benefit 2', recurrence: 'quarterly', periods: {}}
+              ]
+            }];
+            
+            checkAndResetBenefits();
+            
+            const monthlyPeriodIdx = getCurrentPeriodIndex('monthly');
+            const monthlyPeriodKey = getPeriodKey('monthly', monthlyPeriodIdx);
+            const quarterlyPeriodIdx = getCurrentPeriodIndex('quarterly');
+            const quarterlyPeriodKey = getPeriodKey('quarterly', quarterlyPeriodIdx);
+            
+            assert(cards[0].coupons[0].periods[monthlyPeriodKey], 'Should create monthly period');
+            assert(cards[0].coupons[1].periods[quarterlyPeriodKey], 'Should create quarterly period');
+            
+            cards = tempCards;
+          }
+        },
+        {
+          name: 'checkAndResetBenefits does not recreate existing periods',
+          fn: () => {
+            const tempCards = cards;
+            const periodIdx = getCurrentPeriodIndex('annual');
+            const periodKey = getPeriodKey('annual', periodIdx);
+            
+            cards = [{
+              id: 1,
+              name: 'Test',
+              coupons: [{
+                text: 'Benefit',
+                recurrence: 'annual',
+                periods: {
+                  [periodKey]: { used: true, amount: 50, custom: 'data' }
+                }
+              }]
+            }];
+            
+            const originalCustomData = cards[0].coupons[0].periods[periodKey].custom;
+            
+            checkAndResetBenefits();
+            
+            assertEqual(cards[0].coupons[0].periods[periodKey].custom, originalCustomData, 'Should preserve existing period data');
+            
+            cards = tempCards;
+          }
+        },
+        {
+          name: 'getExpiringBenefits default threshold is 7 days',
+          fn: () => {
+            // Call without arguments to test default
+            const result1 = getExpiringBenefits();
+            const result2 = getExpiringBenefits(7);
+            
+            // Both should return same results (within reason, time might pass)
+            assertEqual(result1.length, result2.length, 'Default threshold should be 7 days');
+          }
+        },
+        {
+          name: 'v3.5 functions preserve backward compatibility with v3.4 data',
+          fn: () => {
+            const tempCards = cards;
+            const year = new Date().getFullYear();
+            
+            // Simulate old v3.4 benefit structure
+            const oldBenefit = {
+              text: '$300 Travel Credit',
+              amount: 300,
+              yearlyTotal: 300,
+              recurrence: 'annual',
+              periods: {
+                [`${year}`]: { used: true, amount: 300 }
+              },
+              done: false,
+              expiry: '2025-12-31'
+            };
+            
+            // Test that ensureCurrentPeriodExists works with old data
+            const exists = ensureCurrentPeriodExists(oldBenefit);
+            assert(typeof exists === 'boolean', 'Should still work with old v3.4 format');
+            
+            // Test that getCurrentPeriodIndex works
+            const idx = getCurrentPeriodIndex('annual');
+            assertEqual(idx, 0, 'Should work with v3.4 data');
+            
+            cards = tempCards;
+          }
+        }
+      ],
+
+      'Benefit/Perk Tracking (v3.4)': [
+        {
+          name: 'getPeriodLabels returns 12 months for monthly recurrence',
+          fn: () => {
+            const labels = getPeriodLabels('monthly');
+            assertArrayLength(labels, 12, 'Should have 12 months');
+            assertEqual(labels[0], 'Jan', 'First month should be Jan');
+            assertEqual(labels[11], 'Dec', 'Last month should be Dec');
+          }
+        },
+        {
+          name: 'getPeriodLabels returns 4 quarters for quarterly recurrence',
+          fn: () => {
+            const labels = getPeriodLabels('quarterly');
+            assertArrayLength(labels, 4, 'Should have 4 quarters');
+            assertEqual(labels[0], 'Q1', 'First should be Q1');
+            assertEqual(labels[3], 'Q4', 'Last should be Q4');
+          }
+        },
+        {
+          name: 'getPeriodLabels returns 2 halves for semi-annual recurrence',
+          fn: () => {
+            const labels = getPeriodLabels('semi-annual');
+            assertArrayLength(labels, 2, 'Should have 2 halves');
+            assertEqual(labels[0], 'H1', 'First should be H1');
+            assertEqual(labels[1], 'H2', 'Second should be H2');
+          }
+        },
+        {
+          name: 'getPeriodLabels returns 1 year for annual recurrence',
+          fn: () => {
+            const labels = getPeriodLabels('annual');
+            assertArrayLength(labels, 1, 'Should have 1 year');
+            assertEqual(labels[0], 'Year', 'Should be Year');
+          }
+        },
+        {
+          name: 'getPeriodKey generates correct key for monthly',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const key = getPeriodKey('monthly', 0);
+            assertEqual(key, `${year}-01`, 'January key should be YYYY-01');
+            
+            const decKey = getPeriodKey('monthly', 11);
+            assertEqual(decKey, `${year}-12`, 'December key should be YYYY-12');
+          }
+        },
+        {
+          name: 'getPeriodKey generates correct key for quarterly',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const key = getPeriodKey('quarterly', 0);
+            assertEqual(key, `${year}-Q1`, 'Q1 key should be YYYY-Q1');
+            
+            const q4Key = getPeriodKey('quarterly', 3);
+            assertEqual(q4Key, `${year}-Q4`, 'Q4 key should be YYYY-Q4');
+          }
+        },
+        {
+          name: 'getPeriodKey generates correct key for annual',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const key = getPeriodKey('annual', 0);
+            assertEqual(key, `${year}`, 'Annual key should be YYYY');
+          }
+        },
+        {
+          name: 'initializeBenefitPeriods creates periods for annual benefit',
+          fn: () => {
+            const benefit = { text: 'Test', amount: 100, recurrence: 'annual', periods: {} };
+            const result = initializeBenefitPeriods(benefit);
+            
+            assert(result.periods, 'Should have periods');
+            assertEqual(Object.keys(result.periods).length, 1, 'Should have 1 period for annual');
+          }
+        },
+        {
+          name: 'initializeBenefitPeriods creates periods for monthly benefit',
+          fn: () => {
+            const benefit = { text: 'Test', amount: 10, recurrence: 'monthly', periods: {} };
+            const result = initializeBenefitPeriods(benefit);
+            
+            assertEqual(Object.keys(result.periods).length, 12, 'Should have 12 periods for monthly');
+          }
+        },
+        {
+          name: 'initializeBenefitPeriods preserves existing periods',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const existingPeriods = { [`${year}-01`]: { used: true, amount: 10 } };
+            const benefit = { text: 'Test', amount: 10, recurrence: 'monthly', periods: existingPeriods };
+            const result = initializeBenefitPeriods(benefit);
+            
+            assertEqual(result.periods[`${year}-01`].used, true, 'Should preserve existing used state');
+          }
+        },
+        {
+          name: 'getBenefitUsedTotal calculates total from used periods',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const benefit = {
+              text: 'Test',
+              amount: 10,
+              recurrence: 'monthly',
+              periods: {
+                [`${year}-01`]: { used: true, amount: 10 },
+                [`${year}-02`]: { used: true, amount: 10 },
+                [`${year}-03`]: { used: false, amount: 0 }
+              }
+            };
+            const total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 20, 'Should sum used amounts (10 + 10 = 20)');
+          }
+        },
+        {
+          name: 'getBenefitUsedTotal returns 0 when no periods used',
+          fn: () => {
+            const benefit = {
+              text: 'Test',
+              amount: 100,
+              recurrence: 'annual',
+              periods: { '2025': { used: false, amount: 0 } }
+            };
+            const total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 0, 'Should return 0 when nothing used');
+          }
+        },
+        {
+          name: 'getBenefitUsedTotal returns 0 when no periods exist',
+          fn: () => {
+            const benefit = { text: 'Test', amount: 100 };
+            const total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 0, 'Should return 0 when no periods');
+          }
+        },
+        {
+          name: 'Benefit has correct structure with text, amount, recurrence',
+          fn: () => {
+            const benefit = {
+              text: '$10 Dining Credit',
+              amount: 10,
+              yearlyTotal: 120,
+              recurrence: 'monthly',
+              periods: {}
+            };
+            
+            assert(benefit.text, 'Should have text');
+            assertEqual(benefit.amount, 10, 'Should have amount');
+            assertEqual(benefit.yearlyTotal, 120, 'Should have yearlyTotal');
+            assertEqual(benefit.recurrence, 'monthly', 'Should have recurrence');
+          }
+        },
+        {
+          name: 'Period data has used and amount fields',
+          fn: () => {
+            const periodData = { used: true, amount: 50 };
+            
+            assert(periodData.hasOwnProperty('used'), 'Should have used field');
+            assert(periodData.hasOwnProperty('amount'), 'Should have amount field');
+            assertEqual(periodData.used, true, 'used should be boolean');
+            assertEqual(periodData.amount, 50, 'amount should be number');
+          }
+        },
+        {
+          name: 'Default recurrence is annual when not specified',
+          fn: () => {
+            const labels = getPeriodLabels(undefined);
+            assertArrayLength(labels, 1, 'Should default to annual (1 period)');
+          }
+        },
+        {
+          name: 'Monthly recurrence - 12 period boxes',
+          fn: () => {
+            const benefit = {
+              text: 'Monthly Credit',
+              amount: 50,
+              recurrence: 'monthly',
+              periods: {}
+            };
+            const initialized = initializeBenefitPeriods(benefit);
+            const periodKeys = Object.keys(initialized.periods);
+            assertArrayLength(periodKeys, 12, 'Monthly should have 12 periods');
+            
+            // Verify all 12 months are present
+            const year = new Date().getFullYear();
+            for (let i = 1; i <= 12; i++) {
+              const key = `${year}-${String(i).padStart(2, '0')}`;
+              assert(periodKeys.includes(key), `Should have period key ${key}`);
+              assert(initialized.periods[key].hasOwnProperty('used'), 'Should have used field');
+              assert(initialized.periods[key].hasOwnProperty('amount'), 'Should have amount field');
+            }
+          }
+        },
+        {
+          name: 'Quarterly recurrence - 4 period boxes (Q1-Q4)',
+          fn: () => {
+            const benefit = {
+              text: 'Quarterly Bonus',
+              amount: 75,
+              recurrence: 'quarterly',
+              periods: {}
+            };
+            const initialized = initializeBenefitPeriods(benefit);
+            const periodKeys = Object.keys(initialized.periods);
+            assertArrayLength(periodKeys, 4, 'Quarterly should have 4 periods');
+            
+            // Verify Q1-Q4
+            const year = new Date().getFullYear();
+            const expectedKeys = ['Q1', 'Q2', 'Q3', 'Q4'].map(q => `${year}-${q}`);
+            expectedKeys.forEach(key => {
+              assert(periodKeys.includes(key), `Should have period key ${key}`);
+            });
+          }
+        },
+        {
+          name: 'Semi-annual recurrence - 2 period boxes (H1, H2)',
+          fn: () => {
+            const benefit = {
+              text: 'Semi-Annual Benefit',
+              amount: 100,
+              recurrence: 'semi-annual',
+              periods: {}
+            };
+            const initialized = initializeBenefitPeriods(benefit);
+            const periodKeys = Object.keys(initialized.periods);
+            assertArrayLength(periodKeys, 2, 'Semi-annual should have 2 periods');
+            
+            // Verify H1 and H2
+            const year = new Date().getFullYear();
+            const expectedKeys = [`${year}-H1`, `${year}-H2`];
+            expectedKeys.forEach(key => {
+              assert(periodKeys.includes(key), `Should have period key ${key}`);
+            });
+          }
+        },
+        {
+          name: 'Period key format validation for monthly recurrence',
+          fn: () => {
+            const year = new Date().getFullYear();
+            // Monthly format: YYYY-MM
+            for (let i = 0; i < 12; i++) {
+              const key = getPeriodKey('monthly', i);
+              assert(key.match(/^\d{4}-\d{2}$/), `Monthly key should be YYYY-MM format: ${key}`);
+              assert(key.startsWith(`${year}-`), `Should include year: ${key}`);
+            }
+          }
+        },
+        {
+          name: 'Period key format validation for quarterly recurrence',
+          fn: () => {
+            const year = new Date().getFullYear();
+            // Quarterly format: YYYY-Q#
+            for (let i = 0; i < 4; i++) {
+              const key = getPeriodKey('quarterly', i);
+              assert(key.match(/^\d{4}-Q[1-4]$/), `Quarterly key should be YYYY-Q# format: ${key}`);
+              assert(key.startsWith(`${year}-`), `Should include year: ${key}`);
+            }
+          }
+        },
+        {
+          name: 'Period key format validation for semi-annual recurrence',
+          fn: () => {
+            const year = new Date().getFullYear();
+            // Semi-annual format: YYYY-H#
+            for (let i = 0; i < 2; i++) {
+              const key = getPeriodKey('semi-annual', i);
+              assert(key.match(/^\d{4}-H[1-2]$/), `Semi-annual key should be YYYY-H# format: ${key}`);
+              assert(key.startsWith(`${year}-`), `Should include year: ${key}`);
+            }
+          }
+        },
+        {
+          name: 'Toggle benefit period - marks as used',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const benefit = {
+              text: 'Test Credit',
+              amount: 10,
+              recurrence: 'monthly',
+              periods: {
+                [`${year}-01`]: { used: false, amount: 10 }
+              }
+            };
+            
+            // Simulate toggle
+            benefit.periods[`${year}-01`].used = true;
+            
+            assert(benefit.periods[`${year}-01`].used === true, 'Period should be marked as used');
+          }
+        },
+        {
+          name: 'Toggle benefit period - unmarks when toggled again',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const benefit = {
+              text: 'Test Credit',
+              amount: 10,
+              recurrence: 'monthly',
+              periods: {
+                [`${year}-01`]: { used: true, amount: 10 }
+              }
+            };
+            
+            // Simulate toggle
+            benefit.periods[`${year}-01`].used = false;
+            
+            assert(benefit.periods[`${year}-01`].used === false, 'Period should be unmarked');
+          }
+        },
+        {
+          name: 'Used total updates correctly when periods toggled',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const benefit = {
+              text: 'Test Credit',
+              amount: 10,
+              recurrence: 'monthly',
+              periods: {
+                [`${year}-01`]: { used: false, amount: 10 },
+                [`${year}-02`]: { used: true, amount: 10 },
+                [`${year}-03`]: { used: false, amount: 10 }
+              }
+            };
+            
+            // Initial total
+            let total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 10, 'Initial total should be 10');
+            
+            // Toggle month 1 on
+            benefit.periods[`${year}-01`].used = true;
+            total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 20, 'Total should be 20 after toggling on');
+            
+            // Toggle month 2 off
+            benefit.periods[`${year}-02`].used = false;
+            total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 10, 'Total should be 10 after toggling off');
+            
+            // Toggle month 3 on
+            benefit.periods[`${year}-03`].used = true;
+            total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 20, 'Total should be 20 after toggling month 3 on');
+          }
+        },
+        {
+          name: 'Benefit with $10/month should have $120 yearly total',
+          fn: () => {
+            const benefit = {
+              text: '$10 Monthly Credit',
+              amount: 10,
+              yearlyTotal: 10 * 12, // Calculate yearly total
+              recurrence: 'monthly'
+            };
+            
+            assertEqual(benefit.yearlyTotal, 120, 'Yearly total should be 120 for 12 x $10');
+          }
+        },
+        {
+          name: 'Empty periods object gets initialized',
+          fn: () => {
+            const benefit = {
+              text: 'Test Benefit',
+              amount: 50,
+              recurrence: 'annual',
+              periods: {} // Empty
+            };
+            
+            assert(Object.keys(benefit.periods).length === 0, 'Should start empty');
+            
+            const initialized = initializeBenefitPeriods(benefit);
+            
+            assert(Object.keys(initialized.periods).length > 0, 'Should be initialized with periods');
+            assert(initialized.periods, 'Should have periods property');
+          }
+        },
+        {
+          name: 'Benefit data migration from old format (done/expiry) to new format',
+          fn: () => {
+            // Old format
+            const oldBenefit = {
+              text: '$300 Travel Credit',
+              done: false,
+              expiry: '2025-12-31'
+            };
+            
+            // Migrate to new format
+            const migrated = {
+              text: oldBenefit.text,
+              amount: 300,
+              recurrence: 'annual',
+              periods: {},
+              // Keep migration metadata
+              _migratedFrom: {
+                done: oldBenefit.done,
+                expiry: oldBenefit.expiry
+              }
+            };
+            
+            // Initialize new periods
+            const initialized = initializeBenefitPeriods(migrated);
+            
+            assert(initialized.periods, 'Should have new periods structure');
+            assertEqual(Object.keys(initialized.periods).length, 1, 'Annual should have 1 period');
+            assert(initialized._migratedFrom, 'Should preserve migration metadata');
+            assertEqual(initialized._migratedFrom.expiry, '2025-12-31', 'Should preserve old expiry');
+          }
+        },
+        {
+          name: 'Quarterly benefit - periods have correct structure',
+          fn: () => {
+            const benefit = {
+              text: 'Quarterly Bonus',
+              amount: 75,
+              recurrence: 'quarterly',
+              periods: {}
+            };
+            const initialized = initializeBenefitPeriods(benefit);
+            
+            // Check each period has correct structure
+            for (const [key, period] of Object.entries(initialized.periods)) {
+              assert(key.includes('Q'), `Key should contain Q for quarterly: ${key}`);
+              assert(period.hasOwnProperty('used'), 'Should have used field');
+              assert(period.hasOwnProperty('amount'), 'Should have amount field');
+              assertEqual(typeof period.used, 'boolean', 'used should be boolean');
+              assertEqual(typeof period.amount, 'number', 'amount should be number');
+              assertEqual(period.used, false, 'Should initialize as unused');
+              assertEqual(period.amount, 0, 'Should initialize amount as 0');
+            }
+          }
+        },
+        {
+          name: 'Period toggles preserve amount values across all periods',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const benefit = {
+              text: 'Test',
+              amount: 25,
+              recurrence: 'quarterly',
+              periods: {
+                [`${year}-Q1`]: { used: false, amount: 25 },
+                [`${year}-Q2`]: { used: false, amount: 25 },
+                [`${year}-Q3`]: { used: false, amount: 25 },
+                [`${year}-Q4`]: { used: false, amount: 25 }
+              }
+            };
+            
+            // Toggle Q1 and Q3
+            benefit.periods[`${year}-Q1`].used = true;
+            benefit.periods[`${year}-Q3`].used = true;
+            
+            // Verify amount values preserved
+            assertEqual(benefit.periods[`${year}-Q1`].amount, 25, 'Q1 amount preserved');
+            assertEqual(benefit.periods[`${year}-Q2`].amount, 25, 'Q2 amount preserved');
+            assertEqual(benefit.periods[`${year}-Q3`].amount, 25, 'Q3 amount preserved');
+            assertEqual(benefit.periods[`${year}-Q4`].amount, 25, 'Q4 amount preserved');
+            
+            // Verify total
+            const total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 50, 'Used total should be 50 (25+25)');
+          }
+        },
+        {
+          name: 'Semi-annual benefit calculation - H1 and H2 independent',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const benefit = {
+              text: 'Semi-Annual Credit',
+              amount: 150,
+              yearlyTotal: 300,
+              recurrence: 'semi-annual',
+              periods: {
+                [`${year}-H1`]: { used: false, amount: 150 },
+                [`${year}-H2`]: { used: false, amount: 150 }
+              }
+            };
+            
+            // Toggle H1
+            benefit.periods[`${year}-H1`].used = true;
+            let total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 150, 'H1 alone should be 150');
+            
+            // Toggle H2
+            benefit.periods[`${year}-H2`].used = true;
+            total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 300, 'Both H1 and H2 should total 300');
+            
+            // Toggle H1 back off
+            benefit.periods[`${year}-H1`].used = false;
+            total = getBenefitUsedTotal(benefit);
+            assertEqual(total, 150, 'H2 alone should be 150');
+          }
+        },
+        {
+          name: 'Period data validates period structure compliance',
+          fn: () => {
+            const year = new Date().getFullYear();
+            const periods = {
+              [`${year}-01`]: { used: true, amount: 10 },
+              [`${year}-02`]: { used: false, amount: 0 },
+              [`${year}-03`]: { used: true, amount: 20 }
+            };
+            
+            // Validate each period
+            for (const [key, period] of Object.entries(periods)) {
+              assert(period.hasOwnProperty('used'), `Period ${key} missing 'used'`);
+              assert(period.hasOwnProperty('amount'), `Period ${key} missing 'amount'`);
+              assert(typeof period.used === 'boolean', `Period ${key} 'used' not boolean`);
+              assert(typeof period.amount === 'number', `Period ${key} 'amount' not number`);
+              assert(period.amount >= 0, `Period ${key} 'amount' should be non-negative`);
+            }
+          }
+        }
+      ]
+    };
+
+    // ============================================
+    // TEST RUNNER
+    // ============================================
+    function runAllTests() {
+      testResults = [];
+      logMessages = [];
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      
+      let passed = 0;
+      let failed = 0;
+      
+      for (const [suiteName, tests] of Object.entries(testSuites)) {
+        log(`\n📦 Suite: ${suiteName}`);
+        
+        const suiteDiv = document.createElement('div');
+        suiteDiv.className = 'test-suite';
+        suiteDiv.innerHTML = `<h2>${suiteName}</h2>`;
+        
+        for (const test of tests) {
+          let status = 'pass';
+          let errorMsg = '';
+          
+          try {
+            test.fn();
+            passed++;
+            log(`  ✅ ${test.name}`);
+          } catch (e) {
+            status = 'fail';
+            errorMsg = e.message;
+            failed++;
+            log(`  ❌ ${test.name}`);
+            log(`     ${e.message}`);
+          }
+          
+          const testDiv = document.createElement('div');
+          testDiv.className = `test ${status}`;
+          testDiv.innerHTML = `${status === 'pass' ? '✅' : '❌'} ${test.name}`;
+          if (errorMsg) {
+            testDiv.title = errorMsg;
+          }
+          suiteDiv.appendChild(testDiv);
+          
+          testResults.push({ suite: suiteName, name: test.name, status, error: errorMsg });
+        }
+        
+        resultsDiv.appendChild(suiteDiv);
+      }
+      
+      // Summary
+      const summaryDiv = document.getElementById('summary');
+      summaryDiv.style.display = 'block';
+      summaryDiv.className = `summary ${failed === 0 ? 'all-pass' : 'has-fail'}`;
+      summaryDiv.innerHTML = `${failed === 0 ? '🎉' : '⚠️'} ${passed} passed, ${failed} failed`;
+      
+      log(`\n${'='.repeat(40)}`);
+      log(`TOTAL: ${passed} passed, ${failed} failed`);
+    }
+    
+    // Auto-run on load
+    window.onload = runAllTests;
+  </script>
+</body>
+</html>

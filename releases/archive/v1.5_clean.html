@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title> Card Points Tracker</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; -webkit-font-smoothing: antialiased; }
+
+  @media (prefers-color-scheme: light) {
+    body { background: #f2f2f7; color: #1d1d1f; }
+    .top-bar { background: rgba(255,255,255,0.85); border-bottom: 1px solid rgba(0,0,0,0.1); }
+    .search-box { background: rgba(118,118,128,0.12); color: #1d1d1f; }
+    .search-box::placeholder { color: #86868b; }
+    .card-tile { background: #fff; border: 1px solid rgba(0,0,0,0.08); }
+    .section-label { color: #86868b; }
+    .tag { background: rgba(0,122,255,0.1); color: #007AFF; }
+    .tag.green { background: rgba(52,199,89,0.12); color: #34C759; }
+    .tag.orange { background: rgba(255,149,0,0.12); color: #FF9500; }
+    .tag.purple { background: rgba(175,82,222,0.12); color: #AF52DE; }
+    .tag.red { background: rgba(255,59,48,0.12); color: #FF3B30; }
+    .tag.teal { background: rgba(90,200,250,0.18); color: #32ADE6; }
+    .modal-bg { background: rgba(0,0,0,0.35); }
+    .modal { background: #fff; }
+    .modal-header { border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .detail-row { border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .detail-icon-bg { background: rgba(0,122,255,0.1); }
+    .empty-state { color: #86868b; }
+    .add-btn { background: #007AFF; }
+    .form-input { background: rgba(118,118,128,0.1); border: 1px solid rgba(0,0,0,0.1); color: #1d1d1f; }
+    .form-input:focus { border-color: #007AFF; background: #fff; }
+    .cancel-btn { background: rgba(118,118,128,0.15); color: #1d1d1f; }
+    .bank-chip { background: rgba(0,0,0,0.06); color: #3c3c43; }
+    .coupon-item { background: rgba(255,149,0,0.08); border-left: 3px solid #FF9500; }
+    .coupon-item.used { opacity: 0.45; }
+    .nav-bar { background: rgba(255,255,255,0.9); border-top: 1px solid rgba(0,0,0,0.1); }
+    .nav-btn.active { color: #007AFF; }
+    .nav-btn { color: #86868b; }
+    .fab { background: #007AFF; box-shadow: 0 4px 16px rgba(0,122,255,0.4); }
+    .summary-card { background: linear-gradient(135deg, #007AFF, #5AC8FA); color: #fff; }
+    .progress-bar-bg { background: rgba(0,0,0,0.08); }
+    .redemption-item { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06); }
+    .tab-pill { background: rgba(118,118,128,0.12); color: #3c3c43; }
+    .tab-pill.active { background: #007AFF; color: #fff; }
+    .emoji-btn { background: rgba(118,118,128,0.1); }
+    .emoji-btn.selected { background: rgba(0,122,255,0.2); outline: 2px solid #007AFF; }
+    .coupon-check { background: rgba(255,149,0,0.2); color: #FF9500; }
+    .coupon-check.done { background: #34C759; color: #fff; }
+    .owner-me { background: rgba(0,122,255,0.13); color: #007AFF; }
+    .owner-wife { background: rgba(255,45,85,0.13); color: #FF2D55; }
+    .owner-shared { background: rgba(52,199,89,0.13); color: #34C759; }
+  }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1c1c1e; color: #f5f5f7; }
+    .top-bar { background: rgba(28,28,30,0.92); border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .search-box { background: rgba(118,118,128,0.24); color: #f5f5f7; }
+    .search-box::placeholder { color: #636366; }
+    .card-tile { background: #2c2c2e; border: 1px solid rgba(255,255,255,0.08); }
+    .section-label { color: #636366; }
+    .tag { background: rgba(10,132,255,0.2); color: #0A84FF; }
+    .tag.green { background: rgba(48,209,88,0.18); color: #30D158; }
+    .tag.orange { background: rgba(255,159,10,0.18); color: #FF9F0A; }
+    .tag.purple { background: rgba(191,90,242,0.18); color: #BF5AF2; }
+    .tag.red { background: rgba(255,69,58,0.18); color: #FF453A; }
+    .tag.teal { background: rgba(100,210,255,0.18); color: #64D2FF; }
+    .modal-bg { background: rgba(0,0,0,0.6); }
+    .modal { background: #2c2c2e; }
+    .modal-header { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .detail-row { border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .detail-icon-bg { background: rgba(10,132,255,0.2); }
+    .empty-state { color: #636366; }
+    .add-btn { background: #0A84FF; }
+    .form-input { background: rgba(118,118,128,0.2); border: 1px solid rgba(255,255,255,0.1); color: #f5f5f7; }
+    .form-input:focus { border-color: #0A84FF; }
+    .cancel-btn { background: rgba(118,118,128,0.25); color: #f5f5f7; }
+    .bank-chip { background: rgba(255,255,255,0.1); color: #ebebf5; }
+    .coupon-item { background: rgba(255,159,10,0.1); border-left: 3px solid #FF9F0A; }
+    .coupon-item.used { opacity: 0.35; }
+    .nav-bar { background: rgba(28,28,30,0.95); border-top: 1px solid rgba(255,255,255,0.08); }
+    .nav-btn.active { color: #0A84FF; }
+    .nav-btn { color: #636366; }
+    .fab { background: #0A84FF; box-shadow: 0 4px 20px rgba(10,132,255,0.45); }
+    .summary-card { background: linear-gradient(135deg, #0A84FF, #30D158); color: #fff; }
+    .progress-bar-bg { background: rgba(255,255,255,0.1); }
+    .redemption-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .tab-pill { background: rgba(118,118,128,0.25); color: #ebebf5; }
+    .tab-pill.active { background: #0A84FF; color: #fff; }
+    .emoji-btn { background: rgba(118,118,128,0.2); }
+    .emoji-btn.selected { background: rgba(10,132,255,0.25); outline: 2px solid #0A84FF; }
+    .coupon-check { background: rgba(255,159,10,0.2); color: #FF9F0A; }
+    .coupon-check.done { background: #30D158; color: #fff; }
+    .owner-me { background: rgba(10,132,255,0.2); color: #0A84FF; }
+    .owner-wife { background: rgba(255,69,58,0.2); color: #FF453A; }
+    .owner-shared { background: rgba(48,209,88,0.2); color: #30D158; }
+  }
+
+  #app { max-width: 430px; margin: 0 auto; }
+  .top-bar { position: sticky; top: 0; z-index: 100; padding: 16px 16px 12px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .top-bar h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; opacity: 0.5; }
+  .search-box { width: 100%; padding: 8px 12px 8px 34px; border: none; border-radius: 12px; font-size: 15px; outline: none; }
+  .tab-row { display: flex; gap: 6px; padding: 10px 16px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tab-row::-webkit-scrollbar { display: none; }
+  .tab-pill { flex-shrink: 0; padding: 5px 14px; border-radius: 20px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+  .content-area { padding: 12px 16px 100px; }
+  .section-label { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin: 14px 0 8px; }
+  .card-tile { border-radius: 16px; padding: 16px; margin-bottom: 10px; cursor: pointer; transition: transform 0.15s; }
+  .card-tile:active { transform: scale(0.98); }
+  .card-tile-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .card-title-block { flex: 1; min-width: 0; }
+  .card-name { font-size: 16px; font-weight: 600; }
+  .card-bank { font-size: 12px; margin-top: 2px; }
+  .bank-chip { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+  .owner-chip { display: inline-block; padding: 1px 7px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-left: 3px; }
+  .points-badge { text-align: right; flex-shrink: 0; }
+  .points-num { font-size: 20px; font-weight: 700; }
+  .points-unit { font-size: 11px; opacity: 0.6; }
+  .tags-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .tag { padding: 3px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; }
+  .progress-section { margin-top: 4px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; opacity: 0.65; margin-bottom: 4px; }
+  .progress-bar-bg { border-radius: 4px; height: 5px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #007AFF, #5AC8FA); transition: width 0.6s ease; }
+  .summary-card { border-radius: 20px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
+  .summary-title { font-size: 13px; font-weight: 500; opacity: 0.85; }
+  .summary-num { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin: 4px 0; }
+  .summary-sub { font-size: 12px; opacity: 0.75; }
+  .fab { position: fixed; bottom: 90px; right: calc(50% - 215px + 16px); width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer; font-size: 26px; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 200; transition: transform 0.2s; }
+  .fab:active { transform: scale(0.92); }
+  .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; display: flex; padding: 8px 0 20px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 150; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; cursor: pointer; font-size: 11px; font-weight: 500; transition: color 0.2s; }
+  .nav-btn .nav-icon { font-size: 22px; }
+  .modal-bg { position: fixed; inset: 0; z-index: 300; display: flex; align-items: flex-end; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .modal-bg.hidden { display: none; }
+  .modal { width: 100%; max-width: 430px; margin: 0 auto; border-radius: 24px 24px 0 0; max-height: 88vh; overflow-y: auto; animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: rgba(128,128,128,0.3); margin: 10px auto 4px; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 14px; }
+  .modal-title { font-size: 20px; font-weight: 700; }
+  .close-btn { width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.2); color: inherit; }
+  .modal-body { padding: 0 20px 24px; }
+  .detail-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; }
+  .detail-icon-bg { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .detail-content { flex: 1; }
+  .detail-label { font-size: 12px; opacity: 0.6; margin-bottom: 3px; }
+  .detail-value { font-size: 14px; font-weight: 500; }
+  .coupon-item { padding: 10px 12px; border-radius: 10px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; transition: opacity 0.2s; }
+  .coupon-check { width: 20px; height: 20px; border-radius: 50%; border: none; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+  .coupon-text { flex: 1; font-size: 13px; font-weight: 500; }
+  .coupon-expiry { font-size: 11px; opacity: 0.55; }
+  .redemption-item { border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .redemption-name { font-size: 14px; font-weight: 600; }
+  .redemption-ratio { font-size: 13px; opacity: 0.7; }
+  .redemption-value { font-size: 15px; font-weight: 700; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; opacity: 0.8; display: block; }
+  .form-input { width: 100%; padding: 10px 14px; border-radius: 12px; font-size: 14px; outline: none; transition: all 0.2s; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .add-btn, .cancel-btn { flex: 1; padding: 13px; border-radius: 14px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .add-btn { color: #fff; }
+  .emoji-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 6px; margin-top: 6px; }
+  .emoji-btn { aspect-ratio: 1; border-radius: 10px; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .color-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .color-btn { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.15s; }
+  .color-btn.selected { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 0 2px #007AFF; }
+  .empty-state { text-align: center; padding: 60px 20px; font-size: 15px; line-height: 1.6; }
+  .empty-state .big-emoji { font-size: 56px; display: block; margin-bottom: 12px; }
+  .empty-state strong { font-size: 18px; display: block; margin-bottom: 6px; }
+
+  /*  Backup  */
+  .backup-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:14px; border-radius:16px; border:none; cursor:pointer; font-size:15px; font-weight:600; transition:all 0.2s; margin-bottom:10px; }
+  .backup-export { background:rgba(0,122,255,0.1); color:#007AFF; }
+  .backup-import { background:rgba(52,199,89,0.1); color:#34C759; }
+  @media (prefers-color-scheme: dark) {
+    .backup-export { background:rgba(10,132,255,0.15); color:#0A84FF; }
+    .backup-import { background:rgba(48,209,88,0.15); color:#30D158; }
+  }
+  .backup-info { font-size:12px; opacity:0.5; text-align:center; line-height:1.6; margin-bottom:16px; }
+  #restore-input { display:none; }
+  .hist-item { display:flex; align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid rgba(128,128,128,0.1); }
+  .hist-dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .hist-earned .hist-dot { background:rgba(52,199,89,0.15); color:#34C759; }
+  .hist-spent  .hist-dot { background:rgba(255,59,48,0.12);  color:#FF3B30; }
+  .hist-body { flex:1; }
+  .hist-amount { font-size:15px; font-weight:700; }
+  .hist-earned .hist-amount { color:#34C759; }
+  .hist-spent  .hist-amount { color:#FF3B30; }
+  .hist-meta { font-size:11px; opacity:0.55; margin-top:2px; }
+  .hist-note { font-size:12px; opacity:0.7; margin-top:3px; font-style:italic; }
+  .log-btn { width:100%; padding:12px; border-radius:14px; border:none; cursor:pointer; font-size:15px; font-weight:600; margin-top:6px; background:rgba(0,122,255,0.1); color:#007AFF; transition:all 0.2s; }
+  @media (prefers-color-scheme: dark) {
+    .log-btn { background:rgba(10,132,255,0.15); color:#0A84FF; }
+    .hist-earned .hist-dot { background:rgba(48,209,88,0.18); color:#30D158; }
+    .hist-spent  .hist-dot { background:rgba(255,69,58,0.18);  color:#FF453A; }
+    .hist-earned .hist-amount { color:#30D158; }
+    .hist-spent  .hist-amount { color:#FF453A; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top-bar">
+    <h1> Card Points</h1>
+    <div class="search-wrap">
+      <span class="search-icon"></span>
+      <input class="search-box" id="searchBox" type="text" placeholder="Search cards, airlines, rewards" oninput="handleSearch(this.value)">
+    </div>
+  </div>
+  <div class="tab-row" id="tabRow"></div>
+  <div class="content-area" id="contentArea"></div>
+  <button class="fab" onclick="openAddModal()"></button>
+  <div class="nav-bar">
+    <button class="nav-btn active" id="nav-cards" onclick="switchNav('cards')"><span class="nav-icon"></span>Cards</button>
+    <button class="nav-btn" id="nav-miles" onclick="switchNav('miles')"><span class="nav-icon"></span>Miles</button>
+    <button class="nav-btn" id="nav-coupons" onclick="switchNav('coupons')"><span class="nav-icon"></span>Perks</button>
+    <button class="nav-btn" id="nav-summary" onclick="switchNav('summary')"><span class="nav-icon"></span>Summary</button>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-bg hidden" id="detailModal">
+  <div class="modal" id="detailModalContent"></div>
+</div>
+
+<!-- Add Card Modal -->
+<div class="modal-bg hidden" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Add Credit Card</span>
+      <button class="close-btn" onclick="closeAddModal()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Card Name</label>
+        <input class="form-input" id="f-name" placeholder="e.g. Chase Sapphire Preferred" oninput="autofillCard(this.value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bank</label>
+        <div id="bankGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px"></div>
+        <input class="form-input" id="f-bank" placeholder="Or type bank name" oninput="autofillCard(document.getElementById('f-name').value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Owner</label>
+        <select class="form-input" id="f-owner">
+          <option value="Me"> Me</option>
+          <option value="Wife"> Wife</option>
+          <option value="Shared"> Shared</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Statement Date</label>
+        <input class="form-input" id="f-due" type="date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reward Categories <span style="opacity:0.5;font-weight:400">(auto-filled)</span></label>
+        <input class="form-input" id="f-perks" placeholder="e.g. Dining, Travel, Groceries" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Transfer Partners <span style="opacity:0.5;font-weight:400">(auto-filled)</span></label>
+        <input class="form-input" id="f-redeem" placeholder="e.g. United, Hyatt, Southwest" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Transfer Ratio</label>
+        <input class="form-input" id="f-ratio" placeholder="e.g. 1:1" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Annual Benefits <span style="opacity:0.5;font-weight:400">(auto-filled)</span></label>
+        <input class="form-input" id="f-coupons" placeholder="e.g. $300 travel credit, Priority Pass" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Current Points</label>
+        <input class="form-input" id="f-points" type="number" placeholder="0" />
+      </div>
+      <div class="form-actions">
+        <button class="cancel-btn" onclick="closeAddModal()">Cancel</button>
+        <button class="add-btn" onclick="saveCard()">Save Card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Log Points Modal -->
+<div class="modal-bg hidden" id="logModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"> Log Points</span>
+      <button class="close-btn" onclick="closeLogModal()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button id="log-type-earned" onclick="setLogType('earned')" style="padding:10px;border-radius:12px;border:2px solid #34C759;background:rgba(52,199,89,0.12);color:#34C759;font-size:14px;font-weight:600;cursor:pointer">+ Earned</button>
+          <button id="log-type-spent"  onclick="setLogType('spent')"  style="padding:10px;border-radius:12px;border:2px solid rgba(128,128,128,0.3);background:transparent;color:inherit;font-size:14px;font-weight:600;cursor:pointer"> Spent / Redeemed</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Points</label>
+          <input class="form-input" id="log-amount" type="number" placeholder="0" min="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-input" id="log-date" type="date" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note <span style="opacity:0.5;font-weight:400">(optional)</span></label>
+        <input class="form-input" id="log-note" placeholder="e.g. Monthly spend, Transferred to United" />
+      </div>
+      <div class="form-actions">
+        <button class="cancel-btn" onclick="closeLogModal()">Cancel</button>
+        <button class="add-btn" onclick="saveLog()">Save Entry</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+//  Constants 
+const EMOJIS = ['','','','','','','','','','','','','','','',''];
+const COLORS  = ['#FF6B6B','#FF9500','#FFCC02','#34C759','#00C7BE','#007AFF','#5856D6','#AF52DE','#FF2D55','#8E8E93'];
+const TC      = ['','green','orange','purple','red','teal','','green','orange','purple'];
+
+//  Bank Logo Map 
+const BANK_BRANDS = {
+  'chase':            { bg:'#117ACA', fg:'#fff', abbr:'CHASE' },
+  'american express': { bg:'#016FD0', fg:'#fff', abbr:'AMEX'  },
+  'amex':             { bg:'#016FD0', fg:'#fff', abbr:'AMEX'  },
+  'citi':             { bg:'#C01933', fg:'#fff', abbr:'citi'  },
+  'citibank':         { bg:'#C01933', fg:'#fff', abbr:'citi'  },
+  'capital one':      { bg:'#D03027', fg:'#fff', abbr:'C1'    },
+  'discover':         { bg:'#FF6600', fg:'#fff', abbr:'DISC'  },
+  'wells fargo':      { bg:'#D71E28', fg:'#fff', abbr:'WF'    },
+  'bank of america':  { bg:'#E31837', fg:'#fff', abbr:'BofA'  },
+  'us bank':          { bg:'#003087', fg:'#fff', abbr:'USB'   },
+  'barclays':         { bg:'#00AEEF', fg:'#fff', abbr:'BARC'  },
+  'navy federal':     { bg:'#002F6C', fg:'#fff', abbr:'NFCU'  },
+  'pnc':              { bg:'#F58025', fg:'#fff', abbr:'PNC'   },
+  'td bank':          { bg:'#34A853', fg:'#fff', abbr:'TD'    },
+  'synchrony':        { bg:'#6E2B8B', fg:'#fff', abbr:'SYF'   },
+};
+
+function cardIconHtml(c) {
+  const key   = (c.bank || '').toLowerCase();
+  const brand = Object.entries(BANK_BRANDS).find(([k]) => key.includes(k))?.[1];
+  if (brand) {
+    return `<div style="width:36px;height:36px;border-radius:8px;background:${brand.bg};display:flex;align-items:center;justify-content:center;font-size:${brand.abbr.length>4?8:9}px;font-weight:800;color:${brand.fg};letter-spacing:0.2px;font-family:-apple-system,sans-serif">${brand.abbr}</div>`;
+  }
+  return `<span style="font-size:22px">${c.icon}</span>`;
+}
+
+//  Persistence 
+function saveCards() { localStorage.setItem('cpCards', JSON.stringify(cards)); }
+
+//  Hard reset corrupted data 
+(function(){
+  try {
+    const raw = localStorage.getItem('cpCards');
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (!Array.isArray(p) || p.length === 0) { localStorage.removeItem('cpCards'); return; }
+    const bad = p.some(c =>
+      !c || typeof c !== 'object' ||
+      typeof c.name !== 'string' ||
+      typeof c.bank !== 'string' ||
+      !Array.isArray(c.redeem) ||
+      !Array.isArray(c.perks) ||
+      !Array.isArray(c.coupons) ||
+      /[\u4e00-\u9fff]/.test(c.name + c.bank)
+    );
+    if (bad) localStorage.removeItem('cpCards');
+  } catch(e) { localStorage.removeItem('cpCards'); }
+})();
+
+function loadCards() {
+  try {
+    const raw = localStorage.getItem('cpCards');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.length) return null;
+    // wipe if any card looks like old Taiwan data or is malformed
+    if (parsed.some(c => !c.name || !c.bank || !Array.isArray(c.redeem) || /[\u4e00-\u9fff]/.test(c.name + c.bank))) {
+      localStorage.removeItem('cpCards');
+      return null;
+    }
+    return parsed.map(c => ({
+      id:      c.id      ?? Date.now(),
+      name:    c.name    ?? 'Unknown',
+      bank:    c.bank    ?? 'Unknown',
+      icon:    c.icon    ?? '',
+      color:   c.color   ?? '#007AFF',
+      points:  typeof c.points === 'number' ? c.points : 0,
+      due:     c.due     ?? '',
+      owner:   c.owner   ?? 'Me',
+      perks:   Array.isArray(c.perks)   ? c.perks   : [],
+      redeem:  Array.isArray(c.redeem)  ? c.redeem  : [],
+      coupons: Array.isArray(c.coupons) ? c.coupons : [],
+      history: Array.isArray(c.history) ? c.history : [],
+    }));
+  } catch(e) { localStorage.removeItem('cpCards'); return null; }
+}
+
+const DEFAULTS = [
+  { id:1, name:'Chase Sapphire Reserve', bank:'Chase', icon:'', color:'#007AFF', points:85000, due:'2025-09-15', owner:'Me',
+    perks:['3x Dining','3x Travel','1.5x Everything','Priority Pass Lounge'],
+    redeem:[{name:'United MileagePlus',ratio:'1:1',est:85000},{name:'World of Hyatt',ratio:'1:1',est:85000},{name:'Southwest Rapid Rewards',ratio:'1:1',est:85000},{name:'Air Canada Aeroplan',ratio:'1:1',est:85000}],
+    coupons:[{text:'$300 Annual Travel Credit',expiry:'2026-01-01',done:false},{text:'Global Entry / TSA PreCheck Credit',expiry:'2026-01-01',done:true},{text:'DoorDash DashPass',expiry:'2025-12-31',done:false}],
+    history:[] },
+  { id:2, name:'Amex Platinum', bank:'American Express', icon:'', color:'#AF52DE', points:120000, due:'2025-09-20', owner:'Wife',
+    perks:['5x Flights booked directly','5x Prepaid Hotels via Amex','Centurion Lounge Access','Fine Hotels & Resorts'],
+    redeem:[{name:'Delta SkyMiles',ratio:'1:1',est:120000},{name:'British Airways Avios',ratio:'1:1',est:120000},{name:'Air France/KLM Flying Blue',ratio:'1:1',est:120000},{name:'Marriott Bonvoy',ratio:'1:2',est:240000}],
+    coupons:[{text:'$200 Airline Fee Credit',expiry:'2025-12-31',done:false},{text:'$200 Fine Hotels Credit',expiry:'2025-12-31',done:false},{text:'$240 Digital Entertainment Credit',expiry:'2025-12-31',done:true},{text:'Centurion Lounge Access',expiry:'2026-01-01',done:false},{text:'$189 CLEAR Plus Credit',expiry:'2025-12-31',done:false}],
+    history:[] },
+  { id:3, name:'Chase Freedom Unlimited', bank:'Chase', icon:'', color:'#34C759', points:22000, due:'2025-09-05', owner:'Me',
+    perks:['1.5x Everything','3x Dining','3x Drugstores','5x Travel via Chase Portal'],
+    redeem:[{name:'Chase Ultimate Rewards (cash)',ratio:'1:1',est:22000}],
+    coupons:[{text:'No Annual Fee',expiry:'',done:false}],
+    history:[] },
+  { id:4, name:'Amex Gold', bank:'American Express', icon:'', color:'#FF9500', points:45000, due:'2025-09-28', owner:'Wife',
+    perks:['4x Dining worldwide','4x US Supermarkets (up to $25k/yr)','3x Flights','1x Everything else'],
+    redeem:[{name:'Delta SkyMiles',ratio:'1:1',est:45000},{name:'Air Canada Aeroplan',ratio:'1:1',est:45000},{name:'British Airways Avios',ratio:'1:1',est:45000},{name:'Marriott Bonvoy',ratio:'1:2',est:90000}],
+    coupons:[{text:'$120 Dining Credit ($10/mo)',expiry:'2025-12-31',done:false},{text:'$120 Uber Cash ($10/mo)',expiry:'2025-12-31',done:false}],
+    history:[] },
+];
+
+let cards = loadCards() || DEFAULTS;
+if (!loadCards()) saveCards();
+
+let currentTab  = 'all';
+let currentNav  = 'cards';
+let selEmoji    = '';
+let selColor    = '#007AFF';
+let searchQuery = '';
+
+//  Nav & Tabs 
+function switchNav(n) {
+  currentNav = n;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + n).classList.add('active');
+  renderAll();
+}
+
+function buildTabs() {
+  const opts   = ['all','Me','Wife','Shared', ...new Set(cards.map(c => c.bank))];
+  const labels = { all:'All Cards', Me:' Mine', Wife:' Wife', Shared:' Shared' };
+  document.getElementById('tabRow').innerHTML = opts.map(o =>
+    `<button class="tab-pill ${o===currentTab?'active':''}" onclick="setTab('${o}')">${labels[o]||o}</button>`
+  ).join('');
+}
+
+function setTab(t) { currentTab = t; renderAll(); }
+
+function handleSearch(v) { searchQuery = v.toLowerCase(); renderAll(); }
+
+function filtered() {
+  let list = cards;
+  if (['Me','Wife','Shared'].includes(currentTab)) list = cards.filter(c => (c.owner||'Me') === currentTab);
+  else if (currentTab !== 'all') list = cards.filter(c => c.bank === currentTab);
+  if (searchQuery) list = list.filter(c =>
+    c.name.toLowerCase().includes(searchQuery) ||
+    c.bank.toLowerCase().includes(searchQuery) ||
+    c.perks.some(p => p.toLowerCase().includes(searchQuery)) ||
+    c.redeem.some(r => r.name.toLowerCase().includes(searchQuery)) ||
+    (c.coupons||[]).some(x => x.text.toLowerCase().includes(searchQuery))
+  );
+  return list;
+}
+
+//  Render 
+function renderAll() {
+  buildTabs();
+  const area = document.getElementById('contentArea');
+  const list = filtered();
+  if (currentNav==='cards')   renderCards(area, list);
+  else if (currentNav==='miles')   renderMiles(area, list);
+  else if (currentNav==='coupons') renderCoupons(area, list);
+  else renderSummary(area);
+}
+
+function tc(i) { return TC[i % TC.length]; }
+
+function renderCards(area, list) {
+  if (!list.length) { area.innerHTML = `<div class="empty-state"><span class="big-emoji"></span><strong>No cards yet</strong>Tap + to add your first card</div>`; return; }
+  area.innerHTML = list.map(c => {
+    const due      = c.due ? new Date(c.due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const daysLeft = c.due ? Math.ceil((new Date(c.due)-new Date())/86400000) : 99;
+    const prog     = Math.max(0, Math.min(100, (1-daysLeft/30)*100));
+    const owner    = (c.owner||'Me').toLowerCase();
+    return `<div class="card-tile" onclick="openDetail(${c.id})">
+      <div class="card-tile-header">
+        <div class="card-icon" style="background:${c.color}22">${cardIconHtml(c)}</div>
+        <div class="card-title-block">
+          <div class="card-name">${c.name}</div>
+          <div class="card-bank"><span class="bank-chip">${c.bank}</span> <span class="owner-chip owner-${owner}">${c.owner||'Me'}</span></div>
+        </div>
+        <div class="points-badge"><div class="points-num">${c.points.toLocaleString()}</div><div class="points-unit">pts</div></div>
+      </div>
+      <div class="tags-row">${c.perks.slice(0,4).map((p,i)=>`<span class="tag ${tc(i)}">${p}</span>`).join('')}</div>
+      ${c.due ? `<div class="progress-section">
+        <div class="progress-label"><span>Statement ${due}</span><span>${daysLeft>0?daysLeft+' days':'Today!'}</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${prog}%"></div></div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderMiles(area, list) {
+  if (!list.length) { area.innerHTML = `<div class="empty-state"><span class="big-emoji"></span><strong>No cards found</strong></div>`; return; }
+  const pm = {};
+  list.forEach(c => c.redeem.forEach(r => { if (!pm[r.name]) pm[r.name]=[]; pm[r.name].push({card:c,ratio:r.ratio,est:r.est}); }));
+  let html = `<div class="section-label">Transfer Partners by Card</div>`;
+  list.forEach(c => {
+    html += `<div class="card-tile">
+      <div class="card-tile-header">
+        <div class="card-icon" style="background:${c.color}22">${cardIconHtml(c)}</div>
+        <div class="card-title-block"><div class="card-name">${c.name}</div><div class="card-bank"><span class="bank-chip">${c.bank}</span></div></div>
+        <div class="points-badge"><div class="points-num">${c.points.toLocaleString()}</div><div class="points-unit">pts</div></div>
+      </div>
+      ${c.redeem.map(r=>`<div class="redemption-item"><div><div class="redemption-name">${r.name}</div><div class="redemption-ratio">Ratio ${r.ratio}</div></div><div class="redemption-value">${r.est.toLocaleString()} mi</div></div>`).join('')}
+    </div>`;
+  });
+  html += `<div class="section-label" style="margin-top:20px">Combined by Partner</div>`;
+  Object.entries(pm).forEach(([name, es]) => {
+    const tot  = es.reduce((s,e)=>s+e.est,0);
+    const from = es.map(e=>`${e.card.icon} ${e.card.name}`).join(', ');
+    html += `<div class="redemption-item" style="display:block;margin-bottom:10px">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px"> ${name}</div>
+      <div style="font-size:12px;opacity:0.6;margin-bottom:6px">From: ${from}</div>
+      <div style="font-size:22px;font-weight:800">${tot.toLocaleString()} <span style="font-size:13px;font-weight:500;opacity:0.7">miles</span></div>
+    </div>`;
+  });
+  area.innerHTML = html;
+}
+
+function renderCoupons(area, list) {
+  let html = '', has = false;
+  list.forEach(c => {
+    if (!c.coupons||!c.coupons.length) return;
+    has = true;
+    html += `<div class="card-tile" style="cursor:default">
+      <div class="card-tile-header" style="margin-bottom:10px">
+        <div class="card-icon" style="background:${c.color}22">${cardIconHtml(c)}</div>
+        <div class="card-title-block"><div class="card-name">${c.name}</div><div class="card-bank"><span class="bank-chip">${c.bank}</span></div></div>
+        <div class="points-badge"><div class="points-num">${c.coupons.filter(x=>!x.done).length}</div><div class="points-unit">unused</div></div>
+      </div>
+      ${c.coupons.map((x,xi)=>`<div class="coupon-item ${x.done?'used':''}">
+        <button class="coupon-check ${x.done?'done':''}" onclick="toggleCoupon(${c.id},${xi})">${x.done?'':'!'}</button>
+        <div style="flex:1"><div class="coupon-text">${x.text}</div>
+        ${x.expiry?`<div class="coupon-expiry">Expires ${new Date(x.expiry).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</div>`:''}</div>
+      </div>`).join('')}
+    </div>`;
+  });
+  if (!has) html = `<div class="empty-state"><span class="big-emoji"></span><strong>No perks yet</strong>Add benefits when creating a card</div>`;
+  area.innerHTML = html;
+}
+
+function renderSummary(area) {
+  const totalPts   = cards.reduce((s,c)=>s+(c.points||0),0);
+  const totalMiles = cards.reduce((s,c)=>s+c.redeem.reduce((a,r)=>a+r.est,0),0);
+  const totalPerks = cards.reduce((s,c)=>s+(c.coupons||[]).filter(x=>!x.done).length,0);
+  const expiring   = cards.filter(c=>c.due&&Math.ceil((new Date(c.due)-new Date())/86400000)<=7);
+  area.innerHTML = `
+    <div class="summary-card">
+      <div class="summary-title"> Total Points  All Cards</div>
+      <div class="summary-num">${totalPts.toLocaleString()}</div>
+      <div class="summary-sub">${cards.length} cards tracked</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="redemption-item" style="display:block;text-align:center">
+        <div style="font-size:28px;font-weight:800">${totalMiles.toLocaleString()}</div>
+        <div style="font-size:12px;opacity:0.6;margin-top:2px"> Est. Miles</div>
+      </div>
+      <div class="redemption-item" style="display:block;text-align:center">
+        <div style="font-size:28px;font-weight:800">${totalPerks}</div>
+        <div style="font-size:12px;opacity:0.6;margin-top:2px"> Unused Perks</div>
+      </div>
+    </div>
+    ${expiring.length?`<div class="section-label"> Statement Due Soon</div>${expiring.map(c=>`
+    <div class="card-tile" onclick="openDetail(${c.id})" style="border-left:3px solid #FF9500">
+      <div class="card-tile-header" style="margin-bottom:0">
+        <div class="card-icon" style="background:${c.color}22">${cardIconHtml(c)}</div>
+        <div class="card-title-block"><div class="card-name">${c.name}</div></div>
+        <div class="points-badge"><div class="points-num" style="color:#FF9500">${Math.ceil((new Date(c.due)-new Date())/86400000)}</div><div class="points-unit">days</div></div>
+      </div>
+    </div>`).join('')}`:''}
+    <div class="section-label" style="margin-top:20px"> iCloud Backup</div>
+    <p class="backup-info">Export saves your cards & history as a JSON file.<br>On iPhone, tap Share  Save to Files  iCloud Drive.</p>
+    <button class="backup-btn backup-export" onclick="exportBackup()"> Export Backup</button>
+    <button class="backup-btn backup-import" onclick="document.getElementById('restore-input').click()"> Import Backup</button>
+    <input type="file" id="restore-input" accept=".json" onchange="importBackup(event)" />
+
+    <div class="section-label">Points Distribution</div>    ${cards.map(c=>{
+      const pct = totalPts>0?(c.points/totalPts*100).toFixed(1):0;
+      return `<div class="redemption-item" style="display:block;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:5px;background:${c.color}22;display:inline-flex;align-items:center;justify-content:center;overflow:hidden">${cardIconHtml(c)}</span> ${c.name}</span>
+          <span style="font-size:15px;font-weight:700">${c.points.toLocaleString()}</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+        <div style="font-size:11px;opacity:0.55;margin-top:3px;text-align:right">${pct}%</div>
+      </div>`;
+    }).join('')}`;
+}
+
+//  Detail Modal 
+function openDetail(id) {
+  const c = cards.find(x=>x.id===id); if (!c) return;
+  const due   = c.due ? new Date(c.due).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : 'Not set';
+  const owner = (c.owner||'Me').toLowerCase();
+  document.getElementById('detailModalContent').innerHTML = `
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">${cardIconHtml(c)} ${c.name}</span>
+      <div style="display:flex;gap:8px">
+        <button class="close-btn" onclick="deleteCard(${c.id})" style="background:rgba(255,59,48,0.15);color:#FF3B30"></button>
+        <button class="close-btn" onclick="closeDetailModal()"></button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="detail-row"><div class="detail-icon-bg"></div><div class="detail-content"><div class="detail-label">Bank</div><div class="detail-value">${c.bank}</div></div></div>
+      <div class="detail-row"><div class="detail-icon-bg"></div><div class="detail-content"><div class="detail-label">Owner</div><div class="detail-value"><span class="owner-chip owner-${owner}">${c.owner||'Me'}</span></div></div></div>
+      <div class="detail-row"><div class="detail-icon-bg"></div><div class="detail-content"><div class="detail-label">Current Points</div><div class="detail-value" style="font-size:20px;font-weight:700">${c.points.toLocaleString()} pts</div></div></div>
+      <div class="detail-row"><div class="detail-icon-bg"></div><div class="detail-content"><div class="detail-label">Statement Date</div><div class="detail-value">${due}</div></div></div>
+      <div class="detail-row" style="border:none"><div class="detail-icon-bg"></div><div class="detail-content"><div class="detail-label">Reward Categories</div>
+        <div class="tags-row" style="margin-top:6px">${c.perks.map((p,i)=>`<span class="tag ${tc(i)}">${p}</span>`).join(' ')}</div>
+      </div></div>
+      ${c.redeem.length?`<div style="font-size:14px;font-weight:700;margin:10px 0 8px"> Transfer Partners</div>
+        ${c.redeem.map(r=>`<div class="redemption-item"><div><div class="redemption-name">${r.name}</div><div class="redemption-ratio">Ratio ${r.ratio}</div></div><div class="redemption-value">${r.est.toLocaleString()} mi</div></div>`).join('')}`:''}
+      ${(c.coupons||[]).length?`<div style="font-size:14px;font-weight:700;margin:14px 0 8px"> Annual Benefits</div>
+        ${c.coupons.map((x,xi)=>`<div class="coupon-item ${x.done?'used':''}">
+          <button class="coupon-check ${x.done?'done':''}" onclick="toggleCouponDetail(${c.id},${xi})">${x.done?'':'!'}</button>
+          <div style="flex:1"><div class="coupon-text">${x.text}</div>${x.expiry?`<div class="coupon-expiry">Expires ${new Date(x.expiry).toLocaleDateString('en-US')}</div>`:''}</div>
+        </div>`).join('')}`:''}
+
+      <button class="log-btn" onclick="openLogModal(${c.id})"> Log Points</button>
+
+      ${(c.history||[]).length ? `
+        <div style="font-size:14px;font-weight:700;margin:18px 0 8px"> Point History</div>
+        ${c.history.slice(0,20).map(h=>`
+          <div class="hist-item hist-${h.type}">
+            <div class="hist-dot">${h.type==='earned'?'':''}</div>
+            <div class="hist-body">
+              <div class="hist-amount">${h.type==='earned'?'+':''}${h.amount.toLocaleString()} pts</div>
+              <div class="hist-meta">${new Date(h.date).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</div>
+              ${h.note?`<div class="hist-note">"${h.note}"</div>`:''}
+            </div>
+          </div>`).join('')}
+      ` : `<div style="font-size:13px;opacity:0.45;text-align:center;padding:16px 0">No history yet  tap Log Points to start tracking</div>`}
+    </div>`;
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
+
+function toggleCouponDetail(cid,idx) {
+  const c=cards.find(x=>x.id===cid);
+  if(c&&c.coupons[idx]){c.coupons[idx].done=!c.coupons[idx].done;saveCards();openDetail(cid);renderAll();}
+}
+function toggleCoupon(cid,idx) {
+  const c=cards.find(x=>x.id===cid);
+  if(c&&c.coupons[idx]){c.coupons[idx].done=!c.coupons[idx].done;saveCards();renderAll();}
+}
+function deleteCard(id) {
+  if(confirm('Delete this card?')){cards=cards.filter(c=>c.id!==id);saveCards();closeDetailModal();renderAll();}
+}
+
+//  Add Card 
+const BANK_LIST = [
+  { name:'Chase',            ...BANK_BRANDS['chase']           },
+  { name:'American Express', ...BANK_BRANDS['american express'] },
+  { name:'Citi',             ...BANK_BRANDS['citi']            },
+  { name:'Capital One',      ...BANK_BRANDS['capital one']     },
+  { name:'Discover',         ...BANK_BRANDS['discover']        },
+  { name:'Wells Fargo',      ...BANK_BRANDS['wells fargo']     },
+  { name:'Bank of America',  ...BANK_BRANDS['bank of america'] },
+  { name:'US Bank',          ...BANK_BRANDS['us bank']         },
+  { name:'Barclays',         ...BANK_BRANDS['barclays']        },
+  { name:'Navy Federal',     ...BANK_BRANDS['navy federal']    },
+  { name:'PNC',              ...BANK_BRANDS['pnc']             },
+  { name:'TD Bank',          ...BANK_BRANDS['td bank']         },
+];
+
+function openAddModal() {
+  // Render bank badge grid
+  document.getElementById('bankGrid').innerHTML = BANK_LIST.map(b =>
+    `<button type="button" class="bank-badge-btn" data-bank="${b.name}" onclick="selectBank('${b.name}')"
+      style="padding:8px 4px;border-radius:12px;border:2px solid transparent;background:rgba(128,128,128,0.08);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all 0.15s">
+      <div style="width:40px;height:40px;border-radius:10px;background:${b.bg};display:flex;align-items:center;justify-content:center;font-size:${b.abbr.length>4?8:10}px;font-weight:800;color:${b.fg};letter-spacing:0.2px">${b.abbr}</div>
+      <span style="font-size:9px;font-weight:500;opacity:0.7;text-align:center;line-height:1.2">${b.name.replace('American Express','Amex').replace('Bank of America','BofA').replace('Navy Federal','Navy Fed')}</span>
+    </button>`
+  ).join('');
+  // Reset all fields
+  ['f-name','f-points','f-due','f-perks','f-redeem','f-ratio','f-coupons'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-bank').value = '';
+  selColor = '#007AFF';
+  selEmoji = '';
+  document.getElementById('addModal').classList.remove('hidden');
+}
+
+function selectBank(name) {
+  // Highlight selected badge
+  document.querySelectorAll('.bank-badge-btn').forEach(b => {
+    const isSelected = b.dataset.bank === name;
+    b.style.borderColor = isSelected ? '#007AFF' : 'transparent';
+    b.style.background  = isSelected ? 'rgba(0,122,255,0.1)' : 'rgba(128,128,128,0.08)';
+  });
+  document.getElementById('f-bank').value = name;
+  // Set color from brand
+  const key   = name.toLowerCase();
+  const brand = Object.entries(BANK_BRANDS).find(([k]) => key.includes(k))?.[1];
+  if (brand) selColor = brand.bg;
+  // Autofill card data if card name already typed
+  autofillCard(document.getElementById('f-name').value);
+}
+
+function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
+function selE(e) { selEmoji=e; }
+function selC(c) { selColor=c; }
+
+//  Card DB for autofill 
+const CARD_DB = {
+  'chase sapphire reserve':   {bank:'Chase',icon:'',color:'#007AFF',perks:['3x Dining','3x Travel','1.5x Everything','Priority Pass Lounge'],redeem:['United MileagePlus','World of Hyatt','Southwest Rapid Rewards','Air Canada Aeroplan'],ratio:'1:1',coupons:['$300 Annual Travel Credit','Global Entry / TSA PreCheck Credit','DoorDash DashPass']},
+  'chase sapphire preferred': {bank:'Chase',icon:'',color:'#5856D6',perks:['3x Dining','3x Travel','2x Everything','$50 Hotel Credit'],redeem:['United MileagePlus','World of Hyatt','Southwest Rapid Rewards','Air Canada Aeroplan'],ratio:'1:1',coupons:['$50 Annual Hotel Credit','DoorDash DashPass']},
+  'chase freedom unlimited':  {bank:'Chase',icon:'',color:'#34C759',perks:['1.5x Everything','3x Dining','3x Drugstores','5x Travel via Chase Portal'],redeem:['Chase Ultimate Rewards (cash)'],ratio:'1:1',coupons:['No Annual Fee']},
+  'chase freedom flex':       {bank:'Chase',icon:'',color:'#00C7BE',perks:['5x Rotating Categories','3x Dining','3x Drugstores','1x Everything'],redeem:['Chase Ultimate Rewards (cash)'],ratio:'1:1',coupons:['No Annual Fee']},
+  'amex platinum':            {bank:'American Express',icon:'',color:'#AF52DE',perks:['5x Flights booked directly','5x Prepaid Hotels via Amex','Centurion Lounge Access','Fine Hotels & Resorts'],redeem:['Delta SkyMiles','British Airways Avios','Air France/KLM Flying Blue','Marriott Bonvoy','ANA Mileage Club'],ratio:'1:1',coupons:['$200 Airline Fee Credit','$200 Fine Hotels Credit','$240 Digital Entertainment Credit','$189 CLEAR Plus Credit','Centurion Lounge Access']},
+  'amex gold':                {bank:'American Express',icon:'',color:'#FF9500',perks:['4x Dining worldwide','4x US Supermarkets (up to $25k/yr)','3x Flights','1x Everything else'],redeem:['Delta SkyMiles','Air Canada Aeroplan','British Airways Avios','Marriott Bonvoy'],ratio:'1:1',coupons:['$120 Dining Credit ($10/mo)','$120 Uber Cash ($10/mo)']},
+  'amex blue cash preferred': {bank:'American Express',icon:'',color:'#007AFF',perks:['6x US Supermarkets','6x Select Streaming','3x Gas & Transit','1x Everything'],redeem:['Cash back (statement credit)'],ratio:'1:1',coupons:['$84 Disney Bundle Credit']},
+  'citi premier':             {bank:'Citi',icon:'',color:'#FF6B6B',perks:['3x Restaurants','3x Supermarkets','3x Gas Stations','3x Air & Hotels'],redeem:['Turkish Miles&Smiles','Virgin Atlantic Flying Club','Air France/KLM Flying Blue','Singapore Airlines KrisFlyer'],ratio:'1:1',coupons:['$100 Annual Hotel Savings']},
+  'citi double cash':         {bank:'Citi',icon:'',color:'#FF2D55',perks:['2% on Everything'],redeem:['Cash back'],ratio:'1:1',coupons:['No Annual Fee']},
+  'capital one venture x':    {bank:'Capital One',icon:'',color:'#FF9500',perks:['10x Hotels via C1 Travel','5x Flights via C1 Travel','2x Everything'],redeem:['Air Canada Aeroplan','British Airways Avios','Turkish Miles&Smiles','Avianca LifeMiles'],ratio:'1:1',coupons:['$300 Annual Travel Credit','10,000 Anniversary Miles','Priority Pass Lounge']},
+  'capital one venture':      {bank:'Capital One',icon:'',color:'#FFCC02',perks:['5x Hotels & Rental Cars via C1 Travel','2x Everything'],redeem:['Air Canada Aeroplan','British Airways Avios','Turkish Miles&Smiles'],ratio:'1:1',coupons:['Global Entry / TSA PreCheck Credit']},
+  'discover it cash back':    {bank:'Discover',icon:'',color:'#FF9500',perks:['5x Rotating Categories','1x Everything'],redeem:['Cash back'],ratio:'1:1',coupons:['No Annual Fee','Cashback Match first year']},
+  'wells fargo active cash':  {bank:'Wells Fargo',icon:'',color:'#FF6B6B',perks:['2% on Everything'],redeem:['Cash back'],ratio:'1:1',coupons:['No Annual Fee','Cell Phone Protection']},
+  'bank of america travel rewards':{bank:'Bank of America',icon:'',color:'#007AFF',perks:['1.5x Everything'],redeem:['Travel statement credit'],ratio:'1:1',coupons:['No Annual Fee']},
+};
+
+function autofillCard(val) {
+  const key = val.toLowerCase().trim();
+  const match = Object.keys(CARD_DB).find(k => key.includes(k)||k.includes(key));
+  if (!match) return;
+  const d = CARD_DB[match];
+  document.getElementById('f-bank').value    = d.bank    || '';
+  document.getElementById('f-perks').value   = d.perks   ? d.perks.join(', ')   : '';
+  document.getElementById('f-redeem').value  = d.redeem  ? d.redeem.join(', ')  : '';
+  document.getElementById('f-ratio').value   = d.ratio   || '1:1';
+  document.getElementById('f-coupons').value = d.coupons ? d.coupons.join(', ') : '';
+  if (d.icon)  selE(d.icon);
+  if (d.color) selC(d.color);
+}
+
+function saveCard() {
+  const name  = document.getElementById('f-name').value.trim();
+  const bank  = document.getElementById('f-bank').value.trim();
+  if (!name||!bank) { alert('Please enter card name and bank'); return; }
+  const pts   = parseInt(document.getElementById('f-points').value)||0;
+  const due   = document.getElementById('f-due').value;
+  const owner = document.getElementById('f-owner')?.value||'Me';
+  const perks = document.getElementById('f-perks').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const rNames= document.getElementById('f-redeem').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const ratio = document.getElementById('f-ratio').value.trim()||'1:1';
+  const [a,b] = ratio.split(':').map(Number);
+  const est   = b&&a?Math.floor(pts/a*b):pts;
+  const cRaw  = document.getElementById('f-coupons').value.split(',').map(s=>s.trim()).filter(Boolean);
+  cards.push({
+    id:Date.now(), name, bank, icon:selEmoji, color:selColor,
+    points:pts, due, owner,
+    perks: perks.length?perks:['General spending'],
+    redeem: rNames.map(r=>({name:r,ratio,est})),
+    coupons: cRaw.map(t=>({text:t,expiry:'',done:false})),
+    history:[],
+  });
+  saveCards(); closeAddModal(); renderAll();
+}
+
+//  iCloud Backup 
+function exportBackup() {
+  const data     = { version: 2, exported: new Date().toISOString(), cards };
+  const json     = JSON.stringify(data, null, 2);
+  const blob     = new Blob([json], { type: 'application/json' });
+  const url      = URL.createObjectURL(blob);
+  const date     = new Date().toISOString().slice(0,10);
+  const filename = `CardPoints_backup_${date}.json`;
+  // On iOS Safari this triggers the Share Sheet
+  const a  = document.createElement('a');
+  a.href   = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data   = JSON.parse(e.target.result);
+      const parsed = data.cards || (Array.isArray(data) ? data : null);
+      if (!parsed || !Array.isArray(parsed) || !parsed.length) {
+        alert('Invalid backup file  no cards found.'); return;
+      }
+      if (!confirm(`Import ${parsed.length} cards? This will replace your current data.`)) return;
+      cards = parsed.map(c => ({
+        id:      c.id      ?? Date.now(),
+        name:    c.name    ?? 'Unknown',
+        bank:    c.bank    ?? 'Unknown',
+        icon:    c.icon    ?? '',
+        color:   c.color   ?? '#007AFF',
+        points:  typeof c.points === 'number' ? c.points : 0,
+        due:     c.due     ?? '',
+        owner:   c.owner   ?? 'Me',
+        perks:   Array.isArray(c.perks)   ? c.perks   : [],
+        redeem:  Array.isArray(c.redeem)  ? c.redeem  : [],
+        coupons: Array.isArray(c.coupons) ? c.coupons : [],
+        history: Array.isArray(c.history) ? c.history : [],
+      }));
+      saveCards();
+      renderAll();
+      alert(` Imported ${cards.length} cards successfully!`);
+    } catch(err) {
+      alert('Could not read file  make sure it\'s a valid CardPoints backup JSON.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = ''; // reset so same file can be re-imported
+}
+
+//  Log Points 
+let logCardId  = null;
+let logType    = 'earned';
+
+function openLogModal(id) {
+  logCardId = id;
+  logType   = 'earned';
+  setLogType('earned');
+  document.getElementById('log-amount').value = '';
+  document.getElementById('log-note').value   = '';
+  document.getElementById('log-date').value   = new Date().toISOString().slice(0,10);
+  document.getElementById('logModal').classList.remove('hidden');
+}
+function closeLogModal() { document.getElementById('logModal').classList.add('hidden'); }
+
+function setLogType(t) {
+  logType = t;
+  const eBtn = document.getElementById('log-type-earned');
+  const sBtn = document.getElementById('log-type-spent');
+  eBtn.style.borderColor  = t==='earned' ? '#34C759' : 'rgba(128,128,128,0.3)';
+  eBtn.style.background   = t==='earned' ? 'rgba(52,199,89,0.12)' : 'transparent';
+  eBtn.style.color        = t==='earned' ? '#34C759' : 'inherit';
+  sBtn.style.borderColor  = t==='spent'  ? '#FF3B30' : 'rgba(128,128,128,0.3)';
+  sBtn.style.background   = t==='spent'  ? 'rgba(255,59,48,0.08)' : 'transparent';
+  sBtn.style.color        = t==='spent'  ? '#FF3B30' : 'inherit';
+}
+
+function saveLog() {
+  const amt  = parseInt(document.getElementById('log-amount').value);
+  const date = document.getElementById('log-date').value;
+  const note = document.getElementById('log-note').value.trim();
+  if (!amt || amt <= 0) { alert('Please enter a valid point amount'); return; }
+  if (!date)            { alert('Please select a date'); return; }
+  const c = cards.find(x => x.id === logCardId);
+  if (!c) return;
+  if (!c.history) c.history = [];
+  c.history.unshift({ type: logType, amount: amt, date, note });
+  c.points = logType === 'earned' ? c.points + amt : Math.max(0, c.points - amt);
+  // Update redeem estimates based on new balance
+  const ratio = c.redeem[0]?.ratio || '1:1';
+  const [a, b] = ratio.split(':').map(Number);
+  c.redeem = c.redeem.map(r => ({ ...r, est: Math.floor(c.points / (a||1) * (b||1)) }));
+  saveCards();
+  closeLogModal();
+  openDetail(logCardId);
+  renderAll();
+}
+
+//  Background close 
+document.getElementById('detailModal').addEventListener('click',function(e){if(e.target===this)closeDetailModal();});
+document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
+document.getElementById('logModal').addEventListener('click',function(e){if(e.target===this)closeLogModal();});
+
+//  Init 
+renderAll();
+</script>
+</body>
+</html>

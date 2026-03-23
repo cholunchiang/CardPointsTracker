@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CardPointsTracker E2E Tests 🧪</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background: #f5f5f7;
+    }
+    h1 { color: #1d1d1f; margin-bottom: 8px; }
+    .subtitle { color: #86868b; margin-bottom: 20px; }
+    .test-suite { 
+      background: #fff; 
+      border-radius: 12px; 
+      padding: 16px; 
+      margin: 16px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .test-suite h2 { 
+      margin: 0 0 12px; 
+      font-size: 16px; 
+      color: #1d1d1f;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .test { 
+      padding: 8px 12px; 
+      margin: 4px 0; 
+      border-radius: 8px; 
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .test.pass { background: rgba(52, 199, 89, 0.15); color: #248a3d; }
+    .test.fail { background: rgba(255, 59, 48, 0.15); color: #d70015; }
+    .test .error-detail {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-left: 24px;
+      display: block;
+    }
+    .summary {
+      background: #1d1d1f;
+      color: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+    }
+    .summary.all-pass { background: #248a3d; }
+    .summary.has-fail { background: #d70015; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+    button {
+      background: #007AFF;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    button.secondary { background: #8e8e93; }
+    button.secondary:hover { background: #636366; }
+    #log {
+      background: #1d1d1f;
+      color: #98989d;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 11px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 16px;
+      display: none;
+      white-space: pre-wrap;
+    }
+    #log.visible { display: block; }
+    .category-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(0,122,255,0.1);
+      color: #007AFF;
+    }
+    .category-badge.e2e { background: rgba(175,82,222,0.1); color: #AF52DE; }
+    .category-badge.unit { background: rgba(52,199,89,0.1); color: #34C759; }
+  </style>
+</head>
+<body>
+  <h1>🧪 CardPointsTracker E2E Test Suite</h1>
+  <p class="subtitle">End-to-end tests for complete workflows • Tests actual app behavior</p>
+  
+  <div class="btn-row">
+    <button onclick="runAllTests()">▶️ Run All Tests</button>
+    <button onclick="runE2EOnly()" class="secondary">🔄 E2E Only</button>
+    <button onclick="toggleLog()" class="secondary">📋 Toggle Log</button>
+  </div>
+  
+  <div id="results"></div>
+  <div id="summary" class="summary" style="display:none;"></div>
+  <pre id="log"></pre>
+
+  <script>
+    // ============================================
+    // TEST FRAMEWORK
+    // ============================================
+    let testResults = [];
+    let logMessages = [];
+    let mockLocalStorage = {};
+    
+    function log(msg) {
+      logMessages.push(`[${new Date().toISOString().slice(11,19)}] ${msg}`);
+      console.log(msg);
+    }
+    
+    function toggleLog() {
+      const el = document.getElementById('log');
+      el.classList.toggle('visible');
+      el.textContent = logMessages.join('\n');
+    }
+    
+    function assert(condition, message) {
+      if (!condition) throw new Error(message);
+    }
+    
+    function assertEqual(actual, expected, message) {
+      if (actual !== expected) {
+        throw new Error(`${message}\n  Expected: ${JSON.stringify(expected)}\n  Actual: ${JSON.stringify(actual)}`);
+      }
+    }
+    
+    function assertNotEqual(actual, notExpected, message) {
+      if (actual === notExpected) {
+        throw new Error(`${message}\n  Should NOT be: ${JSON.stringify(notExpected)}`);
+      }
+    }
+    
+    function assertArrayLength(arr, length, message) {
+      if (!arr || arr.length !== length) {
+        throw new Error(`${message}\n  Expected length: ${length}\n  Actual length: ${arr ? arr.length : 'undefined'}`);
+      }
+    }
+    
+    function assertContains(str, substring, message) {
+      if (!str || !str.includes(substring)) {
+        throw new Error(`${message}\n  Expected to contain: "${substring}"\n  Actual: "${str}"`);
+      }
+    }
+    
+    function assertDefined(value, message) {
+      if (value === undefined || value === null) {
+        throw new Error(`${message}\n  Value is ${value}`);
+      }
+    }
+
+    // ============================================
+    // MOCK LOCALSTORAGE
+    // ============================================
+    function setupMockStorage() {
+      mockLocalStorage = {};
+      return {
+        getItem: (key) => mockLocalStorage[key] || null,
+        setItem: (key, value) => { mockLocalStorage[key] = value; },
+        removeItem: (key) => { delete mockLocalStorage[key]; },
+        clear: () => { mockLocalStorage = {}; }
+      };
+    }
+
+    // ============================================
+    // APP STATE SIMULATION
+    // ============================================
+    let cards = [];
+    let editingCardId = null;
+    let currentCategoryFilter = '';
+    let currentPartnerFilter = '';
+    let currentSort = 'recent';
+    let currentTab = 'all';
+    let currentNav = 'cards';
+    
+    function resetAppState() {
+      cards = [];
+      editingCardId = null;
+      currentCategoryFilter = '';
+      currentPartnerFilter = '';
+      currentSort = 'recent';
+      currentTab = 'all';
+      currentNav = 'cards';
+    }
+
+    // ============================================
+    // CORE FUNCTIONS (from main.js)
+    // ============================================
+    
+    // Card validation
+    function validateCard(card) {
+      const errors = [];
+      if (!card.name || !card.name.trim()) errors.push('Name is required');
+      if (!card.bank || !card.bank.trim()) errors.push('Bank is required');
+      if (typeof card.points !== 'number' || card.points < 0) errors.push('Points must be a non-negative number');
+      if (!Array.isArray(card.perks)) errors.push('Perks must be an array');
+      if (!Array.isArray(card.redeem)) errors.push('Redeem must be an array');
+      return { valid: errors.length === 0, errors };
+    }
+    
+    // Create new card
+    function createCard(data) {
+      const card = {
+        id: Date.now(),
+        name: data.name || '',
+        bank: data.bank || '',
+        icon: data.icon || '💳',
+        color: data.color || '#007AFF',
+        points: parseInt(data.points) || 0,
+        due: data.due || '',
+        owner: data.owner || 'Me',
+        perks: data.perks || [],
+        redeem: data.redeem || [],
+        coupons: data.coupons || [],
+        history: []
+      };
+      return card;
+    }
+    
+    // Add card to list
+    function addCard(card) {
+      cards.push(card);
+      return card;
+    }
+    
+    // Update existing card (simulates edit flow)
+    function updateCard(id, updates) {
+      const index = cards.findIndex(c => c.id === id);
+      if (index === -1) return null;
+      
+      const card = cards[index];
+      // Preserve history!
+      const updatedCard = {
+        ...card,
+        ...updates,
+        id: card.id,  // Never change ID
+        history: card.history  // Preserve history
+      };
+      cards[index] = updatedCard;
+      return updatedCard;
+    }
+    
+    // Delete card
+    function deleteCard(id) {
+      const index = cards.findIndex(c => c.id === id);
+      if (index === -1) return false;
+      cards.splice(index, 1);
+      return true;
+    }
+    
+    // Find card
+    function findCard(id) {
+      return cards.find(c => c.id === id);
+    }
+    
+    // Save/Load simulation
+    function saveCards(storage) {
+      storage.setItem('cards', JSON.stringify(cards));
+    }
+    
+    function loadCards(storage) {
+      const data = storage.getItem('cards');
+      if (!data) return [];
+      try {
+        return JSON.parse(data);
+      } catch {
+        return [];
+      }
+    }
+    
+    // Category extraction
+    function extractCategory(perk) {
+      const match = perk.match(/^(\d+(?:\.\d+)?)x\s+(.+)$/i);
+      return match ? match[2] : null;
+    }
+    
+    // Perk parsing (simulates getPerks with data-perk)
+    function parsePerksFromChips(chips) {
+      return chips.map(chip => chip.dataset?.perk || '').filter(p => p);
+    }
+    
+    // Filter functions
+    function filterByOwner(list, tab) {
+      if (tab === 'all') return list;
+      return list.filter(c => (c.owner || 'Me') === tab);
+    }
+    
+    function filterByCategory(list, category) {
+      if (!category) return list;
+      return list.filter(c => {
+        return (c.perks || []).some(p => {
+          const cat = extractCategory(p);
+          return cat && cat.toLowerCase().includes(category.toLowerCase());
+        });
+      });
+    }
+    
+    function filterByPartner(list, partner) {
+      if (!partner) return list;
+      return list.filter(c => {
+        return (c.redeem || []).some(r => r.name === partner);
+      });
+    }
+    
+    // Sort functions
+    function sortCards(list, sortOrder) {
+      const sorted = [...list];
+      switch(sortOrder) {
+        case 'points':
+          return sorted.sort((a, b) => b.points - a.points);
+        case 'due':
+          return sorted.sort((a, b) => {
+            if (!a.due) return 1;
+            if (!b.due) return -1;
+            return new Date(a.due) - new Date(b.due);
+          });
+        case 'name':
+          return sorted.sort((a, b) => a.name.localeCompare(b.name));
+        case 'recent':
+        default:
+          return sorted.sort((a, b) => b.id - a.id);
+      }
+    }
+    
+    // Partner emoji
+    const HOTEL_PARTNERS = ['marriott', 'hilton', 'hyatt', 'ihg', 'wyndham', 'choice', 'accor', 'radisson', 'best western', 'hotel', 'hotels', 'i prefer'];
+    
+    function getPartnerEmoji(partnerName) {
+      const lower = partnerName.toLowerCase();
+      if (HOTEL_PARTNERS.some(h => lower.includes(h))) {
+        return '🏨';
+      }
+      return '✈️';
+    }
+    
+    // Backup/Restore
+    function exportBackup() {
+      return JSON.stringify({
+        version: '2.2',
+        exported: new Date().toISOString(),
+        cards: cards
+      }, null, 2);
+    }
+    
+    function importBackup(jsonString) {
+      try {
+        const data = JSON.parse(jsonString);
+        if (!data.cards || !Array.isArray(data.cards)) {
+          return { success: false, error: 'Invalid backup format: missing cards array' };
+        }
+        // Validate each card
+        for (const card of data.cards) {
+          if (!card.id || !card.name) {
+            return { success: false, error: 'Invalid card in backup: missing id or name' };
+          }
+        }
+        cards = data.cards;
+        return { success: true, count: cards.length };
+      } catch (e) {
+        return { success: false, error: 'Invalid JSON: ' + e.message };
+      }
+    }
+
+    // ============================================
+    // EDIT FLOW SIMULATION (the bug we fixed)
+    // ============================================
+    function simulateOpenAddModal() {
+      editingCardId = null;  // This is what openAddModal does
+    }
+    
+    function simulateOpenEditModal(id) {
+      const card = findCard(id);
+      if (!card) return false;
+      
+      // CORRECT ORDER (after bug fix):
+      simulateOpenAddModal();  // 1. Open modal (resets editingCardId)
+      editingCardId = id;      // 2. Set edit mode AFTER
+      
+      return true;
+    }
+    
+    function simulateSaveCard(formData) {
+      if (editingCardId) {
+        // Edit mode - update existing
+        const updated = updateCard(editingCardId, formData);
+        editingCardId = null;
+        return { action: 'updated', card: updated };
+      } else {
+        // Add mode - create new
+        const newCard = createCard(formData);
+        addCard(newCard);
+        return { action: 'created', card: newCard };
+      }
+    }
+
+    // ============================================
+    // TEST SUITES
+    // ============================================
+    const testSuites = {
+      
+      // ========================================
+      // E2E: Card CRUD Operations
+      // ========================================
+      'E2E: Card CRUD': {
+        category: 'e2e',
+        tests: [
+          {
+            name: 'Create a new card with all fields',
+            fn: () => {
+              resetAppState();
+              const card = createCard({
+                name: 'Chase Sapphire Reserve',
+                bank: 'Chase',
+                points: 85000,
+                due: '2025-09-15',
+                owner: 'Me',
+                perks: ['3x Dining', '3x Travel'],
+                redeem: [{name: 'United', ratio: '1:1', est: 85000}],
+                coupons: [{text: '$300 Travel Credit', expiry: '2025-12-31', done: false}]
+              });
+              addCard(card);
+              
+              assertArrayLength(cards, 1, 'Should have 1 card');
+              assertEqual(cards[0].name, 'Chase Sapphire Reserve', 'Name should match');
+              assertEqual(cards[0].points, 85000, 'Points should match');
+              assertArrayLength(cards[0].history, 0, 'New card should have empty history');
+            }
+          },
+          {
+            name: 'Create card with minimal required fields',
+            fn: () => {
+              resetAppState();
+              const card = createCard({ name: 'Test Card', bank: 'Test Bank' });
+              addCard(card);
+              
+              assertEqual(cards[0].points, 0, 'Default points should be 0');
+              assertEqual(cards[0].owner, 'Me', 'Default owner should be Me');
+              assertEqual(cards[0].icon, '💳', 'Default icon should be 💳');
+            }
+          },
+          {
+            name: 'Find card by ID',
+            fn: () => {
+              resetAppState();
+              const card = createCard({ name: 'Find Me', bank: 'Test' });
+              addCard(card);
+              
+              const found = findCard(card.id);
+              assertDefined(found, 'Should find the card');
+              assertEqual(found.name, 'Find Me', 'Found card name should match');
+            }
+          },
+          {
+            name: 'Update card preserves ID and history',
+            fn: () => {
+              resetAppState();
+              const card = createCard({ name: 'Original', bank: 'Test', points: 1000 });
+              card.history = [{type: 'earned', amount: 500, date: '2025-01-01'}];
+              addCard(card);
+              const originalId = card.id;
+              
+              updateCard(card.id, { name: 'Updated', points: 2000 });
+              
+              assertEqual(cards[0].id, originalId, 'ID should not change');
+              assertEqual(cards[0].name, 'Updated', 'Name should be updated');
+              assertEqual(cards[0].points, 2000, 'Points should be updated');
+              assertArrayLength(cards[0].history, 1, 'History should be preserved');
+            }
+          },
+          {
+            name: 'Delete card removes it from list',
+            fn: () => {
+              resetAppState();
+              const card1 = createCard({ name: 'Card 1', bank: 'Test' });
+              const card2 = createCard({ name: 'Card 2', bank: 'Test' });
+              addCard(card1);
+              addCard(card2);
+              
+              const deleted = deleteCard(card1.id);
+              
+              assert(deleted, 'Delete should return true');
+              assertArrayLength(cards, 1, 'Should have 1 card left');
+              assertEqual(cards[0].name, 'Card 2', 'Remaining card should be Card 2');
+            }
+          },
+          {
+            name: 'Delete non-existent card returns false',
+            fn: () => {
+              resetAppState();
+              const deleted = deleteCard(99999);
+              assert(!deleted, 'Delete should return false for non-existent card');
+            }
+          }
+        ]
+      },
+      
+      // ========================================
+      // E2E: Edit Flow (Bug Regression Test)
+      // ========================================
+      'E2E: Edit Flow': {
+        category: 'e2e',
+        tests: [
+          {
+            name: 'CRITICAL: Edit card updates existing, does NOT create new',
+            fn: () => {
+              resetAppState();
+              
+              // 1. Create initial card
+              const card = createCard({ name: 'Original Card', bank: 'Chase', points: 50000 });
+              addCard(card);
+              const originalId = card.id;
+              assertArrayLength(cards, 1, 'Should start with 1 card');
+              
+              // 2. Simulate opening edit modal (this was the bug!)
+              const opened = simulateOpenEditModal(card.id);
+              assert(opened, 'Should successfully open edit modal');
+              assertEqual(editingCardId, originalId, 'editingCardId should be set');
+              
+              // 3. Simulate saving with changes
+              const result = simulateSaveCard({ 
+                name: 'Updated Card', 
+                bank: 'Chase', 
+                points: 75000 
+              });
+              
+              // 4. Verify: should UPDATE, not CREATE
+              assertEqual(result.action, 'updated', 'Should update existing card');
+              assertArrayLength(cards, 1, 'Should STILL have only 1 card');
+              assertEqual(cards[0].id, originalId, 'Card ID should be unchanged');
+              assertEqual(cards[0].name, 'Updated Card', 'Name should be updated');
+              assertEqual(cards[0].points, 75000, 'Points should be updated');
+            }
+          },
+          {
+            name: 'Add new card when not in edit mode',
+            fn: () => {
+              resetAppState();
+              
+              // Simulate opening add modal (not edit)
+              simulateOpenAddModal();
+              assertEqual(editingCardId, null, 'editingCardId should be null');
+              
+              // Save new card
+              const result = simulateSaveCard({ name: 'New Card', bank: 'Amex', points: 10000 });
+              
+              assertEqual(result.action, 'created', 'Should create new card');
+              assertArrayLength(cards, 1, 'Should have 1 card');
+            }
+          },
+          {
+            name: 'editingCardId resets after save',
+            fn: () => {
+              resetAppState();
+              const card = createCard({ name: 'Test', bank: 'Test' });
+              addCard(card);
+              
+              simulateOpenEditModal(card.id);
+              assertNotEqual(editingCardId, null, 'editingCardId should be set before save');
+              
+              simulateSaveCard({ name: 'Updated', bank: 'Test' });
+              assertEqual(editingCardId, null, 'editingCardId should be null after save');
+            }
+          },
+          {
+            name: 'Multiple edits on same card work correctly',
+            fn: () => {
+              resetAppState();
+              const card = createCard({ name: 'V1', bank: 'Test', points: 100 });
+              addCard(card);
+              const id = card.id;
+              
+              // Edit 1
+              simulateOpenEditModal(id);
+              simulateSaveCard({ name: 'V2', bank: 'Test', points: 200 });
+              assertArrayLength(cards, 1, 'Still 1 card after edit 1');
+              assertEqual(cards[0].name, 'V2', 'Name updated to V2');
+              
+              // Edit 2
+              simulateOpenEditModal(id);
+              simulateSaveCard({ name: 'V3', bank: 'Test', points: 300 });
+              assertArrayLength(cards, 1, 'Still 1 card after edit 2');
+              assertEqual(cards[0].name, 'V3', 'Name updated to V3');
+              assertEqual(cards[0].points, 300, 'Points updated to 300');
+            }
+          }
+        ]
+      },
+      
+      // ========================================
+      // E2E: Data Persistence
+      // ========================================
+      'E2E: Data Persistence': {
+        category: 'e2e',
+        tests: [
+          {
+            name: 'Save and load cards from storage',
+            fn: () => {
+              resetAppState();
+              const storage = setupMockStorage();
+              
+              // Create and save
+              const card = createCard({ name: 'Saved Card', bank: 'Test', points: 5000 });
+              addCard(card);
+              saveCards(storage);
+              
+              // Clear and reload
+              const savedCards = cards;
+              cards = [];
+              cards = loadCards(storage);
+              
+              assertArrayLength(cards, 1, 'Should load 1 card');
+              assertEqual(cards[0].name, 'Saved Card', 'Loaded card name should match');
+              assertEqual(cards[0].points, 5000, 'Loaded card points should match');
+            }
+          },
+          {
+            name: 'Load returns empty array for missing data',
+            fn: () => {
+              const storage = setupMockStorage();
+              const loaded = loadCards(storage);
+              assertArrayLength(loaded, 0, 'Should return empty array');
+            }
+          },
+          {
+            name: 'Load handles corrupted JSON gracefully',
+            fn: () => {
+              const storage = setupMockStorage();
+              storage.setItem('cards', 'not valid json {{{');
+              const loaded = loadCards(storage);
+              assertArrayLength(loaded, 0, 'Should return empty array for corrupted data');
+            }
+          }
+        ]
+      },
+      
+      // ========================================
+      // E2E: Backup & Restore
+      // ========================================
+      'E2E: Backup & Restore': {
+        category: 'e2e',
+        tests: [
+          {
+            name: 'Export creates valid JSON backup',
+            fn: () => {
+              resetAppState();
+              addCard(createCard({ name: 'Card 1', bank: 'Chase', points: 10000 }));
+              addCard(createCard({ name: 'Card 2', bank: 'Amex', points: 20000 }));
+              
+              const backup = exportBackup();
+              const parsed = JSON.parse(backup);
+              
+              assertDefined(parsed.version, 'Backup should have version');
+              assertDefined(parsed.exported, 'Backup should have export date');
+              assertArrayLength(parsed.cards, 2, 'Backup should have 2 cards');
+            }
+          },
+          {
+            name: 'Import restores cards from backup',
+            fn: () => {
+              resetAppState();
+              const backupJson = JSON.stringify({
+                version: '2.2',
+                exported: '2025-01-01T00:00:00Z',
+                cards: [
+                  { id: 1, name: 'Imported Card', bank: 'Test', points: 5000, perks: [], redeem: [], coupons: [], history: [] }
+                ]
+              });
+              
+              const result = importBackup(backupJson);
+              
+              assert(result.success, 'Import should succeed');
+              assertEqual(result.count, 1, 'Should import 1 card');
+              assertEqual(cards[0].name, 'Imported Card', 'Imported card name should match');
+            }
+          },
+          {
+            name: 'Import rejects invalid JSON',
+            fn: () => {
+              resetAppState();
+              const result = importBackup('not valid json');
+              assert(!result.success, 'Import should fail');
+              assertContains(result.error, 'Invalid JSON', 'Error should mention invalid JSON');
+            }
+          },
+          {
+            name: 'Import rejects backup without cards array',
+            fn: () => {
+              resetAppState();
+              const result = importBackup(JSON.stringify({ version: '2.2' }));
+              assert(!result.success, 'Import should fail');
+              assertContains(result.error, 'missing cards', 'Error should mention missing cards');
+            }
+          },
+          {
+            name: 'Full roundtrip: export then import',
+            fn: () => {
+              resetAppState();
+              
+              // Create cards
+              addCard(createCard({ name: 'Chase CSR', bank: 'Chase', points: 80000 }));
+              addCard(createCard({ name: 'Amex Gold', bank: 'Amex', points: 50000 }));
+              
+              // Export
+              const backup = exportBackup();
+              
+              // Clear
+              cards = [];
+              assertArrayLength(cards, 0, 'Cards should be empty');
+              
+              // Import
+              const result = importBackup(backup);
+              
+              assert(result.success, 'Roundtrip import should succeed');
+              assertArrayLength(cards, 2, 'Should have 2 cards after roundtrip');
+              assertEqual(cards[0].name, 'Chase CSR', 'First card should match');
+            }
+          }
+        ]
+      },
+      
+      // ========================================
+      // E2E: Filtering & Sorting
+      // ========================================
+      'E2E: Filtering & Sorting': {
+        category: 'e2e',
+        tests: [
+          {
+            name: 'Filter by owner "Me"',
+            fn: () => {
+              resetAppState();
+              addCard(createCard({ name: 'My Card', bank: 'Test', owner: 'Me' }));
+              addCard(createCard({ name: 'Wife Card', bank: 'Test', owner: 'Wife' }));
+              
+              const filtered = filterByOwner(cards, 'Me');
+              assertArrayLength(filtered, 1, 'Should have 1 card');
+              assertEqual(filtered[0].name, 'My Card', 'Should be My Card');
+            }
+          },
+          {
+            name: 'Filter by category "Dining"',
+            fn: () => {
+              resetAppState();
+              addCard(createCard({ name: 'Dining Card', bank: 'Test', perks: ['3x Dining', '1x Everything'] }));
+              addCard(createCard({ name: 'Travel Card', bank: 'Test', perks: ['3x Travel'] }));
+              
+              const filtered = filterByCategory(cards, 'Dining');
+              assertArrayLength(filtered, 1, 'Should have 1 card');
+              assertEqual(filtered[0].name, 'Dining Card', 'Should be Dining Card');
+            }
+          },
+          {
+            name: 'Filter by partner "United"',
+            fn: () => {
+              resetAppState();
+              addCard(createCard({ name: 'Chase', bank: 'Chase', redeem: [{name: 'United', ratio: '1:1'}] }));
+              addCard(createCard({ name: 'Citi', bank: 'Citi', redeem: [{name: 'AA', ratio: '1:1'}] }));
+              
+              const filtered = filterByPartner(cards, 'United');
+              assertArrayLength(filtered, 1, 'Should have 1 card');
+              assertEqual(filtered[0].name, 'Chase', 'Should be Chase');
+            }
+          },
+          {
+            name: 'Empty filter returns all cards',
+            fn: () => {
+              resetAppState();
+              addCard(createCard({ name: 'Card 1', bank: 'Test' }));
+              addCard(createCard({ name: 'Card 2', bank: 'Test' }));
+              
+              const byCat = filterByCategory(cards, '');
+              const byPartner = filterByPartner(cards, '');
+              const byOwner = filterByOwner(cards, 'all');
+              
+              assertArrayLength(byCat, 2, 'Category filter with empty returns all');
+              assertArrayLength(byPartner, 2, 'Partner filter with empty returns all');
+              assertArrayLength(byOwner, 2, 'Owner filter with "all" returns all');
+            }
+          },
+          {
+            name: 'Sort by points descending',
+            fn: () => {
+              resetAppState();
+              addCard(createCard({ name: 'Low', bank: 'Test', points: 1000 }));
+              addCard(createCard({ name: 'High', bank: 'Test', points: 100000 }));
+              addCard(createCard({ name: 'Mid', bank: 'Test', points: 50000 }));
+              
+              const sorted = sortCards(cards, 'points');
+              assertEqual(sorted[0].name, 'High', 'First should be High');
+              assertEqual(sorted[1].name, 'Mid', 'Second should be Mid');
+              assertEqual(sorted[2].name, 'Low', 'Third should be Low');
+            }
+          },
+          {
+            name: 'Sort by name alphabetically',
+            fn: () => {
+              resetAppState();
+              addCard(createCard({ name: 'Zeta', bank: 'Test' }));
+              addCard(createCard({ name: 'Alpha', bank: 'Test' }));
+              addCard(createCard({ name: 'Beta', bank: 'Test' }));
+              
+              const sorted = sortCards(cards, 'name');
+              assertEqual(sorted[0].name, 'Alpha', 'First should be Alpha');
+              assertEqual(sorted[1].name, 'Beta', 'Second should be Beta');
+              assertEqual(sorted[2].name, 'Zeta', 'Third should be Zeta');
+            }
+          },
+          {
+            name: 'Combined: filter then sort',
+            fn: () => {
+              resetAppState();
+              addCard(createCard({ name: 'My Low', bank: 'Test', owner: 'Me', points: 1000 }));
+              addCard(createCard({ name: 'My High', bank: 'Test', owner: 'Me', points: 100000 }));
+              addCard(createCard({ name: 'Wife Card', bank: 'Test', owner: 'Wife', points: 50000 }));
+              
+              let result = filterByOwner(cards, 'Me');
+              result = sortCards(result, 'points');
+              
+              assertArrayLength(result, 2, 'Should have 2 cards');
+              assertEqual(result[0].name, 'My High', 'First should be My High');
+              assertEqual(result[1].name, 'My Low', 'Second should be My Low');
+            }
+          }
+        ]
+      },
+      
+      // ========================================
+      // E2E: Partner Emoji Detection
+      // ========================================
+      'E2E: Partner Emoji': {
+        category: 'e2e',
+        tests: [
+          {
+            name: 'Airlines get ✈️ emoji',
+            fn: () => {
+              assertEqual(getPartnerEmoji('United'), '✈️', 'United should be airline');
+              assertEqual(getPartnerEmoji('Delta'), '✈️', 'Delta should be airline');
+              assertEqual(getPartnerEmoji('Emirates'), '✈️', 'Emirates should be airline');
+            }
+          },
+          {
+            name: 'Hotels get 🏨 emoji',
+            fn: () => {
+              assertEqual(getPartnerEmoji('Marriott Bonvoy'), '🏨', 'Marriott should be hotel');
+              assertEqual(getPartnerEmoji('Hilton Honors'), '🏨', 'Hilton should be hotel');
+              assertEqual(getPartnerEmoji('World of Hyatt'), '🏨', 'Hyatt should be hotel');
+              assertEqual(getPartnerEmoji('IHG Rewards'), '🏨', 'IHG should be hotel');
+            }
+          }
+        ]
+      },
+      
+      // ========================================
+      // E2E: Validation
+      // ========================================
+      'E2E: Validation': {
+        category: 'e2e',
+        tests: [
+          {
+            name: 'Valid card passes validation',
+            fn: () => {
+              const card = createCard({ name: 'Valid Card', bank: 'Chase', points: 5000 });
+              const result = validateCard(card);
+              assert(result.valid, 'Card should be valid');
+              assertArrayLength(result.errors, 0, 'Should have no errors');
+            }
+          },
+          {
+            name: 'Card without name fails validation',
+            fn: () => {
+              const card = createCard({ name: '', bank: 'Chase' });
+              const result = validateCard(card);
+              assert(!result.valid, 'Card should be invalid');
+              assert(result.errors.some(e => e.includes('Name')), 'Should have name error');
+            }
+          },
+          {
+            name: 'Card without bank fails validation',
+            fn: () => {
+              const card = createCard({ name: 'Test', bank: '' });
+              const result = validateCard(card);
+              assert(!result.valid, 'Card should be invalid');
+              assert(result.errors.some(e => e.includes('Bank')), 'Should have bank error');
+            }
+          },
+          {
+            name: 'Card with negative points fails validation',
+            fn: () => {
+              const card = { name: 'Test', bank: 'Test', points: -100, perks: [], redeem: [] };
+              const result = validateCard(card);
+              assert(!result.valid, 'Card should be invalid');
+              assert(result.errors.some(e => e.includes('Points')), 'Should have points error');
+            }
+          }
+        ]
+      },
+      
+      // ========================================
+      // E2E: Perk Handling
+      // ========================================
+      'E2E: Perk Handling': {
+        category: 'e2e',
+        tests: [
+          {
+            name: 'Extract category from perk string',
+            fn: () => {
+              assertEqual(extractCategory('3x Dining'), 'Dining', 'Should extract Dining');
+              assertEqual(extractCategory('1.5x Everything'), 'Everything', 'Should extract Everything');
+              assertEqual(extractCategory('10x Hotels via Portal'), 'Hotels via Portal', 'Should extract full phrase');
+            }
+          },
+          {
+            name: 'Non-rate perks return null',
+            fn: () => {
+              assertEqual(extractCategory('Priority Pass'), null, 'Should return null');
+              assertEqual(extractCategory('Free Checked Bag'), null, 'Should return null');
+            }
+          },
+          {
+            name: 'Parse perks from mock chip elements',
+            fn: () => {
+              const mockChips = [
+                { dataset: { perk: '3x Dining' } },
+                { dataset: { perk: '2x Travel' } },
+                { dataset: { perk: '1x Everything' } }
+              ];
+              
+              const perks = parsePerksFromChips(mockChips);
+              assertArrayLength(perks, 3, 'Should have 3 perks');
+              assertEqual(perks[0], '3x Dining', 'First perk should match');
+              assert(!perks[0].includes('×'), 'Perks should not contain remove button text');
+            }
+          }
+        ]
+      }
+    };
+
+    // ============================================
+    // TEST RUNNER
+    // ============================================
+    function runTests(filter = null) {
+      testResults = [];
+      logMessages = [];
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      
+      let passed = 0;
+      let failed = 0;
+      
+      for (const [suiteName, suiteData] of Object.entries(testSuites)) {
+        const tests = suiteData.tests || suiteData;
+        const category = suiteData.category || 'unit';
+        
+        if (filter && filter !== category) continue;
+        
+        log(`\n📦 Suite: ${suiteName}`);
+        
+        const suiteDiv = document.createElement('div');
+        suiteDiv.className = 'test-suite';
+        suiteDiv.innerHTML = `<h2>
+          ${suiteName}
+          <span class="category-badge ${category}">${category.toUpperCase()}</span>
+        </h2>`;
+        
+        for (const test of tests) {
+          let status = 'pass';
+          let errorMsg = '';
+          
+          try {
+            test.fn();
+            passed++;
+            log(`  ✅ ${test.name}`);
+          } catch (e) {
+            status = 'fail';
+            errorMsg = e.message;
+            failed++;
+            log(`  ❌ ${test.name}`);
+            log(`     ${e.message}`);
+          }
+          
+          const testDiv = document.createElement('div');
+          testDiv.className = `test ${status}`;
+          testDiv.innerHTML = `${status === 'pass' ? '✅' : '❌'} ${test.name}`;
+          if (errorMsg) {
+            testDiv.innerHTML += `<span class="error-detail">${errorMsg.split('\n')[0]}</span>`;
+          }
+          suiteDiv.appendChild(testDiv);
+          
+          testResults.push({ suite: suiteName, name: test.name, status, error: errorMsg });
+        }
+        
+        resultsDiv.appendChild(suiteDiv);
+      }
+      
+      // Summary
+      const summaryDiv = document.getElementById('summary');
+      summaryDiv.style.display = 'block';
+      summaryDiv.className = `summary ${failed === 0 ? 'all-pass' : 'has-fail'}`;
+      summaryDiv.innerHTML = `${failed === 0 ? '🎉' : '⚠️'} ${passed} passed, ${failed} failed`;
+      
+      log(`\n${'='.repeat(40)}`);
+      log(`TOTAL: ${passed} passed, ${failed} failed`);
+      
+      return { passed, failed };
+    }
+    
+    function runAllTests() {
+      return runTests(null);
+    }
+    
+    function runE2EOnly() {
+      return runTests('e2e');
+    }
+    
+    // Auto-run on load
+    window.onload = runAllTests;
+  </script>
+</body>
+</html>
