@@ -96,10 +96,11 @@ grep -n "PATTERN" /Users/cholunchiang/Desktop/CardPointsTracker/src/js/main.js
 - [x] Auto-reset benefits at period boundaries
 - [x] Tab badge for expiring benefits count
 - [x] Pulsing animation on expiring period boxes
-- [ ] Points Value Calculator (v3.6)
-- [ ] Push notifications for expiring benefits (v3.7)
-- [ ] Spending Tracker analytics (v3.8)
-- [ ] Multi-device sync (v3.9)
+- [ ] **Enhanced card database & smart autofill (v3.6)** ⬅️ NEXT
+- [ ] Points Value Calculator (v3.7)
+- [ ] Push notifications for expiring benefits (v3.8)
+- [ ] Spending Tracker analytics (v3.9)
+- [ ] Multi-device sync (v3.10)
 
 ## Development Workflow
 

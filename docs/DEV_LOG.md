@@ -276,7 +276,15 @@ benefits: [
 
 ## 🔄 Next Up (v3.6+)
 
-### v3.6 — Points Value Calculator 💰
+### v3.6 — Enhanced Card Database & Smart Autofill 💳
+- [ ] Bank-filtered card picker (select bank → shows only that bank's cards)
+- [ ] Comprehensive card database (50+ popular US credit cards)
+- [ ] Auto-populate ALL fields: annual fee, perks, transfer partners, earning rates, benefits
+- [ ] Latest card info (2025 offers and categories)
+- [ ] Easy card selection workflow: Bank → Card → Everything filled!
+- [ ] Expandable database for future card additions
+
+### v3.7 — Points Value Calculator 💰
 - [ ] Calculate redemption value (points × cents-per-point)
 - [ ] Track best-use scenarios for each card
 - [ ] Point valuation database (United = 1.2cpp, Hyatt = 1.8cpp, etc.)
